@@ -1,0 +1,6 @@
+@Whisperwood_HostAddress = http://localhost:5189
+
+GET {{Whisperwood_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

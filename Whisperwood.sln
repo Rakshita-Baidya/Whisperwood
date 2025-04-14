@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whisperwood", "Whisperwood\Whisperwood.csproj", "{835C516D-ECA3-45C6-BE98-45A8135376DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{835C516D-ECA3-45C6-BE98-45A8135376DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{835C516D-ECA3-45C6-BE98-45A8135376DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{835C516D-ECA3-45C6-BE98-45A8135376DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{835C516D-ECA3-45C6-BE98-45A8135376DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6385E208-1705-4474-9BF3-D60244FEC01E}
+	EndGlobalSection
+EndGlobal
