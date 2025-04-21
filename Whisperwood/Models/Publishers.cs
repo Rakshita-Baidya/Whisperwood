@@ -2,21 +2,17 @@
 
 namespace Whisperwood.Models
 {
-    public class Authors
+    public class Publishers
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public string? Name { get; set; }
-        [Required]
         public string? Email { get; set; }
         public string? Address { get; set; }
-        public string? Nationality { get; set; }
-
-        public DateOnly DOB { get; set; }
         public string? Contact { get; set; }
+        public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
 
-        public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
     }

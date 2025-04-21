@@ -40,6 +40,9 @@ namespace Whisperwood.Models
         public string? Format { get; set; }
         public int? Edition { get; set; }
         public bool AvailablilityStatus { get; set; } = true;
+        public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
+        public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
+        public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];
 
         public DateTime DateAdded { get; set; } = DateTime.Now;
 

@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Whisperwood.Models
 {
     public class CoverImages
     {
-        [Key, ForeignKey("Book")]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public string? CoverImageURL { get; set; }
