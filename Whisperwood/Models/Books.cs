@@ -30,7 +30,7 @@ namespace Whisperwood.Models
         public decimal AverageRating { get; set; } = decimal.Zero;
 
         [Required]
-        public DateTime PublishedDate { get; set; } = DateTime.Now;
+        public DateOnly PublishedDate { get; set; } = new DateOnly();
 
         [Required]
         public int Stock { get; set; }
@@ -43,7 +43,7 @@ namespace Whisperwood.Models
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];
-
+        public ICollection<WishlistItem> WishlistItems { get; set; } = [];
         public DateTime DateAdded { get; set; } = DateTime.Now;
 
     }
