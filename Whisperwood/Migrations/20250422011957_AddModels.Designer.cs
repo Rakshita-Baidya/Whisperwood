@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422011957_AddModels")]
+    partial class AddModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -189,44 +192,6 @@ namespace Whisperwood.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Whisperwood.Models.Cart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Cart");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.CartItem", b =>
-                {
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.HasKey("CartId", "BookId");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("CartItem");
-                });
-
             modelBuilder.Entity("Whisperwood.Models.Categories", b =>
                 {
                     b.Property<Guid>("Id")
@@ -306,39 +271,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiscountCodes");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("GenreId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("BookId", "GenreId");
-
-                    b.HasIndex("GenreId");
-
-                    b.ToTable("GenreBooks");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.Genres", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Genre");
+                    b.ToTable("DiscountCode");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
@@ -378,57 +311,6 @@ namespace Whisperwood.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
-                {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("BookId", "PromotionId");
-
-                    b.HasIndex("PromotionId");
-
-                    b.ToTable("PromotionBook");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.Promotions", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("DiscountPercent")
-                        .HasPrecision(3, 2)
-                        .HasColumnType("numeric(3,2)");
-
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.PublisherBooks", b =>
@@ -471,43 +353,6 @@ namespace Whisperwood.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Publishers");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.Reviews", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("BooksId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BooksId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Users", b =>
@@ -627,36 +472,6 @@ namespace Whisperwood.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Whisperwood.Models.Cart", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.CartItem", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Whisperwood.Models.Cart", "cart")
-                        .WithMany()
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("cart");
-                });
-
             modelBuilder.Entity("Whisperwood.Models.CategoryBooks", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
@@ -687,25 +502,6 @@ namespace Whisperwood.Migrations
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Whisperwood.Models.Genres", "Genre")
-                        .WithMany()
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Genre");
-                });
-
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
                 {
                     b.HasOne("Whisperwood.Models.DiscountCode", "DiscountCode")
@@ -721,36 +517,6 @@ namespace Whisperwood.Migrations
                         .IsRequired();
 
                     b.Navigation("DiscountCode");
-
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Whisperwood.Models.Promotions", "Promotion")
-                        .WithMany()
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("Promotion");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.Promotions", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Users", "Users")
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Users");
                 });
@@ -772,23 +538,6 @@ namespace Whisperwood.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Publisher");
-                });
-
-            modelBuilder.Entity("Whisperwood.Models.Reviews", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Books", "Books")
-                        .WithMany()
-                        .HasForeignKey("BooksId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Whisperwood.Models.Users", "Users")
-                        .WithMany()
-                        .HasForeignKey("UsersId");
-
-                    b.Navigation("Books");
-
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Wishlist", b =>

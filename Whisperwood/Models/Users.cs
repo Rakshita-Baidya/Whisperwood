@@ -17,7 +17,7 @@
 
         public ICollection<Announcements> Announcements { get; set; } = [];
         public Wishlist Wishlist { get; set; }
-        public Orders? Order { get; set; }
+        public ICollection<Orders> Orders { get; set; } = [];
 
     }
 }
