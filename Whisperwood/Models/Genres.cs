@@ -5,7 +5,7 @@ namespace Whisperwood.Models
     public class Genres
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public required string? Name { get; set; }
         public string? Description { get; set; }
     }

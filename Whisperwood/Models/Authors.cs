@@ -9,15 +9,16 @@ namespace Whisperwood.Models
         [Required]
         public string? Name { get; set; }
         [Required]
+        [EmailAddress]
         public string? Email { get; set; }
         public string? Address { get; set; }
         public string? Nationality { get; set; }
 
         public DateOnly DOB { get; set; }
+        [Phone]
         public string? Contact { get; set; }
 
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
-        public DateTime DateAdded { get; set; } = DateTime.Now;
 
     }
 }

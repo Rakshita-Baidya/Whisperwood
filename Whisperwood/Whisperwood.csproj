@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
-    <Folder Include="DTOs\" />
+    <Folder Include="Pages\" />
   </ItemGroup>
 
 </Project>

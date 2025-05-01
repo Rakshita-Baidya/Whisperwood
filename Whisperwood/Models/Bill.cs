@@ -2,7 +2,7 @@
 {
     public class Bill
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid ClaimCode { get; set; }
         public DateOnly PickUpDate { get; set; }
         public string Status { get; set; }

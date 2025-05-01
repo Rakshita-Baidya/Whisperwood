@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501050416_RemovedUnnecessaryAttributes")]
+    partial class RemovedUnnecessaryAttributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,7 @@ namespace Whisperwood.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateOnly>("StartDate")
@@ -677,7 +681,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("GenreBooks")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -715,7 +719,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("PromotionBooks")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -820,10 +824,6 @@ namespace Whisperwood.Migrations
                     b.Navigation("CategoryBooks");
 
                     b.Navigation("CoverImage");
-
-                    b.Navigation("GenreBooks");
-
-                    b.Navigation("PromotionBooks");
 
                     b.Navigation("PublisherBooks");
 

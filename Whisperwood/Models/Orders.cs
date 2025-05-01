@@ -4,7 +4,7 @@ namespace Whisperwood.Models
 {
     public class Orders
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
         public Users Users { get; set; }
         public DateOnly Date { get; set; } = new DateOnly();

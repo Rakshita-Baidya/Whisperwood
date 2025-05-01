@@ -13,7 +13,5 @@ namespace Whisperwood.Models
         public string? Contact { get; set; }
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
 
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-
     }
 }

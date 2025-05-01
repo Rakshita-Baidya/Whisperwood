@@ -4,7 +4,7 @@ namespace Whisperwood.Models
 {
     public class Promotions
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; }
         public string? Description { get; set; }
         [Precision(3, 2)]

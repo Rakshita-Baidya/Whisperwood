@@ -9,8 +9,6 @@ namespace Whisperwood.Models
         public string? CoverImageURL { get; set; }
         public Guid BookId { get; set; }
         public Books Book { get; set; }
-        public DateTime DateAdded { get; set; } = DateTime.Now;
-
 
     }
 }

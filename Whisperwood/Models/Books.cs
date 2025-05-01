@@ -11,19 +11,15 @@ namespace Whisperwood.Models
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
-
         [Required]
         public string? Title { get; set; }
-
         [Required]
         [StringLength(13)]
         public string? ISBN { get; set; }
-
+        [Required]
         [Precision(10, 2)]
         public decimal Price { get; set; }
-
         public string? Synopsis { get; set; }
-
         public CoverImages? CoverImage { get; set; }
 
         [Precision(1, 2)]
@@ -39,12 +35,13 @@ namespace Whisperwood.Models
         public string? Language { get; set; }
         public string? Format { get; set; }
         public int? Edition { get; set; }
-        public bool AvailablilityStatus { get; set; } = true;
+        public bool AvailabilityStatus { get; set; } = true;
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];
+        public ICollection<GenreBooks> GenreBooks { get; set; } = [];
+        public ICollection<PromotionBook> PromotionBooks { get; set; } = [];
         public ICollection<WishlistItem> WishlistItems { get; set; } = [];
-        public DateTime DateAdded { get; set; } = DateTime.Now;
 
     }
 }

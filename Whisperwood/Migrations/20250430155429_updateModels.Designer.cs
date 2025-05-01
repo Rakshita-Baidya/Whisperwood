@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250430155429_updateModels")]
+    partial class updateModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,7 @@ namespace Whisperwood.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateOnly>("StartDate")
@@ -83,6 +87,9 @@ namespace Whisperwood.Migrations
 
                     b.Property<DateOnly>("DOB")
                         .HasColumnType("date");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -139,6 +146,9 @@ namespace Whisperwood.Migrations
                     b.Property<decimal>("AverageRating")
                         .HasPrecision(1, 2)
                         .HasColumnType("numeric(1,2)");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("Edition")
                         .HasColumnType("integer");
@@ -265,6 +275,9 @@ namespace Whisperwood.Migrations
                     b.Property<string>("CoverImageURL")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -448,6 +461,9 @@ namespace Whisperwood.Migrations
                     b.Property<string>("Contact")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
@@ -471,6 +487,9 @@ namespace Whisperwood.Migrations
 
                     b.Property<Guid>("BooksId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("Created")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -677,7 +696,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("GenreBooks")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -715,7 +734,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("PromotionBooks")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -820,10 +839,6 @@ namespace Whisperwood.Migrations
                     b.Navigation("CategoryBooks");
 
                     b.Navigation("CoverImage");
-
-                    b.Navigation("GenreBooks");
-
-                    b.Navigation("PromotionBooks");
 
                     b.Navigation("PublisherBooks");
 

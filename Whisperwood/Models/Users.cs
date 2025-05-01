@@ -2,7 +2,7 @@
 {
     public class Users
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public required string Name { get; set; }
         public required string Email { get; set; }
         public string Password { get; set; }
@@ -14,6 +14,7 @@
         public bool IsEligibleForDiscount { get; set; } = false;
         public int OrdersCount { get; set; } = 0;
         public bool? IsAdmin { get; set; } = false;
+        public bool? IsActive { get; set; } = true;
 
         public ICollection<Announcements> Announcements { get; set; } = [];
         public Wishlist Wishlist { get; set; }
