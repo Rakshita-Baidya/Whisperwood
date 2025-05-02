@@ -1,14 +1,15 @@
-﻿namespace Whisperwood.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Whisperwood.Models
 {
-    public class Users
+    public class Users : IdentityUser<long>
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
         public required string Name { get; set; }
         public required string Email { get; set; }
-        public string Password { get; set; }
+        public required string Password { get; set; }
+        public required string ConfirmPassword { get; set; }
         public string? Username { get; set; }
         public string? Contact { get; set; }
-
         public string? ImageURL { get; set; }
         public Guid MembershipId { get; set; } = Guid.NewGuid();
         public bool IsEligibleForDiscount { get; set; } = false;
@@ -17,7 +18,7 @@
         public bool? IsActive { get; set; } = true;
 
         public ICollection<Announcements> Announcements { get; set; } = [];
-        public Wishlist Wishlist { get; set; }
+        public Wishlist? Wishlist { get; set; }
         public ICollection<Orders> Orders { get; set; } = [];
 
     }

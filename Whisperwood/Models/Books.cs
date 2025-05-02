@@ -20,6 +20,7 @@ namespace Whisperwood.Models
         [Precision(10, 2)]
         public decimal Price { get; set; }
         public string? Synopsis { get; set; }
+        public Guid? CoverImageId { get; set; }
         public CoverImages? CoverImage { get; set; }
 
         [Precision(1, 2)]

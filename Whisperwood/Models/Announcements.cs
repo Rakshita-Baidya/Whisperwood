@@ -12,7 +12,8 @@ namespace Whisperwood.Models
         public DateOnly StartDate { get; set; }
         [Required]
         public DateOnly EndDate { get; set; }
-        public Guid? UserId { get; set; }
+        [Required]
+        public Guid UserId { get; set; }
         public Users Users { get; set; }
     }
 }

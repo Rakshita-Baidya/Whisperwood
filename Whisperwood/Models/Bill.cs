@@ -3,7 +3,7 @@
     public class Bill
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid ClaimCode { get; set; }
+        public string ClaimCode { get; set; } = Guid.NewGuid().ToString().Substring(0, 6);
         public DateOnly PickUpDate { get; set; }
         public string Status { get; set; }
         public Guid OrderId { get; set; }

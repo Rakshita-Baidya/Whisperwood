@@ -6,6 +6,6 @@
         public Guid UserId { get; set; }
         public Users User { get; set; }
 
-        public ICollection<WishlistItem> WishListItem { get; set; } = [];
+        public ICollection<WishlistItem> WishListItems { get; set; } = [];
     }
 }
