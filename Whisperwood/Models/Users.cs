@@ -5,9 +5,6 @@ namespace Whisperwood.Models
     public class Users : IdentityUser<long>
     {
         public required string Name { get; set; }
-        public required string Email { get; set; }
-        public required string Password { get; set; }
-        public required string ConfirmPassword { get; set; }
         public string? Username { get; set; }
         public string? Contact { get; set; }
         public string? ImageURL { get; set; }
@@ -21,5 +18,6 @@ namespace Whisperwood.Models
         public Wishlist? Wishlist { get; set; }
         public ICollection<Orders> Orders { get; set; } = [];
 
+        public Cart? Cart { get; set; }
     }
 }

@@ -12,7 +12,9 @@ namespace Whisperwood.Models
         public decimal SubTotal { get; set; }
         [Precision(10, 2)]
         public decimal TotalAmount { get; set; }
-        public string Status { get; set; }
+        public enum OrderStatus { Pending, Cancelled, Fulfilled }
+        public OrderStatus Status { get; set; }
+
         public Guid DiscountCodeId { get; set; }
         public DiscountCode DiscountCode { get; set; }
 

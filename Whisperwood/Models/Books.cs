@@ -27,14 +27,15 @@ namespace Whisperwood.Models
         public decimal AverageRating { get; set; } = decimal.Zero;
 
         [Required]
-        public DateOnly PublishedDate { get; set; } = new DateOnly();
+        public DateOnly PublishedDate { get; set; }
 
         [Required]
         public int Stock { get; set; }
 
         public int SalesCount { get; set; } = 0;
         public string? Language { get; set; }
-        public string? Format { get; set; }
+        public BookFormat Format { get; set; }
+
         public int? Edition { get; set; }
         public bool AvailabilityStatus { get; set; } = true;
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
@@ -43,6 +44,21 @@ namespace Whisperwood.Models
         public ICollection<GenreBooks> GenreBooks { get; set; } = [];
         public ICollection<PromotionBook> PromotionBooks { get; set; } = [];
         public ICollection<WishlistItem> WishlistItems { get; set; } = [];
+
+
+        public enum BookFormat
+        {
+            Paperback,
+            Hardcover,
+            SignedEdition,
+            LimitedEdition,
+            FirstEdition,
+            CollectorsEdition,
+            AuthorsEdition,
+            DeluxeEdition,
+            Ebook,
+            Audiobook
+        }
 
     }
 }

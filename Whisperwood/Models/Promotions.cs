@@ -13,5 +13,7 @@ namespace Whisperwood.Models
         public DateOnly EndDate { get; set; }
         public Guid? UserId { get; set; }
         public Users Users { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

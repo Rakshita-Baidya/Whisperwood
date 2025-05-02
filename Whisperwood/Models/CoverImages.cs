@@ -7,8 +7,7 @@ namespace Whisperwood.Models
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public string? CoverImageURL { get; set; }
-        public Guid BookId { get; set; }
-        public Books Book { get; set; }
+        public ICollection<Books> Books { get; set; } = [];
 
     }
 }
