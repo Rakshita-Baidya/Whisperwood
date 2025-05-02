@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Whisperwood.DTOs
 {
     public class DiscountCodeDto
     {
-        public required string Code { get; set; }
-        [Precision(3, 2)]
+        [Precision(5, 2)]
+        [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100.")]
         public required decimal Percent { get; set; }
         public required DateOnly StartDate { get; set; }
         public required DateOnly EndDate { get; set; }
@@ -13,8 +14,8 @@ namespace Whisperwood.DTOs
 
     public class DiscountCodeUpdateDto
     {
-        public string? Code { get; set; }
-        [Precision(3, 2)]
+        [Precision(5, 2)]
+        [Range(0, 100, ErrorMessage = "Discount percent must be between 0 and 100.")]
         public decimal? Percent { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
