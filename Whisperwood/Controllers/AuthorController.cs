@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
-using Whisperwood.Interfaces;
 using Whisperwood.Models;
 
 namespace Whisperwood.Controllers
@@ -13,12 +11,10 @@ namespace Whisperwood.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly WhisperwoodDbContext dbContext;
-        private readonly IAuthService authService;
 
-        public AuthorController(WhisperwoodDbContext dbContext, IAuthService authService)
+        public AuthorController(WhisperwoodDbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.authService = authService;
         }
 
         [HttpPost("add")]
@@ -41,12 +37,8 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getall")]
-        [Authorize]
         public async Task<IActionResult> GetAllAuthors()
         {
-            if (!await authService.IsAdminAsync(User))
-                return Forbid("Only admins can add authors.");
-
             List<Authors> authorList = await dbContext.Authors.ToListAsync();
             return Ok(authorList);
         }
@@ -75,19 +67,7 @@ namespace Whisperwood.Controllers
             if (dto.Contact != null) author.Contact = dto.Contact;
 
             await dbContext.SaveChangesAsync();
-            return Ok(new
-            {
-                Id = author.Id,
-                Author = new AuthorDto
-                {
-                    Name = author.Name!,
-                    Email = author.Email!,
-                    Address = author.Address,
-                    Nationality = author.Nationality,
-                    DOB = author.DOB,
-                    Contact = author.Contact
-                }
-            });
+            return Ok(author);
         }
 
         [HttpDelete("delete/{id}")]

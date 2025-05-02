@@ -5,7 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Whisperwood.DatabaseContext;
-using Whisperwood.Interfaces;
 using Whisperwood.Models;
 using Whisperwood.Services;
 
@@ -70,7 +69,6 @@ builder.Services.AddIdentity<Users, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<WhisperwoodDbContext>();
 
 builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 JwtTokenInfo? tokenInfo = builder.Configuration.GetSection("jwt").Get<JwtTokenInfo>();
