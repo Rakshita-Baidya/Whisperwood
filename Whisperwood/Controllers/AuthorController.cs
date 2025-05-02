@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
@@ -35,7 +36,7 @@ namespace Whisperwood.Controllers
             await dbContext.SaveChangesAsync();
             return Ok(author);
         }
-
+        [Authorize]
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAuthors()
         {
