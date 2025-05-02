@@ -2,11 +2,9 @@
 
 namespace Whisperwood.Models
 {
-    public class Users : IdentityUser<long>
+    public class Users : IdentityUser<Guid>
     {
         public required string Name { get; set; }
-        public string? Username { get; set; }
-        public string? Contact { get; set; }
         public string? ImageURL { get; set; }
         public Guid MembershipId { get; set; } = Guid.NewGuid();
         public bool IsEligibleForDiscount { get; set; } = false;

@@ -2,23 +2,19 @@
 
 namespace Whisperwood.DTOs
 {
-    public class AnnouncementDTO
+    public class AnnouncementDto
     {
         [Required]
         public required string Title { get; set; }
-
         public string? Message { get; set; }
-
         [Required]
-        public DateOnly StartDate { get; set; }
-
+        public required DateOnly StartDate { get; set; }
         [Required]
-        public DateOnly EndDate { get; set; }
-
-        public Guid? UserId { get; set; }
+        public required DateOnly EndDate { get; set; }
+        public Guid UserId { get; set; }
     }
 
-    public class AnnouncementUpdateDTO
+    public class AnnouncementUpdateDto
     {
         public string? Title { get; set; }
         public string? Message { get; set; }

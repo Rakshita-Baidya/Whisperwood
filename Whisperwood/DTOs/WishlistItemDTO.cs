@@ -9,10 +9,4 @@ namespace Whisperwood.DTOs
         [Required]
         public Guid BookId { get; set; }
     }
-
-    public class WishlistItemUpdateDTO
-    {
-        public Guid? WishlistId { get; set; }
-        public Guid? BookId { get; set; }
-    }
 }

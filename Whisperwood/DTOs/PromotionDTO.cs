@@ -1,30 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Whisperwood.DTOs
 {
-    public class PromotionDTO
+    public class PromotionDto
     {
         [Required]
         public required string Name { get; set; }
         public string? Description { get; set; }
-        [Precision(3, 2)]
-        public decimal DiscountPercent { get; set; }
         [Required]
-        public DateOnly StartDate { get; set; }
+        public required decimal DiscountPercent { get; set; }
         [Required]
-        public DateOnly EndDate { get; set; }
-        public Guid? UserId { get; set; }
+        public required DateOnly StartDate { get; set; }
+        [Required]
+        public required DateOnly EndDate { get; set; }
+        [Required]
+        public required List<Guid> BookIds { get; set; }
     }
 
-    public class PromotionUpdateDTO
+    public class PromotionUpdateDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
-        [Precision(3, 2)]
         public decimal? DiscountPercent { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public Guid? UserId { get; set; }
+        public List<Guid>? BookIds { get; set; }
     }
 }

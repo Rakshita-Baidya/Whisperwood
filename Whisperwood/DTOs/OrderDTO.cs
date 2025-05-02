@@ -1,33 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using static Whisperwood.Models.Orders;
 
 namespace Whisperwood.DTOs
 {
-    public class OrderDTO
+    public class OrderDto
     {
         [Required]
-        public Guid UserId { get; set; }
+        public required Guid UserId { get; set; }
         [Required]
-        public DateOnly Date { get; set; }
-        [Precision(10, 2)]
-        public decimal SubTotal { get; set; }
-        [Precision(10, 2)]
-        public decimal TotalAmount { get; set; }
-        [Required]
-        public required string Status { get; set; }
-        [Required]
-        public Guid DiscountCodeId { get; set; }
+        public required List<OrderItemDto> Items { get; set; }
     }
 
-    public class OrderUpdateDTO
+    public class OrderUpdateDto
     {
         public Guid? UserId { get; set; }
-        public DateOnly? Date { get; set; }
-        [Precision(10, 2)]
-        public decimal? SubTotal { get; set; }
-        [Precision(10, 2)]
-        public decimal? TotalAmount { get; set; }
-        public string? Status { get; set; }
-        public Guid? DiscountCodeId { get; set; }
+        public OrderStatus? Status { get; set; }
+        public List<OrderItemUpdateDto>? Items { get; set; }
     }
 }

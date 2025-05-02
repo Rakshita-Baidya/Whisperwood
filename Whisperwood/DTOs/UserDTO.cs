@@ -2,7 +2,7 @@
 
 namespace Whisperwood.DTOs
 {
-    public class UserDTO
+    public class UserDto
     {
         [Required]
         public required string Name { get; set; }
@@ -11,31 +11,27 @@ namespace Whisperwood.DTOs
         public required string Email { get; set; }
         [Required]
         public required string Password { get; set; }
-        public string? Username { get; set; }
-        [Phone]
-        public string? Contact { get; set; }
-        public string? ImageURL { get; set; }
         [Required]
-        public Guid MembershipId { get; set; }
-        public bool IsEligibleForDiscount { get; set; }
-        public int OrdersCount { get; set; }
-        public bool? IsAdmin { get; set; }
-        public bool? IsActive { get; set; }
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public required string ConfirmPassword { get; set; }
+        public string? Username { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? ImageURL { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsActive { get; set; }
     }
 
-    public class UserUpdateDTO
+    public class UserUpdateDto
     {
         public string? Name { get; set; }
         [EmailAddress]
         public string? Email { get; set; }
         public string? Password { get; set; }
+        [Compare("Password", ErrorMessage = "Passwords do not match")]
+        public string? ConfirmPassword { get; set; }
         public string? Username { get; set; }
-        [Phone]
-        public string? Contact { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? ImageURL { get; set; }
-        public Guid? MembershipId { get; set; }
-        public bool? IsEligibleForDiscount { get; set; }
-        public int? OrdersCount { get; set; }
         public bool? IsAdmin { get; set; }
         public bool? IsActive { get; set; }
     }

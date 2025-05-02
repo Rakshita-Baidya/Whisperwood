@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
+using Whisperwood.Interfaces;
 using Whisperwood.Models;
 
 namespace Whisperwood.Controllers
@@ -11,14 +13,16 @@ namespace Whisperwood.Controllers
     public class AuthorController : ControllerBase
     {
         private readonly WhisperwoodDbContext dbContext;
+        private readonly IAuthService authService;
 
-        public AuthorController(WhisperwoodDbContext dbContext)
+        public AuthorController(WhisperwoodDbContext dbContext, IAuthService authService)
         {
             this.dbContext = dbContext;
+            this.authService = authService;
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddAuthor(AuthorDTO dto)
+        public async Task<IActionResult> AddAuthor(AuthorDto dto)
         {
             var author = new Authors
             {
@@ -37,8 +41,12 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getall")]
+        [Authorize]
         public async Task<IActionResult> GetAllAuthors()
         {
+            if (!await authService.IsAdminAsync(User))
+                return Forbid("Only admins can add authors.");
+
             List<Authors> authorList = await dbContext.Authors.ToListAsync();
             return Ok(authorList);
         }
@@ -51,7 +59,7 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateAuthor(Guid id, AuthorUpdateDTO dto)
+        public async Task<IActionResult> UpdateAuthor(Guid id, AuthorUpdateDto dto)
         {
             var author = await dbContext.Authors.FindAsync(id);
             if (author == null)
@@ -70,7 +78,7 @@ namespace Whisperwood.Controllers
             return Ok(new
             {
                 Id = author.Id,
-                Author = new AuthorDTO
+                Author = new AuthorDto
                 {
                     Name = author.Name!,
                     Email = author.Email!,

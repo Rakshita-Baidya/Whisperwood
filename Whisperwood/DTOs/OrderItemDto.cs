@@ -2,19 +2,18 @@
 
 namespace Whisperwood.DTOs
 {
-    public class CartItemDto
+    public class OrderItemDto
     {
-        public required Guid CartId { get; set; }
         public required Guid BookId { get; set; }
         [Required]
         [Range(1, int.MaxValue)]
         public required int Quantity { get; set; }
     }
 
-    public class CartItemUpdateDto
+    public class OrderItemUpdateDto
     {
-        public required Guid CartId { get; set; }
-        public required Guid BookId { get; set; }
+        public Guid? BookId { get; set; }
+
         [Range(1, int.MaxValue)]
         public int? Quantity { get; set; }
     }

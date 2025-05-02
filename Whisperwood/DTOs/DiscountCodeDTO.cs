@@ -1,21 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 
 namespace Whisperwood.DTOs
 {
-    public class DiscountCodeDTO
+    public class DiscountCodeDto
     {
-        [Required]
         public required string Code { get; set; }
         [Precision(3, 2)]
-        public decimal Percent { get; set; }
-        [Required]
-        public DateOnly StartDate { get; set; }
-        [Required]
-        public DateOnly EndDate { get; set; }
+        public required decimal Percent { get; set; }
+        public required DateOnly StartDate { get; set; }
+        public required DateOnly EndDate { get; set; }
     }
 
-    public class DiscountCodeUpdateDTO
+    public class DiscountCodeUpdateDto
     {
         public string? Code { get; set; }
         [Precision(3, 2)]

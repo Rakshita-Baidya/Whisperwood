@@ -2,14 +2,14 @@
 
 namespace Whisperwood.DTOs
 {
-    public class GenreDTO
+    public class GenreDto
     {
         [Required]
         public required string Name { get; set; }
         public string? Description { get; set; }
     }
 
-    public class GenreUpdateDTO
+    public class GenreUpdateDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

@@ -5,20 +5,17 @@ namespace Whisperwood.DTOs
     public class ReviewDTO
     {
         [Required]
-        public Guid UserId { get; set; }
+        public required Guid BookId { get; set; }
         [Required]
-        public Guid BookId { get; set; }
-        [Range(0, 5)]
-        public int Rating { get; set; }
-        [Required]
-        public required string Message { get; set; }
+        [Range(1, 5)]
+        public required int Rating { get; set; }
+        public string? Message { get; set; }
     }
 
-    public class ReviewUpdateDTO
+    public class ReviewUpdateDto
     {
-        public Guid? UserId { get; set; }
         public Guid? BookId { get; set; }
-        [Range(0, 5)]
+        [Range(1, 5)]
         public int? Rating { get; set; }
         public string? Message { get; set; }
     }

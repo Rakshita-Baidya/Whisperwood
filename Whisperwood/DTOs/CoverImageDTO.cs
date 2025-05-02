@@ -2,17 +2,14 @@
 
 namespace Whisperwood.DTOs
 {
-    public class CoverImageDTO
+    public class CoverImageDto
     {
         [Required]
         public required string CoverImageURL { get; set; }
-        [Required]
-        public Guid BookId { get; set; }
     }
 
-    public class CoverImageUpdateDTO
+    public class CoverImageUpdateDto
     {
         public string? CoverImageURL { get; set; }
-        public Guid? BookId { get; set; }
     }
 }

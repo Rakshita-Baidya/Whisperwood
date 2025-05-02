@@ -15,5 +15,6 @@ namespace Whisperwood.Models
         public Users Users { get; set; }
 
         public bool IsActive { get; set; } = true;
+
     }
 }

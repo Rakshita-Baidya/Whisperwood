@@ -2,7 +2,7 @@
 
 namespace Whisperwood.DTOs
 {
-    public class AuthorDTO
+    public class AuthorDto
     {
         [Required]
         public required string Name { get; set; }
@@ -11,12 +11,13 @@ namespace Whisperwood.DTOs
         public required string Email { get; set; }
         public string? Address { get; set; }
         public string? Nationality { get; set; }
-        public DateOnly DOB { get; set; }
+        [Required]
+        public required DateOnly DOB { get; set; }
         [Phone]
         public string? Contact { get; set; }
     }
 
-    public class AuthorUpdateDTO
+    public class AuthorUpdateDto
     {
         public string? Name { get; set; }
         [EmailAddress]
@@ -25,7 +26,6 @@ namespace Whisperwood.DTOs
         public string? Nationality { get; set; }
         public DateOnly? DOB { get; set; }
         [Phone]
-
         public string? Contact { get; set; }
     }
 }

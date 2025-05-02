@@ -12,8 +12,8 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    [Migration("20250430155429_updateModels")]
-    partial class updateModels
+    [Migration("20250502150311_UpdateUserModel")]
+    partial class UpdateUserModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,6 @@ namespace Whisperwood.Migrations
                         .HasColumnType("date");
 
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateOnly>("StartDate")
@@ -45,7 +44,7 @@ namespace Whisperwood.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("UsersId")
@@ -88,9 +87,6 @@ namespace Whisperwood.Migrations
                     b.Property<DateOnly>("DOB")
                         .HasColumnType("date");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -113,8 +109,9 @@ namespace Whisperwood.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ClaimCode")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ClaimCode")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
@@ -147,14 +144,14 @@ namespace Whisperwood.Migrations
                         .HasPrecision(1, 2)
                         .HasColumnType("numeric(1,2)");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<Guid?>("CoverImageId")
+                        .HasColumnType("uuid");
 
                     b.Property<int?>("Edition")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Format")
-                        .HasColumnType("text");
+                    b.Property<int>("Format")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ISBN")
                         .IsRequired()
@@ -186,6 +183,8 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CoverImageId");
+
                     b.HasIndex("ISBN")
                         .IsUnique();
 
@@ -203,7 +202,8 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Cart");
                 });
@@ -269,20 +269,11 @@ namespace Whisperwood.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("CoverImageURL")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("BookId")
-                        .IsUnique();
 
                     b.ToTable("CoverImages");
                 });
@@ -341,7 +332,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genre");
+                    b.ToTable("Genres");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
@@ -356,9 +347,8 @@ namespace Whisperwood.Migrations
                     b.Property<Guid>("DiscountCodeId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("SubTotal")
                         .HasPrecision(10, 2)
@@ -414,6 +404,9 @@ namespace Whisperwood.Migrations
                     b.Property<DateOnly>("EndDate")
                         .HasColumnType("date");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -461,9 +454,6 @@ namespace Whisperwood.Migrations
                     b.Property<string>("Contact")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
@@ -488,15 +478,19 @@ namespace Whisperwood.Migrations
                     b.Property<Guid>("BooksId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime?>("Created")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Rating")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -519,12 +513,17 @@ namespace Whisperwood.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Contact")
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ImageURL")
                         .HasColumnType("text");
@@ -538,6 +537,12 @@ namespace Whisperwood.Migrations
                     b.Property<bool>("IsEligibleForDiscount")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("MembershipId")
                         .HasColumnType("uuid");
 
@@ -545,14 +550,31 @@ namespace Whisperwood.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
                     b.Property<int>("OrdersCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -633,11 +655,20 @@ namespace Whisperwood.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("Whisperwood.Models.Books", b =>
+                {
+                    b.HasOne("Whisperwood.Models.CoverImages", "CoverImage")
+                        .WithMany("Books")
+                        .HasForeignKey("CoverImageId");
+
+                    b.Navigation("CoverImage");
+                });
+
             modelBuilder.Entity("Whisperwood.Models.Cart", b =>
                 {
                     b.HasOne("Whisperwood.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne("Cart")
+                        .HasForeignKey("Whisperwood.Models.Cart", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -682,27 +713,16 @@ namespace Whisperwood.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Whisperwood.Models.CoverImages", b =>
-                {
-                    b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithOne("CoverImage")
-                        .HasForeignKey("Whisperwood.Models.CoverImages", "BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-                });
-
             modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany()
+                        .WithMany("GenreBooks")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Whisperwood.Models.Genres", "Genre")
-                        .WithMany()
+                        .WithMany("GenreBooks")
                         .HasForeignKey("GenreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -734,7 +754,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany()
+                        .WithMany("PromotionBooks")
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -817,7 +837,7 @@ namespace Whisperwood.Migrations
                         .IsRequired();
 
                     b.HasOne("Whisperwood.Models.Wishlist", "Wishlist")
-                        .WithMany("WishListItem")
+                        .WithMany("WishListItems")
                         .HasForeignKey("WishlistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -838,7 +858,9 @@ namespace Whisperwood.Migrations
 
                     b.Navigation("CategoryBooks");
 
-                    b.Navigation("CoverImage");
+                    b.Navigation("GenreBooks");
+
+                    b.Navigation("PromotionBooks");
 
                     b.Navigation("PublisherBooks");
 
@@ -848,6 +870,16 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.Categories", b =>
                 {
                     b.Navigation("CategoryBooks");
+                });
+
+            modelBuilder.Entity("Whisperwood.Models.CoverImages", b =>
+                {
+                    b.Navigation("Books");
+                });
+
+            modelBuilder.Entity("Whisperwood.Models.Genres", b =>
+                {
+                    b.Navigation("GenreBooks");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
@@ -864,15 +896,16 @@ namespace Whisperwood.Migrations
                 {
                     b.Navigation("Announcements");
 
+                    b.Navigation("Cart");
+
                     b.Navigation("Orders");
 
-                    b.Navigation("Wishlist")
-                        .IsRequired();
+                    b.Navigation("Wishlist");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Wishlist", b =>
                 {
-                    b.Navigation("WishListItem");
+                    b.Navigation("WishListItems");
                 });
 #pragma warning restore 612, 618
         }
