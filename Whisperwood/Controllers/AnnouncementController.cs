@@ -8,7 +8,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnnouncementController : ControllerBase
+    public class AnnouncementController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -20,6 +20,7 @@ namespace Whisperwood.Controllers
         [HttpPost("add")]
         public async Task<IActionResult> AddAnnouncement(AnnouncementDto dto)
         {
+            //var userId = GetLoggedInUserId();
             var announcement = new Announcements
             {
                 Id = Guid.NewGuid(),
@@ -27,6 +28,7 @@ namespace Whisperwood.Controllers
                 Message = dto.Message,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
+                UserId = dto.UserId,
             };
 
             dbContext.Announcements.Add(announcement);
