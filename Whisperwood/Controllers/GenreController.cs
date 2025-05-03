@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
@@ -8,7 +9,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GenreController : ControllerBase
+    public class GenreController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -18,8 +19,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddGenre(GenreDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var genre = new Genres
             {
                 Id = Guid.NewGuid(),
@@ -40,15 +48,29 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetGenreById(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var genre = await dbContext.Genres.FirstOrDefaultAsync(g => g.Id == id);
             return genre != null ? Ok(genre) : NotFound("Genre not found!");
         }
 
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateGenre(Guid id, GenreUpdateDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var genre = await dbContext.Genres.FindAsync(id);
             if (genre == null)
             {
@@ -63,8 +85,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteGenre(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var genre = await dbContext.Genres.FindAsync(id);
             if (genre == null)
             {
@@ -73,7 +102,7 @@ namespace Whisperwood.Controllers
 
             dbContext.Genres.Remove(genre);
             await dbContext.SaveChangesAsync();
-            return Ok(new { Message = "Deleted successfully" });
+            return Ok("Deleted successfully");
         }
     }
 }

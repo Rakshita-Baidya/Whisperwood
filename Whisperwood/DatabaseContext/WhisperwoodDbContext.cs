@@ -86,6 +86,11 @@ namespace Whisperwood.DatabaseContext
                 .WithMany(b => b.GenreBooks)
                 .HasForeignKey(gb => gb.BookId);
 
+            modelBuilder.Entity<Announcements>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Announcements)
+                .HasForeignKey(a => a.UserId);
+
         }
 
     }

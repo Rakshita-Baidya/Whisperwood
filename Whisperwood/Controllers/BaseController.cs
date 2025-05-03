@@ -7,13 +7,12 @@ namespace Whisperwood.Controllers
     {
         protected Guid GetLoggedInUserId()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                           ?? User.FindFirst("sub")?.Value;
-
-            if (Guid.TryParse(userIdClaim, out var userId))
-                return userId;
-
-            throw new UnauthorizedAccessException("Invalid or missing user context.");
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token.");
+            }
+            return userId;
         }
     }
 }

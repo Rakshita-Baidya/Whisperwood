@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
@@ -8,7 +9,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : ControllerBase
+    public class CategoryController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -18,8 +19,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddCategory(CategoryDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var category = new Categories
             {
                 Id = Guid.NewGuid(),
@@ -40,15 +48,29 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetCategoryById(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
             return category != null ? Ok(category) : NotFound("Category not found!");
         }
 
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateCategory(Guid id, CategoryUpdateDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var category = await dbContext.Categories.FindAsync(id);
             if (category == null)
             {
@@ -63,8 +85,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var category = await dbContext.Categories.FindAsync(id);
             if (category == null)
             {
@@ -73,7 +102,7 @@ namespace Whisperwood.Controllers
 
             dbContext.Categories.Remove(category);
             await dbContext.SaveChangesAsync();
-            return Ok(new { Message = "Deleted successfully" });
+            return Ok("Deleted successfully");
         }
     }
 }

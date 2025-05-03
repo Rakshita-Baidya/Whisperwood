@@ -14,6 +14,6 @@ namespace Whisperwood.Models
         public DateOnly EndDate { get; set; }
         [Required]
         public Guid UserId { get; set; }
-        public Users Users { get; set; }
+        public Users User { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
@@ -8,7 +9,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PublisherController : ControllerBase
+    public class PublisherController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -18,8 +19,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddPublisher(PublisherDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var publisher = new Publishers
             {
                 Id = Guid.NewGuid(),
@@ -42,15 +50,29 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetPublisherById(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             Publishers? publisher = await dbContext.Publishers.FirstOrDefaultAsync(p => p.Id == id);
             return publisher != null ? Ok(publisher) : NotFound("Publisher not found!");
         }
 
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdatePublisher(Guid id, PublisherUpdateDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var publisher = await dbContext.Publishers.FindAsync(id);
             if (publisher == null)
             {
@@ -67,8 +89,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeletePublisher(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var publisher = await dbContext.Publishers.FindAsync(id);
             if (publisher == null)
             {
@@ -77,7 +106,7 @@ namespace Whisperwood.Controllers
 
             dbContext.Publishers.Remove(publisher);
             await dbContext.SaveChangesAsync();
-            return Ok(new { Message = "Deleted successfully" });
+            return Ok("Deleted successfully");
         }
 
     }

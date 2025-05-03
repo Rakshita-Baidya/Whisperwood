@@ -9,7 +9,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthorController : ControllerBase
+    public class AuthorController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -19,8 +19,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddAuthor(AuthorDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var author = new Authors
             {
                 Id = Guid.NewGuid(),
@@ -36,7 +43,7 @@ namespace Whisperwood.Controllers
             await dbContext.SaveChangesAsync();
             return Ok(author);
         }
-        [Authorize]
+
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAuthors()
         {
@@ -45,15 +52,29 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
+        [Authorize]
         public async Task<IActionResult> GetAuthorById(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             Authors? author = await dbContext.Authors.FirstOrDefaultAsync(a => a.Id == id);
             return author != null ? Ok(author) : NotFound("Author not found!");
         }
 
         [HttpPut("update/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateAuthor(Guid id, AuthorUpdateDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var author = await dbContext.Authors.FindAsync(id);
             if (author == null)
             {
@@ -72,8 +93,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteAuthor(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var author = await dbContext.Authors.FindAsync(id);
             if (author == null)
             {
@@ -82,7 +110,7 @@ namespace Whisperwood.Controllers
 
             dbContext.Authors.Remove(author);
             await dbContext.SaveChangesAsync();
-            return Ok(new { Message = "Deleted successfully" });
+            return Ok("Deleted successfully");
         }
     }
 }

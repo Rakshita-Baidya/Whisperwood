@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250503034407_MinorUpdate")]
+    partial class MinorUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,9 +47,12 @@ namespace Whisperwood.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UsersId");
 
                     b.ToTable("Announcements");
                 });
@@ -610,13 +616,13 @@ namespace Whisperwood.Migrations
 
             modelBuilder.Entity("Whisperwood.Models.Announcements", b =>
                 {
-                    b.HasOne("Whisperwood.Models.Users", "User")
+                    b.HasOne("Whisperwood.Models.Users", "Users")
                         .WithMany("Announcements")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.AuthorBooks", b =>

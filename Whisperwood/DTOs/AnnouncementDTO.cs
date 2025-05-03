@@ -11,7 +11,6 @@ namespace Whisperwood.DTOs
         public required DateOnly StartDate { get; set; }
         [Required]
         public required DateOnly EndDate { get; set; }
-        public Guid UserId { get; set; }
     }
 
     public class AnnouncementUpdateDto
@@ -20,6 +19,5 @@ namespace Whisperwood.DTOs
         public string? Message { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
-        public Guid? UserId { get; set; }
     }
 }

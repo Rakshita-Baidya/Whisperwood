@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
@@ -8,7 +9,7 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BookController : ControllerBase
+    public class BookController : BaseController
     {
         private readonly WhisperwoodDbContext dbContext;
 
@@ -18,8 +19,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
+        [Authorize]
         public async Task<IActionResult> AddBook(BookDto dto)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var authors = await dbContext.Authors.Where(a => dto.AuthorIds.Contains(a.Id)).ToListAsync();
             var genres = await dbContext.Genres.Where(g => dto.GenreIds.Contains(g.Id)).ToListAsync();
             var categories = await dbContext.Categories.Where(c => dto.CategoryIds.Contains(c.Id)).ToListAsync();
@@ -119,8 +127,15 @@ namespace Whisperwood.Controllers
         }
 
         [HttpDelete("delete/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteBook(Guid id)
         {
+            var userId = GetLoggedInUserId();
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            {
+                return Unauthorized("Only admins can update announcements.");
+            }
             var book = await dbContext.Books.FindAsync(id);
             if (book == null)
             {
@@ -129,7 +144,7 @@ namespace Whisperwood.Controllers
 
             dbContext.Books.Remove(book);
             await dbContext.SaveChangesAsync();
-            return Ok(new { Message = "Deleted successfully" });
+            return Ok("Deleted successfully");
         }
     }
 }

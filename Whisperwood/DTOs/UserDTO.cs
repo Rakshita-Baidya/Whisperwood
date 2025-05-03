@@ -17,8 +17,6 @@ namespace Whisperwood.DTOs
         public string? Username { get; set; }
         public string? PhoneNumber { get; set; }
         public string? ImageURL { get; set; }
-        public bool IsAdmin { get; set; }
-        public bool IsActive { get; set; }
     }
 
     public class UserUpdateDto

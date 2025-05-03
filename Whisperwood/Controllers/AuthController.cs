@@ -68,7 +68,7 @@ namespace Whisperwood.Controllers
                     }
                 );
             }
-            return Unauthorized("Password Wrong");
+            return Unauthorized("Wrong Password");
         }
     }
 }
