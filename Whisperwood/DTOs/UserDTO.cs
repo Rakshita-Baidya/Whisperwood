@@ -15,6 +15,7 @@ namespace Whisperwood.DTOs
         [Compare("Password", ErrorMessage = "Passwords do not match")]
         public required string ConfirmPassword { get; set; }
         public string? Username { get; set; }
+        [Phone]
         public string? PhoneNumber { get; set; }
         public string? ImageURL { get; set; }
     }
@@ -28,6 +29,7 @@ namespace Whisperwood.DTOs
         [Compare("Password", ErrorMessage = "Passwords do not match")]
         public string? ConfirmPassword { get; set; }
         public string? Username { get; set; }
+        [Phone]
         public string? PhoneNumber { get; set; }
         public string? ImageURL { get; set; }
         public bool? IsAdmin { get; set; }

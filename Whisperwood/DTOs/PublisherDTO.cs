@@ -9,6 +9,7 @@ namespace Whisperwood.DTOs
         [EmailAddress]
         public string? Email { get; set; }
         public string? Address { get; set; }
+        [Phone]
         public string? Contact { get; set; }
     }
 
@@ -18,6 +19,7 @@ namespace Whisperwood.DTOs
         [EmailAddress]
         public string? Email { get; set; }
         public string? Address { get; set; }
+        [Phone]
         public string? Contact { get; set; }
     }
 }

@@ -8,7 +8,8 @@ namespace Whisperwood.DTOs
         [Required]
         public required string Title { get; set; }
         [Required]
-        [StringLength(13)]
+        [StringLength(13, MinimumLength = 10)]
+        [RegularExpression(@"^\d{10}(\d{3})?$", ErrorMessage = "ISBN must be 10 or 13 digits.")]
         public required string ISBN { get; set; }
         [Required]
         public required decimal Price { get; set; }
@@ -34,6 +35,8 @@ namespace Whisperwood.DTOs
     public class BookUpdateDto
     {
         public string? Title { get; set; }
+        [StringLength(13, MinimumLength = 10)]
+        [RegularExpression(@"^\d{10}(\d{3})?$", ErrorMessage = "ISBN must be 10 or 13 digits.")]
         public string? ISBN { get; set; }
         public decimal? Price { get; set; }
         public string? Synopsis { get; set; }

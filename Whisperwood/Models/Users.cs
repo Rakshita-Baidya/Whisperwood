@@ -19,7 +19,8 @@ namespace Whisperwood.Models
         public Wishlist? Wishlist { get; set; }
         [JsonIgnore]
         public ICollection<Orders> Orders { get; set; } = [];
-
+        [JsonIgnore]
+        public ICollection<Promotions> Promotions { get; set; } = [];
         public Cart? Cart { get; set; }
     }
 }

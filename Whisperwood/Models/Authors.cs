@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Whisperwood.Models
 {
@@ -17,7 +18,7 @@ namespace Whisperwood.Models
         public DateOnly DOB { get; set; }
         [Phone]
         public string? Contact { get; set; }
-
+        [JsonIgnore]
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
 
     }
