@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
 using Whisperwood.Models;
 using Whisperwood.Services;
@@ -8,14 +9,16 @@ namespace Whisperwood.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
+        private readonly WhisperwoodDbContext dbContext;
         private readonly UserManager<Users> userManager;
         private readonly SignInManager<Users> signInManager;
         private readonly JwtService jwtService;
 
-        public AuthController(UserManager<Users> userManager, SignInManager<Users> signInManager, JwtService jwtService)
+        public AuthController(WhisperwoodDbContext dbContext, UserManager<Users> userManager, SignInManager<Users> signInManager, JwtService jwtService)
         {
+            this.dbContext = dbContext;
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.jwtService = jwtService;
@@ -34,6 +37,12 @@ namespace Whisperwood.Controllers
             };
 
             var result = await userManager.CreateAsync(user, dto.Password!);
+            var cart = new Cart { User = user };
+            var wishlist = new Wishlist { User = user };
+            dbContext.Cart.Add(cart);
+            dbContext.Wishlist.Add(wishlist);
+            await dbContext.SaveChangesAsync();
+
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors);
