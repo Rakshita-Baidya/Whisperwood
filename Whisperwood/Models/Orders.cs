@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace Whisperwood.Models
 {
@@ -11,7 +10,7 @@ namespace Whisperwood.Models
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public Guid UserId { get; set; }
-        public Users Users { get; set; }
+        public Users User { get; set; }
         public DateOnly Date { get; set; } = new DateOnly();
         [Precision(10, 2)]
         public decimal SubTotal { get; set; }
@@ -26,7 +25,6 @@ namespace Whisperwood.Models
         public DateTime OrderedAt { get; set; } = DateTime.Now;
 
         public Bill? Bill { get; set; }
-        [JsonIgnore]
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public enum OrderStatus { Pending, Cancelled, Fulfilled }
 

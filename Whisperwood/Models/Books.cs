@@ -51,8 +51,12 @@ namespace Whisperwood.Models
         public ICollection<PromotionBook> PromotionBooks { get; set; } = [];
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistItems { get; set; } = [];
-
-
+        [JsonIgnore]
+        public ICollection<OrderItem> OrderItems { get; set; } = [];
+        [JsonIgnore]
+        public ICollection<Reviews> Reviews { get; set; } = [];
+        [JsonIgnore]
+        public ICollection<CartItem> CartItems { get; set; } = [];
         public enum BookFormat
         {
             Paperback,
