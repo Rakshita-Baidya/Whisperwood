@@ -155,6 +155,8 @@ namespace Whisperwood.Services
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
+            var bill = await dbContext.Bill.FirstOrDefaultAsync(b => b.OrderId == order.Id);
+
             if (order == null)
                 return new NotFoundObjectResult("Order not found!");
 
@@ -162,6 +164,15 @@ namespace Whisperwood.Services
             {
                 if (order.Status == Orders.OrderStatus.Cancelled || order.Status == Orders.OrderStatus.Fulfilled)
                     return new BadRequestObjectResult("Cannot update a cancelled or fulfilled order.");
+
+                if (dto.Status.Value == Orders.OrderStatus.Fulfilled)
+                {
+                    if (string.IsNullOrEmpty(dto.ClaimCode))
+                        return new BadRequestObjectResult("Claim code is required to fulfill the order.");
+
+                    if (bill == null || bill.ClaimCode != dto.ClaimCode)
+                        return new BadRequestObjectResult("Invalid claim code.");
+                }
 
                 if (dto.Status.Value == Orders.OrderStatus.Cancelled)
                 {
@@ -175,7 +186,21 @@ namespace Whisperwood.Services
             }
 
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult(order);
+            return new OkObjectResult(new
+            {
+                OrderId = order.Id,
+                Status = order.Status.ToString(),
+                Total = order.TotalAmount,
+                Discount = order.Discount,
+                OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                ClaimCode = bill?.ClaimCode,
+                PickUpDate = bill?.PickUpDate.ToString("yyyy-MM-dd"),
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    BookId = oi.Book.Id,
+                    Quantity = oi.Quantity,
+                }).ToList()
+            });
         }
 
         public async Task<IActionResult> GetOrdersByUserAsync(Guid requestingUserId, Guid targetUserId)

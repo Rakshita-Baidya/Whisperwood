@@ -23,7 +23,6 @@ namespace Whisperwood.Models
         //public Guid DiscountCodeId { get; set; }
         //public DiscountCode DiscountCode { get; set; }
         public DateTime OrderedAt { get; set; } = DateTime.Now;
-
         public Bill? Bill { get; set; }
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public enum OrderStatus { Pending, Cancelled, Fulfilled }

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Whisperwood.Models
+﻿namespace Whisperwood.Models
 {
     public class Bill
     {
@@ -8,7 +6,6 @@ namespace Whisperwood.Models
         public string ClaimCode { get; set; } = Guid.NewGuid().ToString().Substring(0, 6);
         public DateOnly PickUpDate { get; set; }
         public Guid OrderId { get; set; }
-        [JsonIgnore]
         public Orders Order { get; set; }
     }
 }
