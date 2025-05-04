@@ -5,10 +5,10 @@ namespace Whisperwood.Interfaces
 {
     public interface IDiscountCodeService
     {
-        Task<IActionResult> AddDiscountCode(Guid userId, DiscountCodeDto dto);
-        Task<IActionResult> GetAllDiscountCodes();
-        Task<IActionResult> GetDiscountCodeById(Guid userId, Guid id);
-        Task<IActionResult> UpdateDiscountCode(Guid userId, Guid id, DiscountCodeUpdateDto dto);
-        Task<IActionResult> DeleteDiscountCode(Guid userId, Guid id);
+        Task<IActionResult> AddDiscountCodeAsync(Guid userId, DiscountCodeDto dto);
+        Task<IActionResult> GetAllDiscountCodesAsync();
+        Task<IActionResult> GetDiscountCodeByIdAsync(Guid userId, Guid id);
+        Task<IActionResult> UpdateDiscountCodeAsync(Guid userId, Guid id, DiscountCodeUpdateDto dto);
+        Task<IActionResult> DeleteDiscountCodeAsync(Guid userId, Guid id);
     }
 }

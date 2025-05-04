@@ -5,9 +5,9 @@ namespace Whisperwood.Interfaces
 {
     public interface ICartItemService
     {
-        Task<IActionResult> AddCartItem(Guid userId, CartItemDto dto);
-        Task<IActionResult> GetAllCartItems(Guid userId);
-        Task<IActionResult> UpdateCartItem(Guid userId, CartItemDto dto);
-        Task<IActionResult> DeleteCartItem(Guid userId, Guid bookId);
+        Task<IActionResult> AddCartItemAsync(Guid userId, CartItemDto dto);
+        Task<IActionResult> GetAllCartItemsAsync(Guid userId);
+        Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemDto dto);
+        Task<IActionResult> DeleteCartItemAsync(Guid userId, Guid bookId);
     }
 }

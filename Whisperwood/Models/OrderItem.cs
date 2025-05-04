@@ -15,6 +15,10 @@ namespace Whisperwood.Models
         public Guid BookId { get; set; }
         public Books Book { get; set; }
 
+        [Precision(10, 2)]
+        public decimal UnitPrice { get; set; }
+
+
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public required int Quantity { get; set; }
 

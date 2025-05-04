@@ -22,7 +22,7 @@ namespace Whisperwood.Services
             this.jwtService = jwtService;
         }
 
-        public async Task<IActionResult> RegisterUser(UserDto dto)
+        public async Task<IActionResult> RegisterUserAsync(UserDto dto)
         {
             var user = new Users
             {
@@ -48,7 +48,7 @@ namespace Whisperwood.Services
             return new OkObjectResult("Registered Successfully!");
         }
 
-        public async Task<IActionResult> LoginUser(LoginDto loginDto)
+        public async Task<IActionResult> LoginUserAsync(LoginDto loginDto)
         {
             var user = await userManager.FindByEmailAsync(loginDto.Email!);
             if (user == null)

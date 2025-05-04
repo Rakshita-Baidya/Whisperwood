@@ -5,10 +5,10 @@ namespace Whisperwood.Interfaces
 {
     public interface ICoverImageService
     {
-        Task<IActionResult> AddCoverImage(Guid userId, CoverImageDto dto);
-        Task<IActionResult> GetAllCoverImages();
-        Task<IActionResult> GetCoverImageById(Guid userId, Guid id);
-        Task<IActionResult> UpdateCoverImage(Guid userId, Guid id, CoverImageUpdateDto dto);
-        Task<IActionResult> DeleteCoverImage(Guid userId, Guid id);
+        Task<IActionResult> AddCoverImageAsync(Guid userId, CoverImageDto dto);
+        Task<IActionResult> GetAllCoverImagesAsync();
+        Task<IActionResult> GetCoverImageByIdAsync(Guid userId, Guid id);
+        Task<IActionResult> UpdateCoverImageAsync(Guid userId, Guid id, CoverImageUpdateDto dto);
+        Task<IActionResult> DeleteCoverImageAsync(Guid userId, Guid id);
     }
 }

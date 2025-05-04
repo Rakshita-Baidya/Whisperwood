@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddReview(Guid userId, ReviewDTO dto)
+        public async Task<IActionResult> AddReviewAsync(Guid userId, ReviewDTO dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -41,7 +41,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(review);
         }
 
-        public async Task<IActionResult> GetAllReviews()
+        public async Task<IActionResult> GetAllReviewsAsync()
         {
             var reviews = await dbContext.Reviews
                 .Include(r => r.Users)
@@ -51,7 +51,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(reviews);
         }
 
-        public async Task<IActionResult> GetReviewsByBook(Guid bookId)
+        public async Task<IActionResult> GetReviewsByBookAsync(Guid bookId)
         {
             var book = await dbContext.Books.FindAsync(bookId);
             if (book == null)
@@ -65,7 +65,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(reviews);
         }
 
-        public async Task<IActionResult> UpdateReview(Guid userId, Guid id, ReviewUpdateDto dto)
+        public async Task<IActionResult> UpdateReviewAsync(Guid userId, Guid id, ReviewUpdateDto dto)
         {
             var review = await dbContext.Reviews.FindAsync(id);
             if (review == null)
@@ -90,7 +90,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(review);
         }
 
-        public async Task<IActionResult> DeleteReview(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteReviewAsync(Guid userId, Guid id)
         {
             var review = await dbContext.Reviews.FindAsync(id);
             if (review == null)

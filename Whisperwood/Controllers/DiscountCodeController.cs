@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddDiscountCode(DiscountCodeDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await discountCodeService.AddDiscountCode(userId, dto);
+            return await discountCodeService.AddDiscountCodeAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllDiscountCodes()
         {
-            return await discountCodeService.GetAllDiscountCodes();
+            return await discountCodeService.GetAllDiscountCodesAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetDiscountCodeById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await discountCodeService.GetDiscountCodeById(userId, id);
+            return await discountCodeService.GetDiscountCodeByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateDiscountCode(Guid id, DiscountCodeUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await discountCodeService.UpdateDiscountCode(userId, id, dto);
+            return await discountCodeService.UpdateDiscountCodeAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteDiscountCode(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await discountCodeService.DeleteDiscountCode(userId, id);
+            return await discountCodeService.DeleteDiscountCodeAsync(userId, id);
         }
     }
 }

@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddCoverImage(CoverImageDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await coverImageService.AddCoverImage(userId, dto);
+            return await coverImageService.AddCoverImageAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllCoverImages()
         {
-            return await coverImageService.GetAllCoverImages();
+            return await coverImageService.GetAllCoverImagesAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetCoverImageById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await coverImageService.GetCoverImageById(userId, id);
+            return await coverImageService.GetCoverImageByIdAsync(userId, id);
         }
 
         [HttpPut("updateCoverImage/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateCoverImage(Guid id, CoverImageUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await coverImageService.UpdateCoverImage(userId, id, dto);
+            return await coverImageService.UpdateCoverImageAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteCoverImage(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await coverImageService.DeleteCoverImage(userId, id);
+            return await coverImageService.DeleteCoverImageAsync(userId, id);
         }
     }
 }

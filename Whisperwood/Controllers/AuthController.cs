@@ -18,13 +18,13 @@ namespace Whisperwood.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser(UserDto dto)
         {
-            return await authService.RegisterUser(dto);
+            return await authService.RegisterUserAsync(dto);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> LoginUser(LoginDto loginDto)
         {
-            return await authService.LoginUser(loginDto);
+            return await authService.LoginUserAsync(loginDto);
         }
     }
 }

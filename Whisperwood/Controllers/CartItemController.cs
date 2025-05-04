@@ -21,7 +21,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddCartItem(CartItemDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await cartItemService.AddCartItem(userId, dto);
+            return await cartItemService.AddCartItemAsync(userId, dto);
         }
 
         [HttpGet("getall")]
@@ -29,7 +29,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetAllCartItems()
         {
             var userId = GetLoggedInUserId();
-            return await cartItemService.GetAllCartItems(userId);
+            return await cartItemService.GetAllCartItemsAsync(userId);
         }
 
         [HttpPut("update")]
@@ -37,7 +37,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateCartItem(CartItemDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await cartItemService.UpdateCartItem(userId, dto);
+            return await cartItemService.UpdateCartItemAsync(userId, dto);
         }
 
         [HttpDelete("delete/{bookId}")]
@@ -45,7 +45,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteCartItem(Guid bookId)
         {
             var userId = GetLoggedInUserId();
-            return await cartItemService.DeleteCartItem(userId, bookId);
+            return await cartItemService.DeleteCartItemAsync(userId, bookId);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddGenre(Guid userId, GenreDto dto)
+        public async Task<IActionResult> AddGenreAsync(Guid userId, GenreDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -36,13 +36,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(genre);
         }
 
-        public async Task<IActionResult> GetAllGenres()
+        public async Task<IActionResult> GetAllGenresAsync()
         {
             var genres = await dbContext.Genres.ToListAsync();
             return new OkObjectResult(genres);
         }
 
-        public async Task<IActionResult> GetGenreById(Guid userId, Guid id)
+        public async Task<IActionResult> GetGenreByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -54,7 +54,7 @@ namespace Whisperwood.Services
             return genre != null ? new OkObjectResult(genre) : new NotFoundObjectResult("Genre not found!");
         }
 
-        public async Task<IActionResult> UpdateGenre(Guid userId, Guid id, GenreUpdateDto dto)
+        public async Task<IActionResult> UpdateGenreAsync(Guid userId, Guid id, GenreUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -75,7 +75,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(genre);
         }
 
-        public async Task<IActionResult> DeleteGenre(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteGenreAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

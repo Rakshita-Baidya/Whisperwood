@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddPromotion(Guid userId, PromotionDto dto)
+        public async Task<IActionResult> AddPromotionAsync(Guid userId, PromotionDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -51,13 +51,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(promotion);
         }
 
-        public async Task<IActionResult> GetAllPromotions()
+        public async Task<IActionResult> GetAllPromotionsAsync()
         {
             var promotions = await dbContext.Promotions.Include(p => p.User).ToListAsync();
             return new OkObjectResult(promotions);
         }
 
-        public async Task<IActionResult> GetPromotionById(Guid userId, Guid id)
+        public async Task<IActionResult> GetPromotionByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -69,7 +69,7 @@ namespace Whisperwood.Services
             return promotion != null ? new OkObjectResult(promotion) : new NotFoundObjectResult("Promotion not found!");
         }
 
-        public async Task<IActionResult> UpdatePromotion(Guid userId, Guid id, PromotionUpdateDto dto)
+        public async Task<IActionResult> UpdatePromotionAsync(Guid userId, Guid id, PromotionUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -98,7 +98,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(promotion);
         }
 
-        public async Task<IActionResult> DeletePromotion(Guid userId, Guid id)
+        public async Task<IActionResult> DeletePromotionAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddPublisher(PublisherDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await publisherService.AddPublisher(userId, dto);
+            return await publisherService.AddPublisherAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllPublishers()
         {
-            return await publisherService.GetAllPublishers();
+            return await publisherService.GetAllPublishersAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetPublisherById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await publisherService.GetPublisherById(userId, id);
+            return await publisherService.GetPublisherByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdatePublisher(Guid id, PublisherUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await publisherService.UpdatePublisher(userId, id, dto);
+            return await publisherService.UpdatePublisherAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeletePublisher(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await publisherService.DeletePublisher(userId, id);
+            return await publisherService.DeletePublisherAsync(userId, id);
         }
     }
 }

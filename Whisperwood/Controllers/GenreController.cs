@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddGenre(GenreDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await genreService.AddGenre(userId, dto);
+            return await genreService.AddGenreAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllGenres()
         {
-            return await genreService.GetAllGenres();
+            return await genreService.GetAllGenresAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetGenreById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await genreService.GetGenreById(userId, id);
+            return await genreService.GetGenreByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateGenre(Guid id, GenreUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await genreService.UpdateGenre(userId, id, dto);
+            return await genreService.UpdateGenreAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteGenre(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await genreService.DeleteGenre(userId, id);
+            return await genreService.DeleteGenreAsync(userId, id);
         }
     }
 }

@@ -5,10 +5,10 @@ namespace Whisperwood.Interfaces
 {
     public interface IAuthorService
     {
-        Task<IActionResult> AddAuthor(Guid userId, AuthorDto dto);
-        Task<IActionResult> GetAllAuthors();
-        Task<IActionResult> GetAuthorById(Guid userId, Guid id);
-        Task<IActionResult> UpdateAuthor(Guid userId, Guid id, AuthorUpdateDto dto);
-        Task<IActionResult> DeleteAuthor(Guid userId, Guid id);
+        Task<IActionResult> AddAuthorAsync(Guid userId, AuthorDto dto);
+        Task<IActionResult> GetAllAuthorsAsync();
+        Task<IActionResult> GetAuthorByIdAsync(Guid userId, Guid id);
+        Task<IActionResult> UpdateAuthorAsync(Guid userId, Guid id, AuthorUpdateDto dto);
+        Task<IActionResult> DeleteAuthorAsync(Guid userId, Guid id);
     }
 }

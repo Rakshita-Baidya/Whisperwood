@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddCoverImage(Guid userId, CoverImageDto dto)
+        public async Task<IActionResult> AddCoverImageAsync(Guid userId, CoverImageDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -35,13 +35,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(coverImage);
         }
 
-        public async Task<IActionResult> GetAllCoverImages()
+        public async Task<IActionResult> GetAllCoverImagesAsync()
         {
             var coverImageList = await dbContext.CoverImages.ToListAsync();
             return new OkObjectResult(coverImageList);
         }
 
-        public async Task<IActionResult> GetCoverImageById(Guid userId, Guid id)
+        public async Task<IActionResult> GetCoverImageByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -53,7 +53,7 @@ namespace Whisperwood.Services
             return coverImage != null ? new OkObjectResult(coverImage) : new NotFoundObjectResult("Cover Image not found! Please check the id again.");
         }
 
-        public async Task<IActionResult> UpdateCoverImage(Guid userId, Guid id, CoverImageUpdateDto dto)
+        public async Task<IActionResult> UpdateCoverImageAsync(Guid userId, Guid id, CoverImageUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -73,7 +73,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(coverImage);
         }
 
-        public async Task<IActionResult> DeleteCoverImage(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteCoverImageAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

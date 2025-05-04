@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddCategory(CategoryDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await categoryService.AddCategory(userId, dto);
+            return await categoryService.AddCategoryAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllCategories()
         {
-            return await categoryService.GetAllCategories();
+            return await categoryService.GetAllCategoriesAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetCategoryById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await categoryService.GetCategoryById(userId, id);
+            return await categoryService.GetCategoryByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateCategory(Guid id, CategoryUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await categoryService.UpdateCategory(userId, id, dto);
+            return await categoryService.UpdateCategoryAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await categoryService.DeleteCategory(userId, id);
+            return await categoryService.DeleteCategoryAsync(userId, id);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddAuthor(Guid userId, AuthorDto dto)
+        public async Task<IActionResult> AddAuthorAsync(Guid userId, AuthorDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -40,13 +40,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(author);
         }
 
-        public async Task<IActionResult> GetAllAuthors()
+        public async Task<IActionResult> GetAllAuthorsAsync()
         {
             var authorList = await dbContext.Authors.ToListAsync();
             return new OkObjectResult(authorList);
         }
 
-        public async Task<IActionResult> GetAuthorById(Guid userId, Guid id)
+        public async Task<IActionResult> GetAuthorByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -58,7 +58,7 @@ namespace Whisperwood.Services
             return author != null ? new OkObjectResult(author) : new NotFoundObjectResult("Author not found!");
         }
 
-        public async Task<IActionResult> UpdateAuthor(Guid userId, Guid id, AuthorUpdateDto dto)
+        public async Task<IActionResult> UpdateAuthorAsync(Guid userId, Guid id, AuthorUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -83,7 +83,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(author);
         }
 
-        public async Task<IActionResult> DeleteAuthor(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteAuthorAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

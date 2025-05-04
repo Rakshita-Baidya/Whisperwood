@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddPublisher(Guid userId, PublisherDto dto)
+        public async Task<IActionResult> AddPublisherAsync(Guid userId, PublisherDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -38,13 +38,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(publisher);
         }
 
-        public async Task<IActionResult> GetAllPublishers()
+        public async Task<IActionResult> GetAllPublishersAsync()
         {
             var publisherList = await dbContext.Publishers.ToListAsync();
             return new OkObjectResult(publisherList);
         }
 
-        public async Task<IActionResult> GetPublisherById(Guid userId, Guid id)
+        public async Task<IActionResult> GetPublisherByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -56,7 +56,7 @@ namespace Whisperwood.Services
             return publisher != null ? new OkObjectResult(publisher) : new NotFoundObjectResult("Publisher not found!");
         }
 
-        public async Task<IActionResult> UpdatePublisher(Guid userId, Guid id, PublisherUpdateDto dto)
+        public async Task<IActionResult> UpdatePublisherAsync(Guid userId, Guid id, PublisherUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -79,7 +79,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(publisher);
         }
 
-        public async Task<IActionResult> DeletePublisher(Guid userId, Guid id)
+        public async Task<IActionResult> DeletePublisherAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

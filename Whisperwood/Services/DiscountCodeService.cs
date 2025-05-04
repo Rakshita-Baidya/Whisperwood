@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddDiscountCode(Guid userId, DiscountCodeDto dto)
+        public async Task<IActionResult> AddDiscountCodeAsync(Guid userId, DiscountCodeDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -38,13 +38,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(discountCode);
         }
 
-        public async Task<IActionResult> GetAllDiscountCodes()
+        public async Task<IActionResult> GetAllDiscountCodesAsync()
         {
             var discountCodeList = await dbContext.DiscountCodes.ToListAsync();
             return new OkObjectResult(discountCodeList);
         }
 
-        public async Task<IActionResult> GetDiscountCodeById(Guid userId, Guid id)
+        public async Task<IActionResult> GetDiscountCodeByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -56,7 +56,7 @@ namespace Whisperwood.Services
             return discountCode != null ? new OkObjectResult(discountCode) : new NotFoundObjectResult("Discount code not found!");
         }
 
-        public async Task<IActionResult> UpdateDiscountCode(Guid userId, Guid id, DiscountCodeUpdateDto dto)
+        public async Task<IActionResult> UpdateDiscountCodeAsync(Guid userId, Guid id, DiscountCodeUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -78,7 +78,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(discountCode);
         }
 
-        public async Task<IActionResult> DeleteDiscountCode(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteDiscountCodeAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

@@ -21,19 +21,19 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddBook(BookDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await bookService.AddBook(userId, dto);
+            return await bookService.AddBookAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllBooks()
         {
-            return await bookService.GetAllBooks();
+            return await bookService.GetAllBooksAsync();
         }
 
         [HttpGet("getbyid/{id}")]
         public async Task<IActionResult> GetBookById(Guid id)
         {
-            return await bookService.GetBookById(id);
+            return await bookService.GetBookByIdAsync(id);
         }
 
         [HttpPut("update/{id}")]
@@ -41,7 +41,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateBook(Guid id, BookUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await bookService.UpdateBook(userId, id, dto);
+            return await bookService.UpdateBookAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -49,7 +49,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteBook(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await bookService.DeleteBook(userId, id);
+            return await bookService.DeleteBookAsync(userId, id);
         }
     }
 }

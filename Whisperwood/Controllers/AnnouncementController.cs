@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddAnnouncement(AnnouncementDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await announcementService.AddAnnouncement(userId, dto);
+            return await announcementService.AddAnnouncementAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAnnouncements()
         {
-            return await announcementService.GetAllAnnouncements();
+            return await announcementService.GetAllAnnouncementsAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetAnnouncementById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await announcementService.GetAnnouncementById(userId, id);
+            return await announcementService.GetAnnouncementByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateAnnouncement(Guid id, AnnouncementUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await announcementService.UpdateAnnouncement(userId, id, dto);
+            return await announcementService.UpdateAnnouncementAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteAnnouncement(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await announcementService.DeleteAnnouncement(userId, id);
+            return await announcementService.DeleteAnnouncementAsync(userId, id);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddCategory(Guid userId, CategoryDto dto)
+        public async Task<IActionResult> AddCategoryAsync(Guid userId, CategoryDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -36,13 +36,13 @@ namespace Whisperwood.Services
             return new OkObjectResult(category);
         }
 
-        public async Task<IActionResult> GetAllCategories()
+        public async Task<IActionResult> GetAllCategoriesAsync()
         {
             var categories = await dbContext.Categories.ToListAsync();
             return new OkObjectResult(categories);
         }
 
-        public async Task<IActionResult> GetCategoryById(Guid userId, Guid id)
+        public async Task<IActionResult> GetCategoryByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -54,7 +54,7 @@ namespace Whisperwood.Services
             return category != null ? new OkObjectResult(category) : new NotFoundObjectResult("Category not found!");
         }
 
-        public async Task<IActionResult> UpdateCategory(Guid userId, Guid id, CategoryUpdateDto dto)
+        public async Task<IActionResult> UpdateCategoryAsync(Guid userId, Guid id, CategoryUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -75,7 +75,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(category);
         }
 
-        public async Task<IActionResult> DeleteCategory(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteCategoryAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddBook(Guid userId, BookDto dto)
+        public async Task<IActionResult> AddBookAsync(Guid userId, BookDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -55,7 +55,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(book);
         }
 
-        public async Task<IActionResult> GetAllBooks()
+        public async Task<IActionResult> GetAllBooksAsync()
         {
             var books = await dbContext.Books
                 .Include(b => b.AuthorBooks).ThenInclude(ab => ab.Author)
@@ -68,7 +68,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(books);
         }
 
-        public async Task<IActionResult> GetBookById(Guid id)
+        public async Task<IActionResult> GetBookByIdAsync(Guid id)
         {
             var book = await dbContext.Books
                 .Include(b => b.AuthorBooks).ThenInclude(ab => ab.Author)
@@ -81,7 +81,7 @@ namespace Whisperwood.Services
             return book != null ? new OkObjectResult(book) : new NotFoundObjectResult("Book not found!");
         }
 
-        public async Task<IActionResult> UpdateBook(Guid userId, Guid id, BookUpdateDto dto)
+        public async Task<IActionResult> UpdateBookAsync(Guid userId, Guid id, BookUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
@@ -140,7 +140,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(book);
         }
 
-        public async Task<IActionResult> DeleteBook(Guid userId, Guid id)
+        public async Task<IActionResult> DeleteBookAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))

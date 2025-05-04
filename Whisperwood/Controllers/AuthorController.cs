@@ -21,13 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddAuthor(AuthorDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await authorService.AddAuthor(userId, dto);
+            return await authorService.AddAuthorAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAuthors()
         {
-            return await authorService.GetAllAuthors();
+            return await authorService.GetAllAuthorsAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -35,7 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetAuthorById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await authorService.GetAuthorById(userId, id);
+            return await authorService.GetAuthorByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -43,7 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateAuthor(Guid id, AuthorUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await authorService.UpdateAuthor(userId, id, dto);
+            return await authorService.UpdateAuthorAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -51,7 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteAuthor(Guid id)
         {
             var userId = GetLoggedInUserId();
-            return await authorService.DeleteAuthor(userId, id);
+            return await authorService.DeleteAuthorAsync(userId, id);
         }
     }
 }

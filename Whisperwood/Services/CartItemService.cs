@@ -16,7 +16,7 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<IActionResult> AddCartItem(Guid userId, CartItemDto dto)
+        public async Task<IActionResult> AddCartItemAsync(Guid userId, CartItemDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -66,7 +66,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(cartItem);
         }
 
-        public async Task<IActionResult> GetAllCartItems(Guid userId)
+        public async Task<IActionResult> GetAllCartItemsAsync(Guid userId)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -87,7 +87,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(cartItems);
         }
 
-        public async Task<IActionResult> UpdateCartItem(Guid userId, CartItemDto dto)
+        public async Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -132,7 +132,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(cartItem);
         }
 
-        public async Task<IActionResult> DeleteCartItem(Guid userId, Guid bookId)
+        public async Task<IActionResult> DeleteCartItemAsync(Guid userId, Guid bookId)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
