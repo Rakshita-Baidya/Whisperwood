@@ -65,6 +65,7 @@ builder.Services.Configure<JwtTokenInfo>(
     );
 
 
+
 builder.Services.AddIdentity<Users, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<WhisperwoodDbContext>();
 
@@ -108,7 +109,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.ConfigObject.PersistAuthorization = true;
+    });
     app.UseDeveloperExceptionPage();
 }
 
@@ -119,6 +123,13 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/", async context =>
+{
+    context.Response.Redirect("/Index");
+
+    await Task.CompletedTask;
+});
 
 app.MapControllers();
 app.MapRazorPages();
