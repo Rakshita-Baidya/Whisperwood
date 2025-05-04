@@ -124,6 +124,13 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", async context =>
+{
+    context.Response.Redirect("/Index");
+
+    await Task.CompletedTask;
+});
+
 app.MapControllers();
 app.MapRazorPages();
 

@@ -129,7 +129,7 @@ namespace Whisperwood.Controllers
             dbContext.CartItem.Remove(cartItem);
             await dbContext.SaveChangesAsync();
 
-            return Ok("Item deleted.");
+            return Ok("Deleted successfully.");
         }
 
 
