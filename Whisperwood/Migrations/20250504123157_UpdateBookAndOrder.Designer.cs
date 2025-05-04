@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250504123157_UpdateBookAndOrder")]
+    partial class UpdateBookAndOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,6 +115,10 @@ namespace Whisperwood.Migrations
 
                     b.Property<DateOnly>("PickUpDate")
                         .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -383,6 +390,9 @@ namespace Whisperwood.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderedAt");
@@ -390,6 +400,8 @@ namespace Whisperwood.Migrations
                     b.HasIndex("Status");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UsersId");
 
                     b.ToTable("Orders");
                 });
@@ -696,7 +708,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.CartItem", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("CartItems")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -753,7 +765,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.OrderItem", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Book")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -771,13 +783,13 @@ namespace Whisperwood.Migrations
 
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
                 {
-                    b.HasOne("Whisperwood.Models.Users", "User")
+                    b.HasOne("Whisperwood.Models.Users", "Users")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Whisperwood.Models.PromotionBook", b =>
@@ -830,7 +842,7 @@ namespace Whisperwood.Migrations
             modelBuilder.Entity("Whisperwood.Models.Reviews", b =>
                 {
                     b.HasOne("Whisperwood.Models.Books", "Books")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("BooksId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -883,19 +895,13 @@ namespace Whisperwood.Migrations
                 {
                     b.Navigation("AuthorBooks");
 
-                    b.Navigation("CartItems");
-
                     b.Navigation("CategoryBooks");
 
                     b.Navigation("GenreBooks");
 
-                    b.Navigation("OrderItems");
-
                     b.Navigation("PromotionBooks");
 
                     b.Navigation("PublisherBooks");
-
-                    b.Navigation("Reviews");
 
                     b.Navigation("WishlistItems");
                 });

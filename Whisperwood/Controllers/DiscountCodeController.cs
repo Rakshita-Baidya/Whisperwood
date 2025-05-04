@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
-using Whisperwood.Models;
+using Whisperwood.Interfaces;
 
 namespace Whisperwood.Controllers
 {
@@ -11,11 +9,11 @@ namespace Whisperwood.Controllers
     [ApiController]
     public class DiscountCodeController : BaseController
     {
-        private readonly WhisperwoodDbContext dbContext;
+        private readonly IDiscountCodeService discountCodeService;
 
-        public DiscountCodeController(WhisperwoodDbContext dbContext)
+        public DiscountCodeController(IDiscountCodeService discountCodeService)
         {
-            this.dbContext = dbContext;
+            this.discountCodeService = discountCodeService;
         }
 
         [HttpPost("add")]
@@ -23,29 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddDiscountCode(DiscountCodeDto dto)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-            var discountCode = new DiscountCode
-            {
-                Id = Guid.NewGuid(),
-                Code = Guid.NewGuid().ToString().Substring(0, 8),
-                Percent = dto.Percent,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-            };
-            dbContext.DiscountCodes.Add(discountCode);
-            await dbContext.SaveChangesAsync();
-            return Ok(discountCode);
+            return await discountCodeService.AddDiscountCodeAsync(userId, dto);
         }
 
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllDiscountCodes()
         {
-            List<DiscountCode> discountCodeList = await dbContext.DiscountCodes.ToListAsync();
-            return Ok(discountCodeList);
+            return await discountCodeService.GetAllDiscountCodesAsync();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -53,13 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetDiscountCodeById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-            DiscountCode? discountCode = await dbContext.DiscountCodes.FirstOrDefaultAsync(d => d.Id == id);
-            return discountCode != null ? Ok(discountCode) : NotFound("Discount code not found!");
+            return await discountCodeService.GetDiscountCodeByIdAsync(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -67,23 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateDiscountCode(Guid id, DiscountCodeUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-            var discountCode = await dbContext.DiscountCodes.FindAsync(id);
-            if (discountCode == null)
-            {
-                return NotFound("Discount code not found!");
-            }
-
-            if (dto.Percent != null) discountCode.Percent = dto.Percent.Value;
-            if (dto.StartDate != null) discountCode.StartDate = dto.StartDate.Value;
-            if (dto.EndDate != null) discountCode.EndDate = dto.EndDate.Value;
-
-            await dbContext.SaveChangesAsync();
-            return Ok(discountCode);
+            return await discountCodeService.UpdateDiscountCodeAsync(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -91,19 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteDiscountCode(Guid id)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-            var discountCode = await dbContext.DiscountCodes.FindAsync(id);
-            if (discountCode == null)
-            {
-                return NotFound("Discount code not found!");
-            }
-            dbContext.DiscountCodes.Remove(discountCode);
-            await dbContext.SaveChangesAsync();
-            return Ok("Deleted successfully!");
+            return await discountCodeService.DeleteDiscountCodeAsync(userId, id);
         }
     }
 }

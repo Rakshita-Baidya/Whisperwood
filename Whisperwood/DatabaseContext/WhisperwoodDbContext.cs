@@ -22,6 +22,7 @@ namespace Whisperwood.DatabaseContext
         public DbSet<GenreBooks> GenreBooks { get; set; }
         public DbSet<Genres> Genres { get; set; }
         public DbSet<Orders> Orders { get; set; }
+        public DbSet<OrderItem> OrderItem { get; set; }
         public DbSet<PromotionBook> PromotionBook { get; set; }
         public DbSet<Promotions> Promotions { get; set; }
         public DbSet<PublisherBooks> PublisherBooks { get; set; }
@@ -45,6 +46,11 @@ namespace Whisperwood.DatabaseContext
                 .HasOne(w => w.User)
                 .WithOne(u => u.Wishlist)
                 .HasForeignKey<Wishlist>(w => w.UserId);
+
+            modelBuilder.Entity<Orders>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId);
 
             modelBuilder.Entity<AuthorBooks>()
                 .HasOne(ab => ab.Author)
@@ -91,6 +97,13 @@ namespace Whisperwood.DatabaseContext
                 .WithMany(u => u.Announcements)
                 .HasForeignKey(a => a.UserId);
 
+            modelBuilder.Entity<Orders>()
+                .Property(o => o.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Books>()
+                .Property(b => b.Format)
+                .HasConversion<string>();
         }
 
     }
