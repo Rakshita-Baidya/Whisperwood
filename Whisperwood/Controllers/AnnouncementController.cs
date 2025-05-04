@@ -47,7 +47,7 @@ namespace Whisperwood.Controllers
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 UserId = userId,
-                Users = user
+                User = user
             };
 
             dbContext.Announcements.Add(announcement);
@@ -59,7 +59,7 @@ namespace Whisperwood.Controllers
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAAnnouncements()
         {
-            List<Announcements> announcementList = await dbContext.Announcements.Include(a => a.Users).ToListAsync();
+            List<Announcements> announcementList = await dbContext.Announcements.Include(a => a.User).ToListAsync();
             return Ok(announcementList);
         }
 
@@ -73,7 +73,7 @@ namespace Whisperwood.Controllers
             {
                 return Unauthorized("Only admins can update announcements.");
             }
-            Announcements? announcement = await dbContext.Announcements.Include(a => a.Users).FirstOrDefaultAsync(a => a.Id == id);
+            Announcements? announcement = await dbContext.Announcements.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
             return announcement != null ? Ok(announcement) : NotFound("Announcement not found!");
         }
 

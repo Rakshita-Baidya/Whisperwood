@@ -4,7 +4,6 @@ namespace Whisperwood.DTOs
 {
     public class CartItemDto
     {
-        public required Guid CartId { get; set; }
         public required Guid BookId { get; set; }
         [Required]
         [Range(1, int.MaxValue)]

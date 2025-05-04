@@ -48,7 +48,7 @@ namespace Whisperwood.Controllers
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 UserId = userId,
-                Users = user
+                User = user
             };
 
             dbContext.Promotions.Add(promotion);
@@ -59,7 +59,7 @@ namespace Whisperwood.Controllers
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllPromotions()
         {
-            var promotions = await dbContext.Promotions.Include(p => p.Users).ToListAsync();
+            var promotions = await dbContext.Promotions.Include(p => p.User).ToListAsync();
             return Ok(promotions);
         }
 
@@ -74,7 +74,7 @@ namespace Whisperwood.Controllers
                 return Unauthorized("Only admins can view promotions by ID.");
             }
 
-            var promotion = await dbContext.Promotions.Include(p => p.Users).FirstOrDefaultAsync(p => p.Id == id);
+            var promotion = await dbContext.Promotions.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
             return promotion != null ? Ok(promotion) : NotFound("Promotion not found!");
         }
 

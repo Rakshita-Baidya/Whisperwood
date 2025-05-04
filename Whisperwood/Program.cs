@@ -65,6 +65,7 @@ builder.Services.Configure<JwtTokenInfo>(
     );
 
 
+
 builder.Services.AddIdentity<Users, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<WhisperwoodDbContext>();
 
@@ -108,7 +109,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.ConfigObject.PersistAuthorization = true;
+    });
     app.UseDeveloperExceptionPage();
 }
 
