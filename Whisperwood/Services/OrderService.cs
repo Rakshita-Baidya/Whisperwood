@@ -35,6 +35,9 @@ namespace Whisperwood.Services
             // Validate stock and calculate subtotal
             decimal subTotal = 0;
             var orderItems = new List<OrderItem>();
+            var promotionDiscounts = new Dictionary<Guid, decimal>(); // Track promotion discounts per book
+
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
             foreach (var cartItem in cart.CartItems)
             {
@@ -42,14 +45,35 @@ namespace Whisperwood.Services
                 if (cartItem.Quantity > book.Stock)
                     return new BadRequestObjectResult($"Not enough stock for: {book.Title}");
 
-                decimal itemSubtotal = book.Price * cartItem.Quantity;
+                // Check for active promotions
+                decimal maxDiscountPercent = 0;
+                var promotions = await dbContext.PromotionBook
+                    .Where(pb => pb.BookId == book.Id)
+                    .Include(pb => pb.Promotion)
+                    .Where(pb => pb.Promotion.IsActive && pb.Promotion.StartDate <= currentDate && pb.Promotion.EndDate >= currentDate)
+                    .ToListAsync();
+
+                if (promotions.Any())
+                {
+                    maxDiscountPercent = promotions.Max(pb => pb.Promotion.DiscountPercent);
+                }
+
+                decimal originalPrice = book.Price;
+                decimal discountedPrice = originalPrice * (1 - maxDiscountPercent);
+                decimal itemSubtotal = originalPrice * cartItem.Quantity;
+                decimal itemPromotionDiscount = (originalPrice - discountedPrice) * cartItem.Quantity;
+
                 subTotal += itemSubtotal;
+                if (itemPromotionDiscount > 0)
+                {
+                    promotionDiscounts[book.Id] = itemPromotionDiscount;
+                }
 
                 orderItems.Add(new OrderItem
                 {
                     BookId = book.Id,
                     Quantity = cartItem.Quantity,
-                    UnitPrice = book.Price,
+                    UnitPrice = discountedPrice,
                     SubTotal = itemSubtotal
                 });
 
@@ -57,14 +81,12 @@ namespace Whisperwood.Services
             }
 
             // Calculate discounts
-            decimal discount = 0;
+            decimal discount = promotionDiscounts.Values.Sum();
             int totalItems = cart.CartItems.Sum(i => i.Quantity);
             if (totalItems >= 5)
                 discount += subTotal * 0.05m;
 
-            int previousOrders = await dbContext.Orders.CountAsync(o => o.UserId == userId);
-            if (previousOrders >= 10)
-                discount += subTotal * 0.1m;
+            if (user.OrdersCount >= 10) discount += subTotal * 0.1m;
 
             decimal total = subTotal - discount;
 
@@ -94,14 +116,36 @@ namespace Whisperwood.Services
             dbContext.Orders.Add(order);
             dbContext.Bill.Add(bill);
             dbContext.CartItem.RemoveRange(cart.CartItems);
+            user.OrdersCount += 1;
             await dbContext.SaveChangesAsync();
 
             //Generate bill
             var pdfBytes = await billService.GenerateBillPdfAsync(order.Id);
 
             // Send email with bill
-            await billService.SendBillEmailAsync(order.Id, user.Email, pdfBytes);
-
+            try
+            {
+                await billService.SendBillEmailAsync(order.Id, user.Email, pdfBytes);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new OkObjectResult(new
+                {
+                    EmailError = $"Failed to send bill email: {ex.Message}",
+                    OrderId = order.Id,
+                    Total = order.TotalAmount,
+                    Discount = order.Discount,
+                    Status = order.Status.ToString(),
+                    OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ClaimCode = bill.ClaimCode,
+                    PickUpDate = bill.PickUpDate.ToString("yyyy-MM-dd"),
+                    OrderItems = order.OrderItems.Select(oi => new OrderItemDto
+                    {
+                        BookId = oi.Book.Id,
+                        Quantity = oi.Quantity,
+                    }).ToList()
+                });
+            }
             return new OkObjectResult(new
             {
                 OrderId = order.Id,
@@ -180,6 +224,7 @@ namespace Whisperwood.Services
                     {
                         item.Book.Stock += item.Quantity;
                     }
+                    user.OrdersCount -= 1;
                 }
 
                 order.Status = dto.Status.Value;
