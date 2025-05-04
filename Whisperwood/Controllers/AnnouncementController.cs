@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
-using Whisperwood.Models;
+using Whisperwood.Interfaces;
 
 namespace Whisperwood.Controllers
 {
@@ -11,11 +9,11 @@ namespace Whisperwood.Controllers
     [ApiController]
     public class AnnouncementController : BaseController
     {
-        private readonly WhisperwoodDbContext dbContext;
+        private readonly IAnnouncementService announcementService;
 
-        public AnnouncementController(WhisperwoodDbContext dbContext)
+        public AnnouncementController(IAnnouncementService announcementService)
         {
-            this.dbContext = dbContext;
+            this.announcementService = announcementService;
         }
 
         [HttpPost("add")]
@@ -23,44 +21,13 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> AddAnnouncement(AnnouncementDto dto)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return BadRequest("User not found. Are you sure you're logged in correctly?");
-            }
-
-            // Check if the user is an admin
-            if (!user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can create announcements.");
-            }
-
-            if (dto.StartDate > dto.EndDate)
-            {
-                return BadRequest("StartDate cannot be after EndDate.");
-            }
-            var announcement = new Announcements
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                Message = dto.Message,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                UserId = userId,
-                User = user
-            };
-
-            dbContext.Announcements.Add(announcement);
-            await dbContext.SaveChangesAsync();
-            return Ok(announcement);
+            return await announcementService.AddAnnouncement(userId, dto);
         }
 
-
         [HttpGet("getall")]
-        public async Task<IActionResult> GetAllAAnnouncements()
+        public async Task<IActionResult> GetAllAnnouncements()
         {
-            List<Announcements> announcementList = await dbContext.Announcements.Include(a => a.User).ToListAsync();
-            return Ok(announcementList);
+            return await announcementService.GetAllAnnouncements();
         }
 
         [HttpGet("getbyid/{id}")]
@@ -68,13 +35,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetAnnouncementById(Guid id)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-            Announcements? announcement = await dbContext.Announcements.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
-            return announcement != null ? Ok(announcement) : NotFound("Announcement not found!");
+            return await announcementService.GetAnnouncementById(userId, id);
         }
 
         [HttpPut("update/{id}")]
@@ -82,37 +43,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> UpdateAnnouncement(Guid id, AnnouncementUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can update announcements.");
-            }
-
-            var announcement = await dbContext.Announcements.FindAsync(id);
-            if (announcement == null)
-            {
-                return NotFound("Announcement not found!");
-            }
-            if (dto.StartDate > dto.EndDate)
-            {
-                return BadRequest("StartDate cannot be after EndDate.");
-            }
-
-            if (dto.Title != null) announcement.Title = dto.Title;
-            if (dto.Message != null) announcement.Message = dto.Message;
-            if (dto.StartDate != null) announcement.StartDate = (DateOnly)dto.StartDate;
-            if (dto.EndDate != null) announcement.EndDate = (DateOnly)dto.EndDate;
-
-            await dbContext.SaveChangesAsync();
-            return Ok(new
-            {
-                Id = announcement.Id,
-                Title = announcement.Title,
-                Message = announcement.Message,
-                StartDate = announcement.StartDate,
-                EndDate = announcement.EndDate,
-                UserId = announcement.UserId
-            });
+            return await announcementService.UpdateAnnouncement(userId, id, dto);
         }
 
         [HttpDelete("delete/{id}")]
@@ -120,21 +51,7 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> DeleteAnnouncement(Guid id)
         {
             var userId = GetLoggedInUserId();
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return Unauthorized("Only admins can delete announcements.");
-            }
-
-            var announcement = await dbContext.Announcements.FindAsync(id);
-            if (announcement == null)
-            {
-                return NotFound("Announcement not found!");
-            }
-
-            dbContext.Announcements.Remove(announcement);
-            await dbContext.SaveChangesAsync();
-            return Ok("Deleted successfully");
+            return await announcementService.DeleteAnnouncement(userId, id);
         }
     }
 }
