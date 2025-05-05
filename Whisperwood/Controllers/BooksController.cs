@@ -51,5 +51,11 @@ namespace Whisperwood.Controllers
             var userId = GetLoggedInUserId();
             return await bookService.DeleteBookAsync(userId, id);
         }
+
+        [HttpPost("filter")]
+        public async Task<IActionResult> GetFilteredBooks([FromBody] BookFilterDto filter)
+        {
+            return await bookService.GetFilteredBooksAsync(filter);
+        }
     }
 }

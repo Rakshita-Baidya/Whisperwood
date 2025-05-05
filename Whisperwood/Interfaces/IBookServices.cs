@@ -10,5 +10,7 @@ namespace Whisperwood.Interfaces
         Task<IActionResult> GetBookByIdAsync(Guid id);
         Task<IActionResult> UpdateBookAsync(Guid userId, Guid id, BookUpdateDto dto);
         Task<IActionResult> DeleteBookAsync(Guid userId, Guid id);
+
+        Task<IActionResult> GetFilteredBooksAsync(BookFilterDto filter);
     }
 }

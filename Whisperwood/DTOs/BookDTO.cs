@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Whisperwood.Models;
 using static Whisperwood.Models.Books;
 
 namespace Whisperwood.DTOs
@@ -50,5 +51,30 @@ namespace Whisperwood.DTOs
         public List<Guid>? GenreIds { get; set; }
         public List<Guid>? CategoryIds { get; set; }
         public List<Guid>? PublisherIds { get; set; }
+    }
+
+    public class BookFilterDto
+    {
+        // Filters
+        public List<Guid>? AuthorIds { get; set; }
+        public List<Guid>? GenreIds { get; set; }
+        public bool? IsAvailable { get; set; }
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public decimal? MinRating { get; set; }
+        public string? Language { get; set; }
+        public List<Books.BookFormat>? Formats { get; set; }
+        public List<Guid>? PublisherIds { get; set; }
+
+        // Search
+        public string? SearchTerm { get; set; }
+
+        // Sorting
+        public SortByOption? SortBy { get; set; }
+        public SortOrders? SortOrder { get; set; }
+
+        public enum SortByOption { Title, PublicationDate, Price, Popularity }
+
+        public enum SortOrders { Ascending, Descending }
     }
 }

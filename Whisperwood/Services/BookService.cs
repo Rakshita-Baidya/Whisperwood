@@ -158,5 +158,101 @@ namespace Whisperwood.Services
             await dbContext.SaveChangesAsync();
             return new OkObjectResult("Deleted successfully.");
         }
+
+        public async Task<IActionResult> GetFilteredBooksAsync(BookFilterDto filter)
+        {
+            var query = dbContext.Books
+                .Include(b => b.AuthorBooks).ThenInclude(ab => ab.Author)
+                .Include(b => b.GenreBooks).ThenInclude(gb => gb.Genre)
+                .Include(b => b.PublisherBooks).ThenInclude(pb => pb.Publisher)
+                .AsNoTracking();
+
+            // Apply Filters
+            if (filter.AuthorIds != null && filter.AuthorIds.Any())
+            {
+                query = query.Where(b => b.AuthorBooks.Any(ab => filter.AuthorIds.Contains(ab.AuthorId)));
+            }
+
+            if (filter.GenreIds != null && filter.GenreIds.Any())
+            {
+                query = query.Where(b => b.GenreBooks.Any(gb => filter.GenreIds.Contains(gb.GenreId)));
+            }
+
+            if (filter.IsAvailable.HasValue && filter.IsAvailable.Value)
+            {
+                query = query.Where(b => b.Stock > 0 && b.AvailabilityStatus);
+            }
+
+            if (filter.MinPrice.HasValue)
+            {
+                query = query.Where(b => b.Price >= filter.MinPrice.Value);
+            }
+
+            if (filter.MaxPrice.HasValue)
+            {
+                query = query.Where(b => b.Price <= filter.MaxPrice.Value);
+            }
+
+            if (filter.MinRating.HasValue)
+            {
+                query = query.Where(b => b.AverageRating >= filter.MinRating.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.Language))
+            {
+                query = query.Where(b => b.Language != null && b.Language.Equals(filter.Language, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filter.Formats != null && filter.Formats.Any())
+            {
+                query = query.Where(b => filter.Formats.Contains(b.Format));
+            }
+
+            if (filter.PublisherIds != null && filter.PublisherIds.Any())
+            {
+                query = query.Where(b => b.PublisherBooks.Any(pb => filter.PublisherIds.Contains(pb.PublisherId)));
+            }
+
+            // Apply Search
+            if (!string.IsNullOrEmpty(filter.SearchTerm))
+            {
+                var searchTerm = filter.SearchTerm.ToLower();
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(searchTerm) ||
+                    b.ISBN.Contains(searchTerm) ||
+                    (b.Synopsis != null && b.Synopsis.ToLower().Contains(searchTerm)));
+            }
+
+            // Apply Sorting
+            if (filter.SortBy.HasValue)
+            {
+                switch (filter.SortBy.Value)
+                {
+                    case BookFilterDto.SortByOption.Title:
+                        query = filter.SortOrder == BookFilterDto.SortOrders.Descending
+                            ? query.OrderByDescending(b => b.Title)
+                            : query.OrderBy(b => b.Title);
+                        break;
+                    case BookFilterDto.SortByOption.PublicationDate:
+                        query = filter.SortOrder == BookFilterDto.SortOrders.Descending
+                            ? query.OrderByDescending(b => b.PublishedDate)
+                            : query.OrderBy(b => b.PublishedDate);
+                        break;
+                    case BookFilterDto.SortByOption.Price:
+                        query = filter.SortOrder == BookFilterDto.SortOrders.Descending
+                            ? query.OrderByDescending(b => b.Price)
+                            : query.OrderBy(b => b.Price);
+                        break;
+                    case BookFilterDto.SortByOption.Popularity:
+                        query = filter.SortOrder == BookFilterDto.SortOrders.Descending
+                            ? query.OrderByDescending(b => b.SalesCount)
+                            : query.OrderBy(b => b.SalesCount);
+                        break;
+                }
+            }
+
+            var books = await query.ToListAsync();
+            return new OkObjectResult(books);
+        }
     }
 }

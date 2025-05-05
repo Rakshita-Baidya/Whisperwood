@@ -35,7 +35,7 @@ namespace Whisperwood.Services
             // Validate stock and calculate subtotal
             decimal subTotal = 0;
             var orderItems = new List<OrderItem>();
-            var promotionDiscounts = new Dictionary<Guid, decimal>(); // Track promotion discounts per book
+            var promotionDiscounts = new Dictionary<Guid, decimal>();
 
             var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -79,6 +79,7 @@ namespace Whisperwood.Services
 
                 book.Stock -= cartItem.Quantity;
                 book.SalesCount += cartItem.Quantity;
+                if (book.Stock == 0) book.AvailabilityStatus = false;
             }
 
             // Calculate discounts
@@ -225,6 +226,7 @@ namespace Whisperwood.Services
                     {
                         item.Book.Stock += item.Quantity;
                         item.Book.SalesCount -= item.Quantity;
+                        if (item.Book.Stock > 0) item.Book.AvailabilityStatus = true;
                     }
                     user.OrdersCount -= 1;
                 }
