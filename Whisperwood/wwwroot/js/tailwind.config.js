@@ -2,8 +2,14 @@
     theme: {
         extend: {
             colors: {
-                primary: '#1a202c',
+                primary: '#FFFFFF',
                 secondary: '#2d3748',
+                accent1: '#E8BA96', 
+                accent2: '#E6C7A8',
+                accent3: '#DAAA63',
+            },
+            fontFamily: {
+                sans: ['"Times New Roman"', 'Times', 'serif'],
             },
         },
     },

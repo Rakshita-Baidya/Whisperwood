@@ -15,6 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -60,18 +62,16 @@ builder.Services.AddDbContext<WhisperwoodDbContext>(
     );
 
 builder.Services.Configure<JwtTokenInfo>(
-
     builder.Configuration.GetSection("jwt")
-
     );
 
-
-
 builder.Services.AddIdentity<Users, IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<WhisperwoodDbContext>();
+    .AddEntityFrameworkStores<WhisperwoodDbContext>()
+    .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IBillService, BillService>();
 builder.Services.AddScoped<IBookService, BookService>();
@@ -85,7 +85,6 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWishlistItemService, WishlistItemService>();
-builder.Services.AddScoped<JwtService>();
 
 
 JwtTokenInfo? tokenInfo = builder.Configuration.GetSection("jwt").Get<JwtTokenInfo>();
@@ -101,8 +100,7 @@ builder.Services.AddAuthentication(
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    }
-    ).AddJwtBearer(
+    }).AddJwtBearer(
         (options) =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -136,7 +134,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

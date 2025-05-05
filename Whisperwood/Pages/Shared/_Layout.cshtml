@@ -3,27 +3,53 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Whisperwood</title>
+    <title>Whisperwood - @ViewData["Title"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.config.js"></script>
 </head>
-<body class="bg-gray-100">
-    <header class="bg-primary p-4 text-white">
-        <nav class="container mx-auto flex items-center justify-between">
-            <h1 class="text-2xl font-bold">Whisperwood</h1>
-            <div class="flex items-center space-x-4">
-                <a href="/" class="hover:text-gray-300">Home</a>
-                <a href="/Categories" class="hover:text-gray-300">Categories</a>
-                <a href="/Genres" class="hover:text-gray-300">Genres</a>
-                <a href="/Login" class="hover:text-gray-300">Login</a>
-            </div>
-        </nav>
-    </header>
+<body class="bg-primary min-h-screen font-sans">
+    @{
+        // Check if the current page is Login or Register
+        var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
+        var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
+    }
+    @if (!hideNavbar)
+    {
+        <header class="bg-primary p-4 text-white">
+            <nav class="container mx-auto flex items-center justify-between">
+                <h1 class="text-accent1 text-2xl font-bold">Whisperwood</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-accent2 hover:text-accent3">Home</a>
+                    <a href="/Categories" class="text-accent2 hover:text-accent3">Categories</a>
+                    <a href="/Genres" class="text-accent2 hover:text-accent3">Genres</a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Debug: Authenticated -->
+                        @if (User.HasClaim(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            <a href="/Dashboard" class="text-accent2 hover:text-accent3">Dashboard</a>
+                        }
+                        <a href="/User/Logout" class="text-accent2 hover:text-accent3">Logout</a>
+                    }
+                    else
+                    {
+                        <!-- Debug: Not Authenticated -->
+                        <a href="/User/Login" class="text-accent2 hover:text-accent3">Login</a>
+                    }
+                </div>
+            </nav>
+        </header>
+    }
     <main class="container mx-auto p-4">
         @RenderBody()
     </main>
-    <footer class="bg-secondary p-4 text-center text-white">
-        <p>&copy; @DateTime.Now.Year Whisperwood</p>
-    </footer>
+    @if (!hideNavbar)
+    {
+        <footer class="bg-secondary p-4 text-center text-white">
+            <p>© @DateTime.Now.Year Whisperwood</p>
+        </footer>
+    }
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
