@@ -38,6 +38,7 @@ namespace Whisperwood.Services
 
             dbContext.Reviews.Add(review);
             await dbContext.SaveChangesAsync();
+            await UpdateAverageRatingAsync(dto.BookId);
             return new OkObjectResult(review);
         }
 
@@ -74,6 +75,7 @@ namespace Whisperwood.Services
             if (review.UserId != userId)
                 return new UnauthorizedObjectResult("You can only update your own reviews.");
 
+
             if (dto.BookId != null)
             {
                 var bookExists = await dbContext.Books.AnyAsync(b => b.Id == dto.BookId);
@@ -81,12 +83,26 @@ namespace Whisperwood.Services
                 review.BookId = dto.BookId.Value;
             }
 
+            var oldBookId = review.BookId;
+
             if (dto.Rating != null) review.Rating = dto.Rating.Value;
             if (dto.Message != null) review.Message = dto.Message;
 
             review.UpdatedAt = DateTime.UtcNow;
-
             await dbContext.SaveChangesAsync();
+
+            if (dto.BookId != null && dto.BookId != oldBookId)
+            {
+                // Update both old and new books
+                await UpdateAverageRatingAsync(oldBookId);
+                await UpdateAverageRatingAsync(dto.BookId.Value);
+            }
+            else if (dto.Rating != null)
+            {
+                // Update only current book if rating changed
+                await UpdateAverageRatingAsync(review.BookId);
+            }
+
             return new OkObjectResult(review);
         }
 
@@ -102,6 +118,28 @@ namespace Whisperwood.Services
             dbContext.Reviews.Remove(review);
             await dbContext.SaveChangesAsync();
             return new OkObjectResult("Review deleted successfully.");
+        }
+
+        private async Task UpdateAverageRatingAsync(Guid bookId)
+        {
+            var reviews = await dbContext.Reviews
+                .Where(r => r.BookId == bookId)
+                .ToListAsync();
+
+            var book = await dbContext.Books.FindAsync(bookId);
+            if (book == null) return;
+
+            if (reviews.Any())
+            {
+                var averageRating = Math.Round(reviews.Average(r => r.Rating), 2);
+                book.AverageRating = (decimal)averageRating;
+            }
+            else
+            {
+                book.AverageRating = 0;
+            }
+
+            await dbContext.SaveChangesAsync();
         }
     }
 }

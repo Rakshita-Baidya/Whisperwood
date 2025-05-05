@@ -21,6 +21,8 @@ namespace Whisperwood.Models
         public ICollection<Orders> Orders { get; set; } = [];
         [JsonIgnore]
         public ICollection<Promotions> Promotions { get; set; } = [];
+        [JsonIgnore]
+        public ICollection<Reviews> Reviews { get; set; } = [];
         public Cart? Cart { get; set; }
     }
 }

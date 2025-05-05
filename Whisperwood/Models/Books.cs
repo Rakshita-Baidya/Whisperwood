@@ -24,7 +24,7 @@ namespace Whisperwood.Models
         public Guid? CoverImageId { get; set; }
         public CoverImages? CoverImage { get; set; }
 
-        [Precision(1, 2)]
+        [Precision(3, 2)]
         public decimal AverageRating { get; set; } = decimal.Zero;
 
         [Required]

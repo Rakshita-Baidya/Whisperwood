@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Whisperwood.DatabaseContext;
@@ -11,9 +12,11 @@ using Whisperwood.DatabaseContext;
 namespace Whisperwood.Migrations
 {
     [DbContext(typeof(WhisperwoodDbContext))]
-    partial class WhisperwoodDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505065921_userReview")]
+    partial class userReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,8 +134,8 @@ namespace Whisperwood.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<decimal>("AverageRating")
-                        .HasPrecision(3, 2)
-                        .HasColumnType("numeric(3,2)");
+                        .HasPrecision(1, 2)
+                        .HasColumnType("numeric(1,2)");
 
                     b.Property<Guid?>("CoverImageId")
                         .HasColumnType("uuid");

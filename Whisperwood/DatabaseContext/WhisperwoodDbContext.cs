@@ -52,6 +52,16 @@ namespace Whisperwood.DatabaseContext
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId);
 
+            modelBuilder.Entity<Reviews>()
+                .HasOne(b => b.Books)
+                .WithMany(r => r.Reviews)
+                .HasForeignKey(b => b.BookId);
+
+            modelBuilder.Entity<Reviews>()
+                .HasOne(u => u.Users)
+                .WithMany(r => r.Reviews)
+                .HasForeignKey(u => u.UserId);
+
             modelBuilder.Entity<AuthorBooks>()
                 .HasOne(ab => ab.Author)
                 .WithMany(a => a.AuthorBooks)

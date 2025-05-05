@@ -78,6 +78,7 @@ namespace Whisperwood.Services
                 });
 
                 book.Stock -= cartItem.Quantity;
+                book.SalesCount += cartItem.Quantity;
             }
 
             // Calculate discounts
@@ -223,6 +224,7 @@ namespace Whisperwood.Services
                     foreach (var item in order.OrderItems)
                     {
                         item.Book.Stock += item.Quantity;
+                        item.Book.SalesCount -= item.Quantity;
                     }
                     user.OrdersCount -= 1;
                 }

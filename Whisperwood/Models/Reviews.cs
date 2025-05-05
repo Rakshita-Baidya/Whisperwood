@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Whisperwood.Models
 {
@@ -9,8 +9,8 @@ namespace Whisperwood.Models
         public Users? Users { get; set; }
         public Guid BookId { get; set; }
         public Books Books { get; set; }
-        [Precision(10, 2)]
-        public decimal Rating { get; set; } = 0;
+        [Range(1, 5)]
+        public int Rating { get; set; } = 0;
         public string Message { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
