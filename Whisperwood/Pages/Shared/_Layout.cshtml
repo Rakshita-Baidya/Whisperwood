@@ -7,6 +7,7 @@
     <title>Whisperwood - @ViewData["Title"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.config.js"></script>
+    <script type="module" src="/js/wishlist.js"></script>
 </head>
 <body class="bg-primary h-screen min-h-screen font-sans">
     @{
@@ -15,9 +16,9 @@
         var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
         bool isAuthenticated = false;
         bool isAdmin = false;
-
+        string jwtToken = null;
         // Parse JwtToken cookie
-        var jwtToken = Context.Request.Cookies["JwtToken"];
+        jwtToken = Context.Request.Cookies["JwtToken"];
         if (!string.IsNullOrEmpty(jwtToken))
         {
             try
@@ -34,6 +35,12 @@
             }
         }
     }
+    <script>
+        window.isAuthenticated = @isAuthenticated.ToString().ToLower();
+        window.isAdmin = @isAdmin.ToString().ToLower();
+        window.jwtToken = @Json.Serialize(jwtToken);
+    </script>
+
     @if (!hideNavbar)
     {
         <header class="bg-primary border-accent4 border-b-[1.6px] p-4 text-white">

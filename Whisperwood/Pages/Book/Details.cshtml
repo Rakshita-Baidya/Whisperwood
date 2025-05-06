@@ -77,110 +77,90 @@
 @section Scripts {
     <script>
         async function fetchBookDetails() {
-            const errorMessageElement = document.getElementById('error-message');
-            const loadingElement = document.getElementById('loading');
-            const bookDetailsElement = document.getElementById('book-details');
-            const coverImageElement = document.getElementById('cover-image');
-            const titleElement = document.getElementById('book-title');
-            const authorElement = document.getElementById('book-author');
-            const stockElement = document.getElementById('book-stock');
-            const priceElement = document.getElementById('book-price');
-            const isbnElement = document.getElementById('book-isbn');
-            const publishedElement = document.getElementById('book-published');
-            const editionElement = document.getElementById('book-edition');
-            const ratingElement = document.getElementById('book-rating');
-            const synopsisElement = document.getElementById('book-synopsis');
-            const languageElement = document.getElementById('book-language');
-            const formatElement = document.getElementById('book-format');
-            const authorDetailsElement = document.getElementById('author-details');
-            const genreDetailsElement = document.getElementById('genre-details');
+            const elements = {
+                error: document.getElementById('error-message'),
+                loading: document.getElementById('loading'),
+                details: document.getElementById('book-details'),
+                cover: document.getElementById('cover-image'),
+                title: document.getElementById('book-title'),
+                author: document.getElementById('book-author'),
+                stock: document.getElementById('book-stock'),
+                price: document.getElementById('book-price'),
+                isbn: document.getElementById('book-isbn'),
+                published: document.getElementById('book-published'),
+                edition: document.getElementById('book-edition'),
+                rating: document.getElementById('book-rating'),
+                synopsis: document.getElementById('book-synopsis'),
+                language: document.getElementById('book-language'),
+                format: document.getElementById('book-format'),
+                authorDetails: document.getElementById('author-details'),
+                genreDetails: document.getElementById('genre-details'),
+                wishlist: document.getElementById('add-to-wishlist'),
+                cart: document.getElementById('add-to-cart'),
+                review: document.getElementById('add-review')
+            };
 
-            // Get the book ID from the URL
-            const urlParams = new URLSearchParams(window.location.search);
             const id = window.location.pathname.split('/').pop();
 
             try {
                 const response = await fetch(`https://localhost:7018/api/Book/getbyid/${id}`);
-                if (!response.ok) {
-                    throw new Error('Failed to load book details. Please try again later.');
-                }
+                if (!response.ok) throw new Error('Failed to load book details. Please try again later.');
 
                 const book = await response.json();
-                loadingElement.classList.add('hidden');
-                bookDetailsElement.classList.remove('hidden');
+                elements.loading.classList.add('hidden');
+                elements.details.classList.remove('hidden');
 
-                // Cover Image
-                if (book.coverImage && book.coverImage.coverImageURL) {
-                    coverImageElement.innerHTML = `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="h-96 w-full rounded-md object-cover shadow-md" />`;
-                } else {
-                    coverImageElement.innerHTML = `<div class="bg-accent2 text-accent3 flex h-96 w-full items-center justify-center rounded-md shadow-md">No Image</div>`;
-                }
+                elements.cover.innerHTML = book.coverImage?.coverImageURL
+                    ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="h-96 w-full rounded-md object-cover shadow-md" />`
+                    : `<div class="bg-accent2 text-accent3 flex h-96 w-full items-center justify-center rounded-md shadow-md">No Image</div>`;
 
-                //details
-                titleElement.textContent = book.title || 'Untitled';
-                authorElement.textContent = book.authorBooks && book.authorBooks.length > 0
+                elements.title.textContent = book.title || 'Untitled';
+                elements.author.textContent = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
                     : 'Unknown Author';
-                stockElement.textContent = `Available Stock: ${book.stock || 0}`;
-                priceElement.textContent = `Price: Rs. ${book.price?.toFixed(2) || '0.00'}-`;
+                elements.stock.textContent = `Available Stock: ${book.stock || 0}`;
+                elements.price.textContent = `Price: Rs. ${book.price?.toFixed(2) || '0.00'}-`;
+                elements.isbn.textContent = `ISBN: ${book.isbn || 'N/A'}`;
+                elements.published.textContent = `Published Date: ${book.publishedDate || 'N/A'}`;
+                elements.edition.textContent = `Edition: ${book.edition || 1}`;
+                elements.rating.innerHTML = `${book.averageRating || 0} `;
+                elements.rating.nextElementSibling.textContent = '★★★★★'.slice(0, Math.round(book.averageRating || 0)).padEnd(5, '☆');
+                elements.synopsis.textContent = book.synopsis || 'No description available';
+                elements.language.textContent = book.language || 'Unknown';
+                elements.format.textContent = book.format === 0 ? 'Paperback' : 'Unknown';
 
-                isbnElement.textContent = `ISBN: ${book.isbn || 'N/A'}`;
-                publishedElement.textContent = `Published Date: ${book.publishedDate || 'N/A'}`;
-                editionElement.textContent = `Edition: ${book.edition || 1}`;
-
-                // Rating
-                ratingElement.innerHTML = `${book.averageRating || 0} `;
-                const stars = '★★★★★'.slice(0, Math.round(book.averageRating || 0));
-                ratingElement.nextElementSibling.textContent = stars.padEnd(5, '☆');
-
-                // Synopsis
-                synopsisElement.textContent = book.synopsis || 'No description available';
-
-                // Language, Format
-                languageElement.textContent = book.language || 'Unknown';
-                formatElement.textContent = book.format === 0 ? 'Paperback' : 'Unknown';
-
-                // Authors
-                if (book.authorBooks && book.authorBooks.length > 0) {
-                    const authorDetails = book.authorBooks.map(ab => `
+                elements.authorDetails.innerHTML = book.authorBooks?.length > 0
+                    ? book.authorBooks.map(ab => `
                         <div>
                             ${ab.author.name}<br>
                             Nationality: ${ab.author.nationality || 'Unknown'}<br>
-                            DOB: ${ab.author.dob}<br>
+                            DOB: ${ab.author.dob || 'Unknown'}<br>
                             Contact: ${ab.author.contact || 'Unknown'}<br>
                             Email: ${ab.author.email || 'Unknown'}
                         </div>
-                    `).join('<hr class="border-accent2 my-2">');
-                    authorDetailsElement.innerHTML = authorDetails;
-                } else {
-                    authorDetailsElement.textContent = 'No authors listed';
-                }
+                    `).join('<hr class="border-accent2 my-2">')
+                    : 'No authors listed';
 
-                // Genres
-                if (book.genreBooks && book.genreBooks.length > 0) {
-                    const genres = book.genreBooks.map(gb => `${gb.genre.name} (${gb.genre.description || 'No description'})`).join(', ');
-                    genreDetailsElement.textContent = genres;
-                } else {
-                    genreDetailsElement.textContent = 'No genres listed';
-                }
+                elements.genreDetails.textContent = book.genreBooks?.length > 0
+                    ? book.genreBooks.map(gb => `${gb.genre.name} (${gb.genre.description || 'No description'})`).join(', ')
+                    : 'No genres listed';
 
-                // Add event listeners for buttons
-                document.getElementById('add-to-wishlist').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    alert(`Added ${book.title} to wishlist! (Implement API call here)`);
-                });
-                document.getElementById('add-to-cart').addEventListener('click', (e) => {
+                // Initialize wishlist functionality
+                initializeWishlistButton('add-to-wishlist', id);
+
+                elements.cart.addEventListener('click', (e) => {
                     e.preventDefault();
                     alert(`Added ${book.title} to cart! (Implement API call here)`);
                 });
-                document.getElementById('add-review').addEventListener('click', (e) => {
+
+                elements.review.addEventListener('click', (e) => {
                     e.preventDefault();
                     alert(`Add a review for ${book.title}! (Implement review form here)`);
                 });
             } catch (error) {
-                loadingElement.classList.add('hidden');
-                errorMessageElement.textContent = error.message;
-                errorMessageElement.classList.remove('hidden');
+                elements.loading.classList.add('hidden');
+                elements.error.textContent = error.message;
+                elements.error.classList.remove('hidden');
             }
         }
 

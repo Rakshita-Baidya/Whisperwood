@@ -57,12 +57,14 @@
                                 <p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>
                             </div>
                             <div class="flex justify-between gap-2">
-                                <button onclick="handleWishlist('${book.id}', event)" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Wishlist</button>
-                                <button onclick="handleReview('${book.id}', event)" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</button>
-                                <button onclick="handleAddToCart('${book.id}', event)" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Cart</button>
+                                <button id="wishlist-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Wishlist</button>
+                                <button id="review-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</button>
+                                <button id="cart-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Cart</button>
                             </div>
                         `;
                         booksContainer.appendChild(bookElement);
+                        // Initialize wishlist button for this book
+                        initializeWishlistButton(`wishlist-${book.id}`, book.id);
                     });
                 } else {
                     noBooksElement.classList.remove('hidden');
