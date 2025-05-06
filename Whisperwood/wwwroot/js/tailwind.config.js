@@ -5,7 +5,7 @@
                 primary: '#FFFFFF',
                 secondary: '#2d3748',
                 accent1: '#E8BA96', 
-                accent2: '#E6C7A8',
+                accent2: '#ddb277',
                 accent3: '#DAAA63',
                 accent4: '#ab7640',
             },

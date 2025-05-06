@@ -26,23 +26,7 @@
             const loadingElement = document.getElementById('loading');
             const noBooksElement = document.getElementById('no-books');
             const errorMessageElement = document.getElementById('error-message');
-            const token = localStorage.getItem('token');
-
-            let wishlistItems = [];
-            if (token) {
-                try {
-                    const wishlistResponse = await fetch('https://localhost:7018/api/WishlistItem/getall', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if (wishlistResponse.ok) {
-                        wishlistItems = await wishlistResponse.json();
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch wishlist:', error);
-                }
-            }
-
-
+            
             try {
                 const response = await fetch('https://localhost:7018/api/Book/getall');
                 if (!response.ok) {
@@ -67,12 +51,9 @@
                                 : `<div class="text-accent3 mb-4 h-64 w-full">No Image</div>`
                             }
                             <h2 class="text-accent3 text-xl font-semibold">${book.title}</h2>
-                            <p class="text-accent3 flex items-center">
-                                <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="#ab7640" d="M22 10.1c.1-.5-.3-1.1-.8-1.1l-5.7-.8L12.9 3c-.1-.2-.2-.3-.4-.4-.5-.3-1.1-.1-1.4.4L8.6 8.2 2.9 9q-.45 0-.6.3c-.4.4-.4 1 0 1.4l4.1 4-1 5.7c0 .2 0 .4.1.6.3.5.9.7 1.4.4l5.1-2.7 5.1 2.7c.1.1.3.1.5.1h.2c.5-.1.9-.6.8-1.2l-1-5.7 4.1-4c.2-.1.3-.3.3-.5"/></svg>
-                                ${book.averageRating}
-                            </p>
+                            <p class="text-accent1 font-medium">${authorNames}</p>
                             <div class="mb-3 flex justify-between">
-                                <p class="text-accent1 font-medium">${authorNames}</p>
+                                <p class="text-accent3"> ★ ${book.averageRating} </p> 
                                 <p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>
                             </div>
                             <div class="flex justify-between gap-2">
