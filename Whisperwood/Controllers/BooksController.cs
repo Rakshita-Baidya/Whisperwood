@@ -53,7 +53,7 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("filter")]
-        public async Task<IActionResult> GetFilteredBooks([FromBody] BookFilterDto filter)
+        public async Task<IActionResult> GetFilteredBooks(BookFilterDto filter)
         {
             return await bookService.GetFilteredBooksAsync(filter);
         }

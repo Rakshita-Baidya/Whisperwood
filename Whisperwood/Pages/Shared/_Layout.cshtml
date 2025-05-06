@@ -19,6 +19,7 @@
         bool isAuthenticated = false;
         bool isAdmin = false;
         string jwtToken = null;
+
         // Parse JwtToken cookie
         jwtToken = Context.Request.Cookies["JwtToken"];
         if (!string.IsNullOrEmpty(jwtToken))
