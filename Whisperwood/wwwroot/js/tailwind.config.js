@@ -7,6 +7,7 @@
                 accent1: '#E8BA96', 
                 accent2: '#E6C7A8',
                 accent3: '#DAAA63',
+                accent4: '#ab7640',
             },
             fontFamily: {
                 sans: ['"Times New Roman"', 'Times', 'serif'],

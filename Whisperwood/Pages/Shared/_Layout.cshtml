@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/tailwind.config.js"></script>
 </head>
-<body class="bg-primary min-h-screen font-sans">
+<body class="bg-primary h-screen min-h-screen font-sans">
     @{
         // Check if the current page is Login or Register
         var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
@@ -36,24 +36,25 @@
     }
     @if (!hideNavbar)
     {
-        <header class="bg-primary p-4 text-white">
-            <nav class="container mx-auto flex items-center justify-between">
-                <h1 class="text-accent1 text-2xl font-bold">Whisperwood</h1>
-                <div class="flex items-center space-x-4">
-                    <a href="/" class="text-accent2 hover:text-accent3">Home</a>
-                    <a href="/Categories" class="text-accent2 hover:text-accent3">Categories</a>
-                    <a href="/Genres" class="text-accent2 hover:text-accent3">Genres</a>
+        <header class="bg-primary border-accent4 border-b-[1.6px] p-4 text-white">
+            <nav class="flex items-center justify-between px-12">
+                <h1 class="text-accent3 text-4xl font-bold">Whisperwood</h1>
+                <div class="items-center space-x-4 text-lg font-semibold">
+                    <a href="/" class="text-accent3 hover:text-accent4">Home</a>
+                    <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
+                    <a href="/book/categories" class="text-accent3 hover:text-accent4">Categories</a>
+                    <a href="/book/genre" class="text-accent3 hover:text-accent4">Genres</a>
                     @if (isAuthenticated)
                     {
                         @if (isAdmin)
                         {
-                            <a href="/Dashboard" class="text-accent2 hover:text-accent3">Dashboard</a>
+                            <a href="/Dashboard" class="text-accent3 hover:text-accent4">Dashboard</a>
                         }
-                        <a href="/User/Logout" class="text-accent2 hover:text-accent3">Logout</a>
+                        <a href="/User/Logout" class="text-accent3 hover:text-accent4">Logout</a>
                     }
                     else
                     {
-                        <a href="/User/Login" class="text-accent2 hover:text-accent3">Login</a>
+                        <a href="/User/Login" class="text-accent3 hover:text-accent4">Login</a>
                     }
                 </div>
             </nav>
