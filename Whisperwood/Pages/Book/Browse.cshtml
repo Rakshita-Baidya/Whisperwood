@@ -10,6 +10,79 @@
 
     <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
 
+    <!-- Filter Form -->
+    <form id="filter-form" class="mb-6 bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Search Term -->
+            <div>
+                <label for="search-term" class="text-accent2 block mb-1">Search</label>
+                <input type="text" id="search-term" placeholder="Title, ISBN, or synopsis" class="border-accent2 w-full rounded border p-2 text-gray-800" />
+            </div>
+
+            <!-- Genres -->
+            <div>
+                <label for="genres" class="text-accent2 block mb-1">Genres</label>
+                <select id="genres" multiple class="border-accent2 w-full rounded border p-2 text-gray-800">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+
+            <!-- Price Range -->
+            <div>
+                <label class="text-accent2 block mb-1">Price Range</label>
+                <div class="flex gap-2">
+                    <input type="number" id="min-price" placeholder="Min" step="0.01" min="0" class="border-accent2 w-full rounded border p-2 text-gray-800" />
+                    <input type="number" id="max-price" placeholder="Max" step="0.01" min="0" class="border-accent2 w-full rounded border p-2 text-gray-800" />
+                </div>
+            </div>
+
+            <!-- Minimum Rating -->
+            <div>
+                <label for="min-rating" class="text-accent2 block mb-1">Minimum Rating</label>
+                <select id="min-rating" class="border-accent2 w-full rounded border p-2 text-gray-800">
+                    <option value="">Any</option>
+                    <option value="1">1★</option>
+                    <option value="2">2★</option>
+                    <option value="3">3★</option>
+                    <option value="4">4★</option>
+                    <option value="5">5★</option>
+                </select>
+            </div>
+
+            <!-- Availability -->
+            <div class="flex items-center">
+                <input type="checkbox" id="is-available" class="mr-2">
+                <label for="is-available" class="text-accent2">Available Only</label>
+            </div>
+
+            <!-- Sort By -->
+            <div>
+                <label for="sort-by" class="text-accent2 block mb-1">Sort By</label>
+                <select id="sort-by" class="border-accent2 w-full rounded border p-2 text-gray-800">
+                    <option value="">None</option>
+                    <option value="Title">Title</option>
+                    <option value="PublicationDate">Publication Date</option>
+                    <option value="Price">Price</option>
+                    <option value="Popularity">Popularity</option>
+                </select>
+            </div>
+
+            <!-- Sort Order -->
+            <div>
+                <label for="sort-order" class="text-accent2 block mb-1">Sort Order</label>
+                <select id="sort-order" class="border-accent2 w-full rounded border p-2 text-gray-800">
+                    <option value="Ascending">Ascending</option>
+                    <option value="Descending">Descending</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-2">
+            <button type="button" id="clear-filters" class="bg-gray-500 rounded px-3 py-1 text-white hover:bg-gray-600">Clear Filters</button>
+            <button type="submit" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Apply Filters</button>
+        </div>
+    </form>
+
     <div id="books-container" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <!-- Books will be injected here by JavaScript -->
         <div id="loading" class="text-accent2 col-span-full text-center text-lg">Loading books...</div>

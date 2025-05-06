@@ -5,7 +5,7 @@ namespace Whisperwood.Interfaces
 {
     public interface IOrderService
     {
-        Task<IActionResult> AddOrderAsync(Guid userId);
+        Task<IActionResult> AddOrderAsync(Guid userId, OrderDto dto);
         Task<IActionResult> GetAllOrdersAsync(Guid userId);
         Task<IActionResult> GetOrderByIdAsync(Guid userId, Guid id);
         Task<IActionResult> UpdateOrderAsync(Guid userId, Guid id, OrderUpdateDto dto);

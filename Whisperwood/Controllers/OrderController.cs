@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Whisperwood.DTOs;
 using Whisperwood.Interfaces;
 
@@ -17,15 +16,13 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
-        [Authorize]
-        public async Task<IActionResult> AddOrderAsync()
+        public async Task<IActionResult> AddOrderAsync(OrderDto dto)
         {
             var userId = GetLoggedInUserId();
-            return await orderService.AddOrderAsync(userId);
+            return await orderService.AddOrderAsync(userId, dto);
         }
 
         [HttpGet("getall")]
-        [Authorize]
         public async Task<IActionResult> GetAllOrdersAsync()
         {
             var userId = GetLoggedInUserId();
@@ -33,7 +30,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetOrderByIdAsync(Guid id)
         {
             var userId = GetLoggedInUserId();
@@ -41,7 +37,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPut("update/{id}")]
-        [Authorize]
         public async Task<IActionResult> UpdateOrderAsync(Guid id, OrderUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
@@ -49,7 +44,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyuser/{userId}")]
-        [Authorize]
         public async Task<IActionResult> GetOrdersByUserAsync(Guid userId)
         {
             var requestingUserId = GetLoggedInUserId();

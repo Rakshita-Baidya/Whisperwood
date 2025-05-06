@@ -16,6 +16,39 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
+        public decimal CalculateDiscount(decimal subTotal, int totalItems, int userOrdersCount, Promotions? promotion)
+        {
+            decimal currentSubTotal = subTotal;
+            decimal totalDiscount = 0m;
+
+            if (promotion != null)
+            {
+                decimal promoDiscount = currentSubTotal * promotion.DiscountPercent / 100;
+                totalDiscount += promoDiscount;
+                currentSubTotal -= promoDiscount;
+            }
+
+            if (totalItems >= 5)
+            {
+                decimal fivePercentDiscount = currentSubTotal * 0.05m;
+                totalDiscount += fivePercentDiscount;
+                currentSubTotal -= fivePercentDiscount;
+            }
+
+            if (userOrdersCount >= 10)
+            {
+                decimal tenPercentDiscount = currentSubTotal * 0.10m;
+                totalDiscount += tenPercentDiscount;
+            }
+
+            return totalDiscount;
+        }
+
+        public decimal GetPromotionDiscount(decimal subTotal, Promotions? promotion)
+        {
+            return promotion != null ? subTotal * promotion.DiscountPercent : 0m;
+        }
+
         public async Task<IActionResult> AddDiscountCodeAsync(Guid userId, DiscountCodeDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);

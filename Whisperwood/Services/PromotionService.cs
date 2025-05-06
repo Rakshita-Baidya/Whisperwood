@@ -48,6 +48,7 @@ namespace Whisperwood.Services
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Description = dto.Description,
+                Code = Guid.NewGuid().ToString().Substring(0, 8),
                 DiscountPercent = dto.DiscountPercent,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
@@ -148,6 +149,30 @@ namespace Whisperwood.Services
             {
                 message = "Promotion deleted successfully"
             });
+        }
+
+        public async Task<(Promotions? Promotion, string? Error)> ValidatePromoCodeAsync(Guid userId, string? promoCode)
+        {
+            if (string.IsNullOrEmpty(promoCode))
+                return (null, null);
+
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var promotion = await dbContext.Promotions
+                .FirstOrDefaultAsync(p => p.Code == promoCode && p.IsActive &&
+                                        p.StartDate <= currentDate && p.EndDate >= currentDate);
+
+            if (promotion == null)
+                return (null, "Invalid or expired promo code.");
+
+            var promoUsed = await dbContext.Orders
+                .AnyAsync(o => o.UserId == userId && o.PromoCode == promoCode &&
+                              o.Status != Orders.OrderStatus.Cancelled);
+
+            if (promoUsed)
+                return (null, "This promo code has already been used.");
+
+            return (promotion, null);
         }
     }
 }

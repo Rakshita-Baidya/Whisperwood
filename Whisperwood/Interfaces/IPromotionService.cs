@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Whisperwood.DTOs;
+using Whisperwood.Models;
 
 namespace Whisperwood.Interfaces
 {
@@ -10,5 +11,6 @@ namespace Whisperwood.Interfaces
         Task<IActionResult> GetPromotionByIdAsync(Guid userId, Guid id);
         Task<IActionResult> UpdatePromotionAsync(Guid userId, Guid id, PromotionUpdateDto dto);
         Task<IActionResult> DeletePromotionAsync(Guid userId, Guid id);
+        Task<(Promotions? Promotion, string? Error)> ValidatePromoCodeAsync(Guid userId, string? promoCode);
     }
 }

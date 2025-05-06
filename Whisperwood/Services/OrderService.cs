@@ -11,14 +11,18 @@ namespace Whisperwood.Services
     {
         private readonly WhisperwoodDbContext dbContext;
         private readonly IBillService billService;
+        private readonly IPromotionService promotionService;
+        private readonly IDiscountCodeService discountService;
 
-        public OrderService(WhisperwoodDbContext dbContext, IBillService billService)
+        public OrderService(WhisperwoodDbContext dbContext, IBillService billService, IPromotionService promotionService, IDiscountCodeService discountService)
         {
             this.dbContext = dbContext;
             this.billService = billService;
+            this.promotionService = promotionService;
+            this.discountService = discountService;
         }
 
-        public async Task<IActionResult> AddOrderAsync(Guid userId)
+        public async Task<IActionResult> AddOrderAsync(Guid userId, OrderDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -32,12 +36,14 @@ namespace Whisperwood.Services
             if (cart == null || !cart.CartItems.Any())
                 return new BadRequestObjectResult("Your cart is empty.");
 
+            // Validate promo code
+            var (appliedPromotion, promoError) = await promotionService.ValidatePromoCodeAsync(userId, dto.PromoCode);
+            if (promoError != null)
+                return new BadRequestObjectResult(promoError);
+
             // Validate stock and calculate subtotal
             decimal subTotal = 0;
             var orderItems = new List<OrderItem>();
-            var promotionDiscounts = new Dictionary<Guid, decimal>();
-
-            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
             foreach (var cartItem in cart.CartItems)
             {
@@ -45,35 +51,16 @@ namespace Whisperwood.Services
                 if (cartItem.Quantity > book.Stock)
                     return new BadRequestObjectResult($"Not enough stock for: {book.Title}");
 
-                // Check for active promotions
-                decimal maxDiscountPercent = 0;
-                var promotions = await dbContext.PromotionBook
-                    .Where(pb => pb.BookId == book.Id)
-                    .Include(pb => pb.Promotion)
-                    .Where(pb => pb.Promotion.IsActive && pb.Promotion.StartDate <= currentDate && pb.Promotion.EndDate >= currentDate)
-                    .ToListAsync();
-
-                if (promotions.Any())
-                {
-                    maxDiscountPercent = promotions.Max(pb => pb.Promotion.DiscountPercent);
-                }
-
                 decimal originalPrice = book.Price;
-                decimal discountedPrice = originalPrice * (1 - maxDiscountPercent);
                 decimal itemSubtotal = originalPrice * cartItem.Quantity;
-                decimal itemPromotionDiscount = (originalPrice - discountedPrice) * cartItem.Quantity;
 
                 subTotal += itemSubtotal;
-                if (itemPromotionDiscount > 0)
-                {
-                    promotionDiscounts[book.Id] = itemPromotionDiscount;
-                }
 
                 orderItems.Add(new OrderItem
                 {
                     BookId = book.Id,
                     Quantity = cartItem.Quantity,
-                    UnitPrice = discountedPrice,
+                    UnitPrice = originalPrice,
                     SubTotal = itemSubtotal
                 });
 
@@ -83,13 +70,9 @@ namespace Whisperwood.Services
             }
 
             // Calculate discounts
-            decimal discount = promotionDiscounts.Values.Sum();
             int totalItems = cart.CartItems.Sum(i => i.Quantity);
-            if (totalItems >= 5)
-                discount += subTotal * 0.05m;
-
-            if (user.OrdersCount >= 10) discount += subTotal * 0.1m;
-
+            decimal discount = discountService.CalculateDiscount(subTotal, totalItems, user.OrdersCount, appliedPromotion);
+            decimal promotionDiscount = discountService.GetPromotionDiscount(subTotal, appliedPromotion);
             decimal total = subTotal - discount;
 
             // Create order
@@ -103,7 +86,8 @@ namespace Whisperwood.Services
                 Status = Orders.OrderStatus.Pending,
                 Date = DateOnly.FromDateTime(DateTime.UtcNow),
                 OrderedAt = DateTime.UtcNow,
-                OrderItems = orderItems
+                OrderItems = orderItems,
+                PromoCode = dto.PromoCode
             };
 
             // Create bill
@@ -111,7 +95,9 @@ namespace Whisperwood.Services
             {
                 OrderId = order.Id,
                 ClaimCode = Guid.NewGuid().ToString().Substring(0, 6),
-                PickUpDate = order.Date.AddDays(2)
+                PickUpDate = order.Date.AddDays(2),
+                PromoCode = dto.PromoCode,
+                PromoDiscount = promotionDiscount
             };
 
             // Save order and bill
@@ -121,7 +107,7 @@ namespace Whisperwood.Services
             user.OrdersCount += 1;
             await dbContext.SaveChangesAsync();
 
-            //Generate bill
+            // Generate bill
             var pdfBytes = await billService.GenerateBillPdfAsync(order.Id);
 
             // Send email with bill
@@ -136,6 +122,7 @@ namespace Whisperwood.Services
                     EmailError = $"Failed to send bill email: {ex.Message}",
                     OrderId = order.Id,
                     Total = order.TotalAmount,
+                    PromoCode = bill.PromoCode,
                     Discount = order.Discount,
                     Status = order.Status.ToString(),
                     OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -152,13 +139,18 @@ namespace Whisperwood.Services
             {
                 OrderId = order.Id,
                 Total = order.TotalAmount,
+                PromoCode = bill.PromoCode,
                 Discount = order.Discount,
                 Status = order.Status.ToString(),
                 OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
                 ClaimCode = bill.ClaimCode,
-                PickUpDate = bill.PickUpDate.ToString("yyyy-MM-dd")
+                PickUpDate = bill.PickUpDate.ToString("yyyy-MM-dd"),
+                OrderItems = order.OrderItems.Select(oi => new OrderItemDto
+                {
+                    BookId = oi.Book.Id,
+                    Quantity = oi.Quantity,
+                }).ToList()
             });
-
         }
 
         public async Task<IActionResult> GetAllOrdersAsync(Guid userId)
@@ -239,6 +231,7 @@ namespace Whisperwood.Services
             {
                 OrderId = order.Id,
                 Status = order.Status.ToString(),
+                PromoCode = order.PromoCode,
                 Total = order.TotalAmount,
                 Discount = order.Discount,
                 OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
