@@ -1,6 +1,5 @@
 ﻿@page
 @model Whisperwood.Pages.Book.BrowseModel
-
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Browse Books";
@@ -17,61 +16,95 @@
     </div>
 
     <div id="no-books" class="text-accent2 mt-4 hidden text-center text-lg">No books found.</div>
+
+    <div id="pagination-container" class="mt-6 flex justify-center gap-2"></div>
 </div>
 
 @section Scripts {
+    <script src="/js/wishlist.js"></script>
+    <script src="/js/cart.js"></script>
+    <script src="/js/pagination.js"></script>
     <script>
-        async function fetchBooks() {
+        let currentPage = 1;
+        const pageSize = 8;
+        let allBooks = []; // Store all books fetched from API
+
+        function renderBooks(page) {
             const booksContainer = document.getElementById('books-container');
-            const loadingElement = document.getElementById('loading');
             const noBooksElement = document.getElementById('no-books');
+            const paginationContainer = document.getElementById('pagination-container');
+
+            booksContainer.innerHTML = ''; // Clear previous books
+
+            if (allBooks.length === 0) {
+                noBooksElement.classList.remove('hidden');
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            // Calculate start and end indices for the current page
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allBooks.length);
+            const paginatedBooks = allBooks.slice(startIndex, endIndex);
+
+            if (paginatedBooks.length > 0) {
+                paginatedBooks.forEach(book => {
+                    const authorNames = book.authorBooks && book.authorBooks.length > 0
+                        ? book.authorBooks.map(ab => ab.author.name).join(', ')
+                        : 'Unknown Author';
+
+                    const bookElement = document.createElement('a');
+                    bookElement.href = `/Book/Details/${book.id}`;
+                    bookElement.className = 'block bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition-shadow hover:shadow-xl';
+                    bookElement.innerHTML = `
+                        ${book.coverImage && book.coverImage.coverImageURL
+                            ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-64 w-full rounded-md object-cover" />`
+                            : `<div class="text-accent3 mb-4 h-64 w-full">No Image</div>`
+                        }
+                        <h2 class="text-accent3 text-xl font-semibold">${book.title}</h2>
+                        <p class="text-accent1 font-medium">${authorNames}</p>
+                        <div class="mb-3 flex justify-between">
+                            <p class="text-accent3"> ★ ${book.averageRating} </p>
+                            <p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                            <button id="wishlist-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Wishlist</button>
+                            <button id="review-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</button>
+                            <button id="cart-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Cart</button>
+                        </div>
+                    `;
+                    booksContainer.appendChild(bookElement);
+
+                    // Initialize wishlist and cart buttons
+                    initializeWishlistButton(`wishlist-${book.id}`, book.id);
+                    initializeCartButton(`cart-${book.id}`, book.id, book.stock);
+                });
+
+                // Render pagination controls
+                const totalPages = Math.ceil(allBooks.length / pageSize);
+                createPaginationControls('pagination-container', totalPages, page, (newPage) => {
+                    currentPage = newPage;
+                    renderBooks(newPage);
+                });
+            } else {
+                noBooksElement.classList.remove('hidden');
+                paginationContainer.innerHTML = '';
+            }
+        }
+
+        async function fetchBooks() {
+            const loadingElement = document.getElementById('loading');
             const errorMessageElement = document.getElementById('error-message');
-            
+
             try {
                 const response = await fetch('https://localhost:7018/api/Book/getall');
                 if (!response.ok) {
                     throw new Error('Failed to load books. Please try again later.');
                 }
 
-                const books = await response.json();
+                allBooks = await response.json();
                 loadingElement.classList.add('hidden');
-
-                if (books && books.length > 0) {
-                    books.forEach(book => {
-                        const authorNames = book.authorBooks && book.authorBooks.length > 0
-                            ? book.authorBooks.map(ab => ab.author.name).join(', ')
-                            : 'Unknown Author';
-
-                        const bookElement = document.createElement('a');
-                        bookElement.href = `/Book/Details/${book.id}`;
-                        bookElement.className = 'block bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition-shadow hover:shadow-xl';
-                        bookElement.innerHTML = `
-                            ${book.coverImage && book.coverImage.coverImageURL
-                                ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-64 w-full rounded-md object-cover" />`
-                                : `<div class="text-accent3 mb-4 h-64 w-full">No Image</div>`
-                            }
-                            <h2 class="text-accent3 text-xl font-semibold">${book.title}</h2>
-                            <p class="text-accent1 font-medium">${authorNames}</p>
-                            <div class="mb-3 flex justify-between">
-                                <p class="text-accent3"> ★ ${book.averageRating} </p> 
-                                <p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>
-                            </div>
-                            <div class="flex justify-between gap-2">
-                                <button id="wishlist-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Wishlist</button>
-                                <button id="review-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</button>
-                                <button id="cart-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Cart</button>
-                            </div>
-                        `;
-                        booksContainer.appendChild(bookElement);
-                        // Initialize wishlist button for this book
-                        initializeWishlistButton(`wishlist-${book.id}`, book.id);
-
-                        // Initialize cart button for this book
-                        initializeCartButton(`cart-${book.id}`, book.id, book.stock);
-                    });
-                } else {
-                    noBooksElement.classList.remove('hidden');
-                }
+                renderBooks(currentPage);
             } catch (error) {
                 loadingElement.classList.add('hidden');
                 errorMessageElement.textContent = error.message;
