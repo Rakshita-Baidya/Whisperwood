@@ -1,0 +1,116 @@
+﻿@page
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Register";
+}
+
+<div class="mx-auto max-w-md text-center">
+    <h1 class="text-accent3 mb-4 text-4xl font-bold">Register</h1>
+    <div id="error-message" class="mb-4 hidden text-red-600"></div>
+    <form id="register-form">
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="name">Name</label>
+            <input type="text" id="name" name="name" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+        </div>
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="phone">Phone</label>
+            <input type="text" id="phone" name="phone" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" placeholder="1234567890" />
+        </div>
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="username">Username</label>
+            <input type="text" id="username" name="username" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" />
+        </div>
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="email">Email</label>
+            <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+        </div>
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="password">Password</label>
+            <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required title="Password must be at least 6 characters, including a number, letter, and special character" />
+            <p class="text-accent2 mt-1 text-sm">Password must be 6+ characters, with a number, letter, and special character.</p>
+        </div>
+        <div class="mb-4">
+            <label class="text-accent2 block text-lg font-medium" for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+        </div>
+        <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Register</button>
+        <p class="text-accent2 mt-4">
+            Already have an account? <a href="/User/Login" class="text-accent1 hover:text-accent3">Login</a>
+        </p>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const errorMessageDiv = document.getElementById('error-message');
+
+            if (!name || !email || !password || !confirmPassword) {
+                errorMessageDiv.textContent = 'Please fill in all required fields.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                errorMessageDiv.textContent = 'Passwords do not match.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            const payload = {
+                Name: name,
+                Username: username || null,
+                Email: email,
+                Password: password,
+                PhoneNumber: phone || null,
+                ConfirmPassword: confirmPassword,
+                ImageURL: null
+            };
+            console.log('Register Payload:', payload);
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                console.log('Register Response:', data);
+
+                if (response.ok) {
+                    window.location.href = '/User/Login';
+                } else {
+                    let errorMessages = [];
+                    if (data.message) {
+                        errorMessages.push(data.message);
+                    } else if (data.errors) {
+                        if (data.errors.$) {
+                            errorMessages.push(...data.errors.$);
+                        }
+                        if (data.errors.dto) {
+                            errorMessages.push(...data.errors.dto);
+                        }
+                    }
+                    errorMessageDiv.textContent = errorMessages.length > 0 ? errorMessages.join(', ') : 'An error occurred during registration.';
+                    errorMessageDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Register Error:', error);
+                errorMessageDiv.textContent = 'An error occurred during registration.';
+                errorMessageDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+}

@@ -24,6 +24,11 @@ namespace Whisperwood.Services
 
         public async Task<IActionResult> RegisterUserAsync(UserDto dto)
         {
+            if (dto.Password != dto.ConfirmPassword)
+            {
+                return new BadRequestObjectResult(new { message = "Passwords do not match" });
+            }
+
             var user = new Users
             {
                 UserName = dto.Username,
@@ -45,7 +50,7 @@ namespace Whisperwood.Services
             dbContext.Wishlist.Add(wishlist);
             await dbContext.SaveChangesAsync();
 
-            return new OkObjectResult("Registered Successfully!");
+            return new OkObjectResult(new { message = "Registered Successfully!" });
         }
 
         public async Task<IActionResult> LoginUserAsync(LoginDto loginDto)
