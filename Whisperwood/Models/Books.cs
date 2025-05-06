@@ -43,7 +43,6 @@ namespace Whisperwood.Models
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];
         public ICollection<GenreBooks> GenreBooks { get; set; } = [];
-        public ICollection<PromotionBook> PromotionBooks { get; set; } = [];
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistItems { get; set; } = [];
         [JsonIgnore]

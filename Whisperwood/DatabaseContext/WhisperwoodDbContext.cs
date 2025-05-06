@@ -23,7 +23,6 @@ namespace Whisperwood.DatabaseContext
         public DbSet<Genres> Genres { get; set; }
         public DbSet<Orders> Orders { get; set; }
         public DbSet<OrderItem> OrderItem { get; set; }
-        public DbSet<PromotionBook> PromotionBook { get; set; }
         public DbSet<Promotions> Promotions { get; set; }
         public DbSet<PublisherBooks> PublisherBooks { get; set; }
         public DbSet<Publishers> Publishers { get; set; }
