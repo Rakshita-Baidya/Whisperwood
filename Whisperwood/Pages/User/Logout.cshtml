@@ -1,0 +1,22 @@
+﻿@page
+@model Whisperwood.Pages.User.LogoutModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Logout";
+
+    // Clear the JwtToken cookie by setting its expiration to a past date
+    Response.Cookies.Append("JwtToken", "", new CookieOptions
+        {
+            Expires = DateTime.Now.AddDays(-1),
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict
+        });
+}
+
+@section Scripts {
+    <script>
+        alert("You have been successfully logged out.");
+        window.location.href = "/";
+    </script>
+}

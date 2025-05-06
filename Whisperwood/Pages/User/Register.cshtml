@@ -1,4 +1,5 @@
 ﻿@page
+@model Whisperwood.Pages.User.RegisterModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Register";
@@ -90,6 +91,7 @@
                 console.log('Register Response:', data);
 
                 if (response.ok) {
+                    alert("You have successfully registered!");
                     window.location.href = '/User/Login';
                 } else {
                     let errorMessages = [];

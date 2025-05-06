@@ -1,4 +1,5 @@
 ﻿@page
+@model Whisperwood.Pages.User.LoginModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Login";
@@ -51,6 +52,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    alert("You have successfully logged in!");
                     window.location.href = '/Index';
                 } else {
                     errorMessageDiv.textContent = data.message || 'An error occurred during login.';
