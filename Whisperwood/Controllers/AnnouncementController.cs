@@ -17,7 +17,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPost("add")]
-        [Authorize]
         public async Task<IActionResult> AddAnnouncement(AnnouncementDto dto)
         {
             var userId = GetLoggedInUserId();
@@ -31,7 +30,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetAnnouncementById(Guid id)
         {
             var userId = GetLoggedInUserId();
@@ -39,7 +37,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPut("update/{id}")]
-        [Authorize]
         public async Task<IActionResult> UpdateAnnouncement(Guid id, AnnouncementUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
