@@ -65,6 +65,9 @@
                         booksContainer.appendChild(bookElement);
                         // Initialize wishlist button for this book
                         initializeWishlistButton(`wishlist-${book.id}`, book.id);
+
+                        // Initialize cart button for this book
+                        initializeCartButton(`cart-${book.id}`, book.id, book.stock);
                     });
                 } else {
                     noBooksElement.classList.remove('hidden');
