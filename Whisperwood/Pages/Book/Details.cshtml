@@ -148,10 +148,8 @@
                 // Initialize wishlist functionality
                 initializeWishlistButton('add-to-wishlist', id);
 
-                elements.cart.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    alert(`Added ${book.title} to cart! (Implement API call here)`);
-                });
+                //cart func
+                initializeCartButton('add-to-cart', book.id, book.stock);
 
                 elements.review.addEventListener('click', (e) => {
                     e.preventDefault();
