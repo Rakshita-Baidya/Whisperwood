@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.IdentityModel.Tokens.Jwt
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -12,6 +13,26 @@
         // Check if the current page is Login or Register
         var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
         var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
+        bool isAuthenticated = false;
+        bool isAdmin = false;
+
+        // Parse JwtToken cookie
+        var jwtToken = Context.Request.Cookies["JwtToken"];
+        if (!string.IsNullOrEmpty(jwtToken))
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(jwtToken);
+                isAuthenticated = token != null && token.ValidTo > DateTime.UtcNow;
+                isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
+            }
+            catch
+            {
+                isAuthenticated = false;
+                isAdmin = false;
+            }
+        }
     }
     @if (!hideNavbar)
     {
@@ -22,10 +43,9 @@
                     <a href="/" class="text-accent2 hover:text-accent3">Home</a>
                     <a href="/Categories" class="text-accent2 hover:text-accent3">Categories</a>
                     <a href="/Genres" class="text-accent2 hover:text-accent3">Genres</a>
-                    @if (User.Identity.IsAuthenticated)
+                    @if (isAuthenticated)
                     {
-                        <!-- Debug: Authenticated -->
-                        @if (User.HasClaim(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)))
+                        @if (isAdmin)
                         {
                             <a href="/Dashboard" class="text-accent2 hover:text-accent3">Dashboard</a>
                         }
@@ -33,7 +53,6 @@
                     }
                     else
                     {
-                        <!-- Debug: Not Authenticated -->
                         <a href="/User/Login" class="text-accent2 hover:text-accent3">Login</a>
                     }
                 </div>
