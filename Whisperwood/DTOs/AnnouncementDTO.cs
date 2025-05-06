@@ -11,6 +11,9 @@ namespace Whisperwood.DTOs
         public required DateOnly StartDate { get; set; }
         [Required]
         public required DateOnly EndDate { get; set; }
+        [Required]
+        [MinLength(1, ErrorMessage = "At least one recipient group must be selected.")]
+        public required List<string> RecipientGroups { get; set; }
     }
 
     public class AnnouncementUpdateDto
@@ -19,5 +22,6 @@ namespace Whisperwood.DTOs
         public string? Message { get; set; }
         public DateOnly? StartDate { get; set; }
         public DateOnly? EndDate { get; set; }
+        public List<string>? RecipientGroups { get; set; }
     }
 }

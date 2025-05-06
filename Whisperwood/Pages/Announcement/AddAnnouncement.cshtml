@@ -29,6 +29,14 @@
                 <label for="endDate" class="text-accent3 mb-1 block font-medium">End Date</label>
                 <input type="date" id="endDate" name="endDate" class="w-full rounded border border-accent1 p-2" required>
             </div>
+            <div>
+                <label for="recipientGroups" class="text-accent3 mb-1 block font-medium">Recipient Groups</label>
+                <select id="recipientGroups" name="recipientGroups" multiple class="w-full rounded border border-accent1 p-2" required>
+                    <option value="AllUsers" selected>All Users</option>
+                    <option value="IsStaff">Staff</option>
+                    <option value="IsAdmin">Admins</option>
+                </select>
+            </div>
             <div class="flex justify-end gap-2">
                 <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Create Announcement</button>
                 <button type="button" id="clear-form" class="bg-gray-500 rounded px-4 py-2 text-white hover:bg-gray-600">Clear</button>
@@ -84,10 +92,17 @@
                 const message = document.getElementById('message').value;
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
+                const recipientGroups = Array.from(document.getElementById('recipientGroups').selectedOptions).map(option => option.value);
 
                 // Client-side validation
                 if (new Date(startDate) > new Date(endDate)) {
                     errorMessage.textContent = 'Start Date cannot be after End Date.';
+                    errorMessage.classList.remove('hidden');
+                    successMessage.classList.add('hidden');
+                    return;
+                }
+                if (!recipientGroups.length) {
+                    errorMessage.textContent = 'At least one recipient group must be selected.';
                     errorMessage.classList.remove('hidden');
                     successMessage.classList.add('hidden');
                     return;
@@ -97,7 +112,8 @@
                     title,
                     message,
                     startDate,
-                    endDate
+                    endDate,
+                    recipientGroups
                 };
 
                 try {

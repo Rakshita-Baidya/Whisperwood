@@ -1,4 +1,7 @@
 ﻿@using System.IdentityModel.Tokens.Jwt
+@using Whisperwood.DatabaseContext
+@inject WhisperwoodDbContext dbContext
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,14 +56,19 @@
                 <div class="items-center space-x-4 text-lg font-semibold">
                     <a href="/" class="text-accent3 hover:text-accent4">Home</a>
                     <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
-                    <a href="/book/categories" class="text-accent3 hover:text-accent4">Categories</a>
-                    <a href="/book/genre" class="text-accent3 hover:text-accent4">Genres</a>
+                    <a href="/" class="text-accent3 hover:text-accent4">Categories</a>
+                    <a href="/" class="text-accent3 hover:text-accent4">Genres</a>
                     @if (isAuthenticated)
                     {
                         @if (isAdmin)
                         {
-                            <a href="/Dashboard" class="text-accent3 hover:text-accent4">Dashboard</a>
+                            <a href="/" class="text-accent3 hover:text-accent4">Dashboard</a>
                         }
+                        <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </button>
                         <a href="/User/Logout" class="text-accent3 hover:text-accent4">Logout</a>
                     }
                     else
@@ -71,6 +79,23 @@
             </nav>
         </header>
     }
+    <div id="announcements-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-primary rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-accent3 text-2xl font-bold">Announcements</h2>
+                <button id="close-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="announcements-error" class="text-red-600 text-center mb-4 hidden"></div>
+            <div id="announcements-list" class="space-y-4">
+            </div>
+            <div id="no-announcements" class="text-accent2 text-center hidden">No announcements available.</div>
+        </div>
+    </div>
+
     <main class="container mx-auto p-4">
         @RenderBody()
     </main>
@@ -81,6 +106,152 @@
         </footer>
     }
 
+    @{
+        var userId = User.FindFirst("sub")?.Value;
+        var user = userId != null && Guid.TryParse(userId, out var guidUserId)
+        ? dbContext.Users.FirstOrDefault(u => u.Id == guidUserId)
+        : null;
+
+        var isStaff = user?.IsStaff.GetValueOrDefault(false) ?? false;
+    }
+
+    <script>
+        const userRoles = {
+            isStaff: @isStaff.ToString().ToLower(),
+            isAdmin: @isAdmin.ToString().ToLower()
+        };
+    </script>
+
     @RenderSection("Scripts", required: false)
+    <script>
+        async function fetchAnnouncements() {
+            try {
+                const response = await fetch('https://localhost:7018/api/Announcement/getall', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch announcements.');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching announcements:', error);
+                return null;
+            }
+        }
+
+        function filterAnnouncements(announcements, user) {
+            if (!user || !announcements) return [];
+
+            const userRoles = [];
+            userRoles.push('AllUsers');
+            if (user.isStaff) userRoles.push('IsStaff');
+            if (user.isAdmin) userRoles.push('IsAdmin');
+
+            const currentDate =  new Date();
+
+            return announcements.filter(announcement => {
+                const isRoleMatch = announcement.recipientGroups.some(group => userRoles.includes(group));
+
+                const startDate = new Date(announcement.startDate);
+                const endDate = new Date(announcement.endDate);
+                const isWithinDateRange = currentDate >= startDate && currentDate <= endDate;
+
+                return isRoleMatch && isWithinDateRange;
+            });
+        }
+
+        function renderAnnouncements(announcements) {
+            const announcementsList = document.getElementById('announcements-list');
+            const noAnnouncements = document.getElementById('no-announcements');
+
+            if (!announcementsList || !noAnnouncements) {
+                console.error('Modal elements not found:', {
+                    announcementsList: !!announcementsList,
+                    noAnnouncements: !!noAnnouncements
+                });
+                return;
+            }
+
+            announcementsList.innerHTML = '';
+
+            if (announcements.length === 0) {
+                noAnnouncements.classList.remove('hidden');
+                return;
+            }
+
+            noAnnouncements.classList.add('hidden');
+
+            announcements.forEach(announcement => {
+                const announcementItem = document.createElement('div');
+                announcementItem.className = 'bg-gray-100 p-4 rounded-lg border border-accent1';
+                announcementItem.innerHTML = `
+                    <h3 class="text-accent3 font-semibold text-lg">${announcement.title}</h3>
+                    <p class="text-accent2">${announcement.message || 'No message'}</p>
+                    <p class="text-accent1 text-sm">From: ${announcement.startDate} | To: ${announcement.endDate}</p>
+                `;
+                announcementsList.appendChild(announcementItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const announcementsIcon = document.getElementById('announcements-icon');
+            const announcementsModal = document.getElementById('announcements-modal');
+            const closeModal = document.getElementById('close-modal');
+            const announcementsError = document.getElementById('announcements-error');
+
+            if (!announcementsIcon || !announcementsModal || !closeModal || !announcementsError) {
+                console.error('One or more DOM elements not found:', {
+                    announcementsIcon: !!announcementsIcon,
+                    announcementsModal: !!announcementsModal,
+                    closeModal: !!closeModal,
+                    announcementsError: !!announcementsError
+                });
+                return;
+            }
+
+            // Redirect to login if not authenticated
+            if (!window.jwtToken) {
+                window.location.href = '/User/Login';
+                return;
+            }
+
+            announcementsIcon.addEventListener('click', async () => {
+                announcementsError.classList.add('hidden');
+
+                const user = {
+                    isStaff: userRoles.isStaff,
+                    isAdmin: userRoles.isAdmin
+                };
+
+                const announcements = await fetchAnnouncements();
+                if (!announcements) {
+                    announcementsError.textContent = 'Failed to load announcements.';
+                    announcementsError.classList.remove('hidden');
+                    return;
+                }
+
+                const filteredAnnouncements = filterAnnouncements(announcements, user);
+                renderAnnouncements(filteredAnnouncements);
+
+                announcementsModal.classList.remove('hidden');
+            });
+
+            closeModal.addEventListener('click', () => {
+                announcementsModal.classList.add('hidden');
+            });
+
+            announcementsModal.addEventListener('click', (e) => {
+                if (e.target === announcementsModal) {
+                    announcementsModal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

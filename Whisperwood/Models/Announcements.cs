@@ -15,5 +15,8 @@ namespace Whisperwood.Models
         [Required]
         public Guid UserId { get; set; }
         public Users User { get; set; }
+        [Required]
+        [MinLength(1)]
+        public required List<string> RecipientGroups { get; set; } = ["AllUsers"];
     }
 }
