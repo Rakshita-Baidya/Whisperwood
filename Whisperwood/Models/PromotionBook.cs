@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Whisperwood.Models
 {
@@ -8,6 +9,8 @@ namespace Whisperwood.Models
     {
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
+        [JsonIgnore]
+
         public Books Book { get; set; }
 
         [ForeignKey("Promotion")]

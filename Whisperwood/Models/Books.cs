@@ -39,15 +39,10 @@ namespace Whisperwood.Models
 
         public int? Edition { get; set; }
         public bool AvailabilityStatus { get; set; } = true;
-        [JsonIgnore]
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
-        [JsonIgnore]
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
-        [JsonIgnore]
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];
-        [JsonIgnore]
         public ICollection<GenreBooks> GenreBooks { get; set; } = [];
-        [JsonIgnore]
         public ICollection<PromotionBook> PromotionBooks { get; set; } = [];
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistItems { get; set; } = [];

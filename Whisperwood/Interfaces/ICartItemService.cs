@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Whisperwood.DTOs;
+using Whisperwood.Models;
 
 namespace Whisperwood.Interfaces
 {
@@ -9,5 +10,6 @@ namespace Whisperwood.Interfaces
         Task<IActionResult> GetAllCartItemsAsync(Guid userId);
         Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemDto dto);
         Task<IActionResult> DeleteCartItemAsync(Guid userId, Guid bookId);
+        Task<Cart?> GetByUserIdAsync(Guid userId);
     }
 }

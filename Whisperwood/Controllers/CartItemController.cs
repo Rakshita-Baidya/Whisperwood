@@ -47,5 +47,16 @@ namespace Whisperwood.Controllers
             var userId = GetLoggedInUserId();
             return await cartItemService.DeleteCartItemAsync(userId, bookId);
         }
+
+
+        [HttpGet("getbyuserid")]
+        public async Task<IActionResult> GetByUserId()
+        {
+            var userId = GetLoggedInUserId();
+            var cart = await cartItemService.GetByUserIdAsync(userId);
+            if (cart == null)
+                return NotFound("Cart not found.");
+            return Ok(cart);
+        }
     }
 }

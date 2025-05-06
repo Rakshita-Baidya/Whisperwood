@@ -10,11 +10,11 @@ namespace Whisperwood.Models
         [ForeignKey("Wishlist")]
         public Guid WishlistId { get; set; }
         [JsonIgnore]
+
         public Wishlist Wishlist { get; set; }
 
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
-        [JsonIgnore]
         public Books Book { get; set; }
     }
 }

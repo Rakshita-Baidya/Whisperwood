@@ -51,5 +51,15 @@ namespace Whisperwood.Controllers
             var userId = GetLoggedInUserId();
             return await reviewService.DeleteReviewAsync(userId, id);
         }
+
+        [HttpGet("getbyuserid")]
+        public async Task<IActionResult> GetByUserId()
+        {
+            var userId = GetLoggedInUserId();
+            var review = await reviewService.GetByUserIdAsync(userId);
+            if (review == null)
+                return NotFound("Reviews not found.");
+            return Ok(review);
+        }
     }
 }

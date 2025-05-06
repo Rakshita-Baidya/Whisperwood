@@ -80,5 +80,13 @@ namespace Whisperwood.Services
             await dbContext.SaveChangesAsync();
             return new OkObjectResult("Wishlist item deleted successfully.");
         }
+
+        public async Task<Wishlist?> GetByUserIdAsync(Guid userId)
+        {
+            return await dbContext.Wishlist
+                .Include(w => w.WishListItems)
+                .ThenInclude(i => i.Book)
+                .FirstOrDefaultAsync(w => w.UserId == userId);
+        }
     }
 }

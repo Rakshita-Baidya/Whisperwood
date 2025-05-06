@@ -21,17 +21,26 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found. Are you logged in?");
+                return new BadRequestObjectResult(new
+                {
+                    message = "User not found. Are you logged in?"
+                });
             }
 
             if (!user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can create promotions.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can create promotions."
+                });
             }
 
             if (dto.StartDate > dto.EndDate)
             {
-                return new BadRequestObjectResult("StartDate cannot be after EndDate.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "StartDate cannot be after EndDate."
+                });
             }
 
             var promotion = new Promotions
@@ -62,11 +71,17 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can view promotions by ID.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can view promotions by ID."
+                });
             }
 
             var promotion = await dbContext.Promotions.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
-            return promotion != null ? new OkObjectResult(promotion) : new NotFoundObjectResult("Promotion not found!");
+            return promotion != null ? new OkObjectResult(promotion) : new NotFoundObjectResult(new
+            {
+                message = "Promotion not found!"
+            });
         }
 
         public async Task<IActionResult> UpdatePromotionAsync(Guid userId, Guid id, PromotionUpdateDto dto)
@@ -74,18 +89,27 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can update promotions.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can update promotions."
+                });
             }
 
             var promotion = await dbContext.Promotions.FindAsync(id);
             if (promotion == null)
             {
-                return new NotFoundObjectResult("Promotion not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Promotion not found!"
+                });
             }
 
             if (dto.StartDate != null && dto.EndDate != null && dto.StartDate > dto.EndDate)
             {
-                return new BadRequestObjectResult("StartDate cannot be after EndDate.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "StartDate cannot be after EndDate."
+                });
             }
 
             if (dto.Name != null) promotion.Name = dto.Name;
@@ -103,18 +127,27 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can delete promotions.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can delete promotions."
+                });
             }
 
             var promotion = await dbContext.Promotions.FindAsync(id);
             if (promotion == null)
             {
-                return new NotFoundObjectResult("Promotion not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Promotion not found!"
+                });
             }
 
             dbContext.Promotions.Remove(promotion);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Promotion deleted successfully");
+            return new OkObjectResult(new
+            {
+                message = "Promotion deleted successfully"
+            });
         }
     }
 }

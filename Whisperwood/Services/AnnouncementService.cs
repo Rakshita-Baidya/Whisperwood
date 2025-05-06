@@ -21,17 +21,17 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found. Are you sure you're logged in correctly?");
+                return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
             }
 
             if (!user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can create announcements.");
+                return new UnauthorizedObjectResult(new { message = "Only admins can create announcements." });
             }
 
             if (dto.StartDate > dto.EndDate)
             {
-                return new BadRequestObjectResult("StartDate cannot be after EndDate.");
+                return new BadRequestObjectResult(new { message = "StartDate cannot be after EndDate." });
             }
 
             var announcement = new Announcements
@@ -61,11 +61,11 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can view announcements.");
+                return new UnauthorizedObjectResult(new { message = "Only admins can view announcements." });
             }
 
             var announcement = await dbContext.Announcements.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
-            return announcement != null ? new OkObjectResult(announcement) : new NotFoundObjectResult("Announcement not found!");
+            return announcement != null ? new OkObjectResult(announcement) : new NotFoundObjectResult(new { message = "Announcement not found!" });
         }
 
         public async Task<IActionResult> UpdateAnnouncementAsync(Guid userId, Guid id, AnnouncementUpdateDto dto)

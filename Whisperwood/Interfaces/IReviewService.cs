@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Whisperwood.DTOs;
+using Whisperwood.Models;
 
 namespace Whisperwood.Interfaces
 {
@@ -10,5 +11,6 @@ namespace Whisperwood.Interfaces
         Task<IActionResult> GetReviewsByBookAsync(Guid bookId);
         Task<IActionResult> UpdateReviewAsync(Guid userId, Guid id, ReviewUpdateDto dto);
         Task<IActionResult> DeleteReviewAsync(Guid userId, Guid id);
+        Task<List<Reviews>> GetByUserIdAsync(Guid userId);
     }
 }

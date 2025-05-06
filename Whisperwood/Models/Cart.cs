@@ -8,7 +8,6 @@ namespace Whisperwood.Models
         public Guid UserId { get; set; }
         [JsonIgnore]
         public Users User { get; set; }
-        [JsonIgnore]
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 
     }

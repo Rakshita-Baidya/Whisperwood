@@ -6,8 +6,8 @@ namespace Whisperwood.Models
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public Users User { get; set; }
         [JsonIgnore]
+        public Users User { get; set; }
         public ICollection<WishlistItem> WishListItems { get; set; } = [];
     }
 }

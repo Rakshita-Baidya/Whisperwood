@@ -32,5 +32,15 @@ namespace Whisperwood.Controllers
         {
             return await wishlistService.DeleteWishlistItemAsync(GetLoggedInUserId(), bookId);
         }
+
+        [HttpGet("getbyuserid")]
+        public async Task<IActionResult> GetByUserId()
+        {
+            var userId = GetLoggedInUserId();
+            var wishlist = await wishlistService.GetByUserIdAsync(userId);
+            if (wishlist == null)
+                return NotFound("Wishlist not found.");
+            return Ok(wishlist);
+        }
     }
 }

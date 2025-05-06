@@ -157,5 +157,13 @@ namespace Whisperwood.Services
 
             return new OkObjectResult("Deleted successfully.");
         }
+
+        public async Task<Cart?> GetByUserIdAsync(Guid userId)
+        {
+            return await dbContext.Cart
+                .Include(c => c.CartItems)
+                .ThenInclude(i => i.Book)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+        }
     }
 }

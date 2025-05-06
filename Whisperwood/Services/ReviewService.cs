@@ -66,6 +66,14 @@ namespace Whisperwood.Services
             return new OkObjectResult(reviews);
         }
 
+        public async Task<List<Reviews>> GetByUserIdAsync(Guid userId)
+        {
+            return await dbContext.Reviews
+                .Include(b => b.Books)
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+        }
+
         public async Task<IActionResult> UpdateReviewAsync(Guid userId, Guid id, ReviewUpdateDto dto)
         {
             var review = await dbContext.Reviews.FindAsync(id);
