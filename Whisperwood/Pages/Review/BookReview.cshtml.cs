@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Whisperwood.DTOs;
 using Whisperwood.Interfaces;
@@ -8,7 +7,6 @@ using Whisperwood.Models;
 
 namespace Whisperwood.Pages.Review
 {
-    [Authorize]
     public class BookReviewModel : PageModel
     {
         private readonly IReviewService _reviewService;

@@ -82,36 +82,36 @@
     }
 
     <!-- Announcements Modal -->
-    <div id="announcements-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-100">
-        <div class="bg-primary rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-lg">
-            <div class="flex justify-between items-center mb-4">
+    <div id="announcements-modal" class="bg-opacity-50 fixed inset-0 z-100 flex hidden items-center justify-center bg-gray-800">
+        <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
+            <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-accent3 text-2xl font-bold">Announcements</h2>
                 <button id="close-announcements-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div id="announcements-error" class="text-red-600 text-center mb-4 hidden"></div>
+            <div id="announcements-error" class="mb-4 hidden text-center text-red-600"></div>
             <div id="announcements-list" class="space-y-4"></div>
-            <div id="no-announcements" class="text-accent2 text-center hidden">No announcements available.</div>
+            <div id="no-announcements" class="text-accent2 hidden text-center">No announcements available.</div>
         </div>
     </div>
 
     <!-- Promotions Modal -->
-    <div id="promotions-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 hidden flex items-center justify-center z-100">
-        <div class="bg-primary rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-lg">
-            <div class="flex justify-between items-center mb-4">
+    <div id="promotions-modal" class="bg-opacity-50 fixed inset-0 z-100 flex hidden items-center justify-center bg-gray-800">
+        <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
+            <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-accent3 text-2xl font-bold">Promotions</h2>
                 <button id="close-promotions-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div id="promotions-error" class="text-red-600 text-center mb-4 hidden"></div>
+            <div id="promotions-error" class="mb-4 hidden text-center text-red-600"></div>
             <div id="promotions-list" class="space-y-4"></div>
-            <div id="no-promotions" class="text-accent2 text-center hidden">No promotions available.</div>
+            <div id="no-promotions" class="text-accent2 hidden text-center">No promotions available.</div>
         </div>
     </div>
 
