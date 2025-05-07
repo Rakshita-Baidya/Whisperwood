@@ -9,7 +9,7 @@
     <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Book Reviews</h1>
 
     <div class="mb-4 text-center">
-        <a href="/Book/Browse" class="text-accent2 underline hover:text-accent3">← Back to Browse</a>
+        <div onclick="history.back()" class="text-accent2 underline hover:text-accent3 hover:cursor-pointer">Back</div>
     </div>
 
     @if (Model.Reviews != null && Model.Reviews.Count > 0)

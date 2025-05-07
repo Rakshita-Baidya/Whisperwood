@@ -162,7 +162,7 @@
                         </div>
                         <div class="flex justify-between gap-2">
                             <button id="wishlist-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Wishlist</button>
-                            <a href="/review/bookreview" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</a>
+                            <a href="/Review/BookReview?BookId=${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Review</a>
                             <button id="cart-${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Cart</button>
                         </div>
                     `;
@@ -170,6 +170,8 @@
 
                     initializeWishlistButton(`wishlist-${book.id}`, book.id);
                     initializeCartButton(`cart-${book.id}`, book.id, book.stock);
+
+
                 });
 
                 const totalPages = Math.ceil(allBooks.length / pageSize);
