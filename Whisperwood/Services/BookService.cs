@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddBookAsync(Guid userId, BookDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add books.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add books.");
+                }
             }
 
             if (await dbContext.Books.AnyAsync(b => b.ISBN == dto.ISBN))
@@ -84,9 +87,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateBookAsync(Guid userId, Guid id, BookUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update books.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update books.");
+                }
             }
 
             if (dto.ISBN != null && await dbContext.Books.AnyAsync(b => b.ISBN == dto.ISBN && b.Id != id))
@@ -143,9 +149,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteBookAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete books.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete books.");
+                }
             }
 
             var book = await dbContext.Books.FindAsync(id);

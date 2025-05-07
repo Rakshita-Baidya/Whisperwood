@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddGenreAsync(Guid userId, GenreDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add genres.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add genres.");
+                }
             }
 
             var genre = new Genres
@@ -45,10 +48,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetGenreByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult("Only admins can view genres.");
-            }
 
             var genre = await dbContext.Genres.FirstOrDefaultAsync(g => g.Id == id);
             return genre != null ? new OkObjectResult(genre) : new NotFoundObjectResult("Genre not found!");
@@ -57,11 +56,13 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateGenreAsync(Guid userId, Guid id, GenreUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update genres.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update genres.");
+                }
             }
-
             var genre = await dbContext.Genres.FindAsync(id);
             if (genre == null)
             {
@@ -78,9 +79,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteGenreAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete genres.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete genres.");
+                }
             }
 
             var genre = await dbContext.Genres.FindAsync(id);

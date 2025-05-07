@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddCoverImageAsync(Guid userId, CoverImageDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add cover images.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add cover images.");
+                }
             }
 
             var coverImage = new CoverImages
@@ -44,11 +47,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetCoverImageByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult("Only admins can view cover images.");
-            }
-
             var coverImage = await dbContext.CoverImages.FirstOrDefaultAsync(c => c.Id == id);
             return coverImage != null ? new OkObjectResult(coverImage) : new NotFoundObjectResult("Cover Image not found! Please check the id again.");
         }
@@ -56,9 +54,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateCoverImageAsync(Guid userId, Guid id, CoverImageUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update cover images.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update cover images.");
+                }
             }
 
             var coverImage = await dbContext.CoverImages.FindAsync(id);
@@ -76,9 +77,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteCoverImageAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete cover images.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete cover images.");
+                }
             }
 
             var coverImage = await dbContext.CoverImages.FindAsync(id);

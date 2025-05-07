@@ -24,9 +24,9 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
             }
 
-            if (!user.IsAdmin.GetValueOrDefault(false))
+            if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult(new { message = "Only admins can create announcements." });
+                return new UnauthorizedObjectResult("Only admins or staff can add announcements.");
             }
 
             if (dto.StartDate > dto.EndDate)
@@ -79,9 +79,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateAnnouncementAsync(Guid userId, Guid id, AnnouncementUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false) || !user.IsStaff.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins and staff can update announcements.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update announcements.");
+                }
             }
 
             var announcement = await dbContext.Announcements.FindAsync(id);
@@ -129,9 +132,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteAnnouncementAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false) || !user.IsStaff.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins and staff  can delete announcements.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete announcements.");
+                }
             }
 
             var announcement = await dbContext.Announcements.FindAsync(id);

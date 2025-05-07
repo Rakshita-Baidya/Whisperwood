@@ -248,8 +248,13 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetOrdersByUserAsync(Guid requestingUserId, Guid targetUserId)
         {
             var requestingUser = await dbContext.Users.FindAsync(requestingUserId);
-            if (requestingUser == null || !requestingUser.IsAdmin.GetValueOrDefault(false))
-                return new UnauthorizedObjectResult("Only admins can view orders for other users.");
+            if (requestingUser != null)
+            {
+                if (!requestingUser.IsAdmin.GetValueOrDefault(false) && !requestingUser.IsStaff.GetValueOrDefault(false) && requestingUserId != targetUserId)
+                {
+                    return new UnauthorizedObjectResult("Only admins, staff or own user can view user orders.");
+                }
+            }
 
             var targetUser = await dbContext.Users.FindAsync(targetUserId);
             if (targetUser == null)
