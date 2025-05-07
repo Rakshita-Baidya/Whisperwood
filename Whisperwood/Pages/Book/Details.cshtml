@@ -74,11 +74,11 @@
 
                 @* Review Grid *@
                 <div id="reviews-section" class="mt-10 hidden">
-                    <h2 class="text-accent3 mb-4 text-2xl font-semibold text-center">Reader Reviews</h2>
-                    <div id="reviews-grid" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 px-4">
+                    <h2 class="text-accent3 mb-4 text-center text-2xl font-semibold">Reader Reviews</h2>
+                    <div id="reviews-grid" class="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 lg:grid-cols-3">
                         <!-- Reviews will be injected here -->
                     </div>
-                    <p id="no-reviews" class="text-center text-accent2 text-lg hidden">No reviews yet for this book.</p>
+                    <p id="no-reviews" class="text-accent2 hidden text-center text-lg">No reviews yet for this book.</p>
                 </div>
             </div>
         </div>
@@ -196,9 +196,9 @@
                     reviewCard.className = "bg-primary border-[2px] border-accent1 p-4 rounded shadow-md";
 
                     reviewCard.innerHTML = `
-                            <p class="text-sm text-accent2 mb-1 font-semibold">By: ${review.users?.name || "Anonymous"}</p>
+                            <p class="text-accent2 mb-1 text-sm font-semibold">By: ${review.users?.name || "Anonymous"}</p>
                             <p class="text-accent3 mb-2">Rating: ★ ${review.rating}</p>
-                            <p class="text-accent1 italic mb-2">"${review.message || "No comment"}"</p>
+                            <p class="text-accent1 mb-2 italic">"${review.message || "No comment"}"</p>
                             <p class="text-xs text-gray-500">Posted: ${new Date(review.createdAt).toLocaleString()}</p>
                         `;
 
