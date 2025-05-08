@@ -16,7 +16,7 @@ namespace Whisperwood.Models
         public string? Title { get; set; }
         [Required]
         [StringLength(13)]
-        public string? ISBN { get; set; }
+        public string ISBN { get; set; }
         [Required]
         [Precision(10, 2)]
         public decimal Price { get; set; }

@@ -54,7 +54,7 @@ function filterBooks(books, params) {
         const searchLower = params.searchTerm.toLowerCase();
         filteredBooks = filteredBooks.filter(book =>
             book.title.toLowerCase().includes(searchLower) ||
-            book.ISBN.toSting().includes(searchLower) ||
+            book.isbn.includes(searchLower) ||
             book.synopsis.toLowerCase().includes(searchLower)   
         );
     }
