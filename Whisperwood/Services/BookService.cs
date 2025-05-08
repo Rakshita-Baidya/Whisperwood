@@ -23,13 +23,13 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add books.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can add books." });
                 }
             }
 
             if (await dbContext.Books.AnyAsync(b => b.ISBN == dto.ISBN))
             {
-                return new BadRequestObjectResult("A book with this ISBN already exists.");
+                return new BadRequestObjectResult(new { message = "A book with this ISBN already exists." });
             }
 
             var book = new Books
@@ -81,7 +81,7 @@ namespace Whisperwood.Services
                 .Include(b => b.CoverImage)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
-            return book != null ? new OkObjectResult(book) : new NotFoundObjectResult("Book not found!");
+            return book != null ? new OkObjectResult(book) : new NotFoundObjectResult(new { message = "Book not found!" });
         }
 
         public async Task<IActionResult> UpdateBookAsync(Guid userId, Guid id, BookUpdateDto dto)
@@ -91,13 +91,13 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update books.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can update books." });
                 }
             }
 
             if (dto.ISBN != null && await dbContext.Books.AnyAsync(b => b.ISBN == dto.ISBN && b.Id != id))
             {
-                return new BadRequestObjectResult("A book with this ISBN already exists.");
+                return new BadRequestObjectResult(new { message = "A book with this ISBN already exists." });
             }
 
             var book = await dbContext.Books
@@ -108,7 +108,7 @@ namespace Whisperwood.Services
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null)
-                return new NotFoundObjectResult("Book not found.");
+                return new NotFoundObjectResult(new { message = "Book not found." });
 
             if (dto.Title != null) book.Title = dto.Title;
             if (dto.ISBN != null) book.ISBN = dto.ISBN;
@@ -153,19 +153,19 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete books.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can delete books." });
                 }
             }
 
             var book = await dbContext.Books.FindAsync(id);
             if (book == null)
             {
-                return new NotFoundObjectResult("Book not found.");
+                return new NotFoundObjectResult(new { message = "Book not found." });
             }
 
             dbContext.Books.Remove(book);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully.");
+            return new OkObjectResult(new { message = "Deleted successfully." });
         }
 
         public async Task<IActionResult> GetFilteredBooksAsync(BookFilterDto filter)

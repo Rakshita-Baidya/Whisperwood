@@ -2,26 +2,26 @@
 @model Whisperwood.Pages.Book.BrowseModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Browse Books";
+    ViewData["Title"] = "Manage Books";
 }
 
 <div class="px-4 py-8">
-    
     <div class="mb-4 flex justify-between">
-        <h1 class="text-accent3 text-center text-4xl font-bold">Browse Books</h1>
-        <button id="toggle-filter" class="bg-accent3 rounded px-2 text-white hover:bg-accent4">Add Filter</button>
+        <h1 class="text-accent4 text-center text-4xl font-bold">Manage Books</h1>
+        <div class="flex space-x-4 text-white">
+            <a href="/Book/AddBook" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Book</a>
+            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Filter Books</button>
+        </div>
     </div>
-
     <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
-
-
+    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
     <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
         <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <div>
                 <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
                 <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by title, ISBN, or Synopsis">
             </div>
-
+            
             <div>
                 <label for="minPrice" class="text-accent3 mb-1 block font-medium">Price Range</label>
                 <div class="flex gap-2">
@@ -98,9 +98,8 @@
         </form>
     </div>
 
-    <div id="books-container" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-        @* book loading from js  *@
-        <div id="loading" class="text-accent2 col-span-full text-center text-lg">Loading books...</div>
+    <div id="book-list" class="space-y-4">
+        <ol id="books-ordered-list" class="border-accent4 list-inside list-decimal border-b"></ol>
     </div>
 
     <div id="no-books" class="text-accent2 mt-4 hidden text-center text-lg">No books found.</div>
@@ -111,18 +110,18 @@
 @section Scripts {
     <script>
         let currentPage = 1;
-        const pageSize = 8;
+        const pageSize = 10;
         let allBooks = [];
         let originalBooks = [];
 
         function renderBooks(page) {
-            const booksContainer = document.getElementById('books-container');
+            const booksOrderedList = document.getElementById('books-ordered-list');
             const noBooksElement = document.getElementById('no-books');
             const paginationContainer = document.getElementById('pagination-container');
 
-            if (!booksContainer || !noBooksElement || !paginationContainer) {
+            if (!booksOrderedList || !noBooksElement || !paginationContainer) {
                 console.error('One or more DOM elements not found:', {
-                    booksContainer: !!booksContainer,
+                    booksOrderedList: !!booksOrderedList,
                     noBooksElement: !!noBooksElement,
                     paginationContainer: !!paginationContainer
                 });
@@ -134,7 +133,7 @@
                 return;
             }
 
-            booksContainer.innerHTML = '';
+            booksOrderedList.innerHTML = '';
 
             if (allBooks.length === 0) {
                 noBooksElement.classList.remove('hidden');
@@ -152,32 +151,27 @@
                         ? book.authorBooks.map(ab => ab.author.name).join(', ')
                         : 'Unknown Author';
 
-                    const bookElement = document.createElement('a');
-                    bookElement.href = `/Book/Details/${book.id}`;
-                    bookElement.className = 'block bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition-shadow hover:shadow-xl';
+                    const bookElement = document.createElement('li');
+                    bookElement.className = 'flex items-center space-x-4 w-full border-t border-accent4';
                     bookElement.innerHTML = `
-                        ${book.coverImage && book.coverImage.coverImageURL
-                            ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-64 w-full rounded-md object-cover" />`
-                            : `<div class="text-accent3 mb-4 h-64 w-full">No Image</div>`
-                        }
-                        <h2 class="text-accent3 truncate text-xl font-semibold">${book.title}</h2>
-                        <p class="text-accent1 font-medium">${authorNames}</p>
-                        <div class="mb-3 flex justify-between">
-                            <p class="text-accent3"> ★ ${book.averageRating} </p>
-                            <p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded hover:bg-accent4"></button>
-                            <a href="/Review/BookReview?BookId=${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded text-white hover:bg-accent4">
-                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M12 4 9.22 9.27 3 10.11l4.5 4.1L6.44 20 12 17.27 17.56 20l-1.06-5.79 4.5-4.1-6.22-.84z"/></svg>
-                            </a>
-                            <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4"></button>
+                        <div class="flex w-full items-center space-x-4 py-4">
+                            ${book.coverImage && book.coverImage.coverImageURL
+                                ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="border-2 border-accent2 h-20 w-16 object-cover" />`
+                                : `<div class="text-accent3 flex h-20 w-16 items-center justify-center">No Image</div>`
+                            }
+                            <div class="flex-1">
+                                <h2 class="text-accent3 text-2xl font-semibold">${book.title}</h2>
+                                <p class="text-accent1 text-lg italic">${authorNames}</p>
+                                <p class="text-accent1">${book.isbn}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <a href="/Book/Details/${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">View</a>
+                                <a href="/Book/UpdateBook/${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
+                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" onclick="deleteBook('${book.id}', '${book.title}')">Delete</button>
+                            </div>
                         </div>
                     `;
-                    booksContainer.appendChild(bookElement);
-
-                    initializeWishlistButton(`wishlist-${book.id}`, book.id);
-                    initializeCartButton(`cart-${book.id}`, book.id, book.stock);
+                    booksOrderedList.appendChild(bookElement);
                 });
 
                 const totalPages = Math.ceil(allBooks.length / pageSize);
@@ -192,10 +186,13 @@
         }
 
         async function fetchBooks() {
-            const loadingElement = document.getElementById('loading');
             const errorMessageElement = document.getElementById('error-message');
 
-            loadingElement.classList.remove('hidden');
+            if (!errorMessageElement) {
+                console.error('Error message element not found');
+                return;
+            }
+
             errorMessageElement.classList.add('hidden');
 
             try {
@@ -206,28 +203,67 @@
 
                 originalBooks = await response.json();
                 allBooks = [...originalBooks];
-                loadingElement.classList.add('hidden');
                 renderBooks(currentPage);
             } catch (error) {
                 console.error('Error fetching books:', error);
-                loadingElement.classList.add('hidden');
+                errorMessageElement.textContent = error.message;
+                errorMessageElement.classList.remove('hidden');
+            }
+        }
+
+        async function deleteBook(bookId, bookTitle) {
+            if (!confirm(`Are you sure you want to delete ${bookTitle}?`)) {
+                return;
+            }
+
+            const errorMessageElement = document.getElementById('error-message');
+            const successMessageElement = document.getElementById('success-message');
+
+            if (!errorMessageElement || !successMessageElement) {
+                console.error('Message elements not found');
+                return;
+            }
+
+            errorMessageElement.classList.add('hidden');
+            successMessageElement.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://localhost:7018/api/Book/delete/${bookId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete book.');
+                }
+
+                successMessageElement.textContent = 'Book deleted successfully!';
+                successMessageElement.classList.remove('hidden');
+
+                // Refresh the book list after deletion
+                await fetchBooks();
+            } catch (error) {
+                console.error('Error deleting book:', error);
                 errorMessageElement.textContent = error.message;
                 errorMessageElement.classList.remove('hidden');
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            const filterButton = document.getElementById('filter-button');
+            const filterSection = document.getElementById('filter-section');
             const filterForm = document.getElementById('filter-form');
             const clearFiltersButton = document.getElementById('clear-filters');
-            const toggleFilterButton = document.getElementById('toggle-filter');
-            const filterSection = document.getElementById('filter-section');
 
-            if (!filterForm || !clearFiltersButton || !toggleFilterButton || !filterSection) {
+            if (!filterButton || !filterSection || !filterForm || !clearFiltersButton) {
                 console.error('One or more DOM elements not found:', {
+                    filterButton: !!filterButton,
+                    filterSection: !!filterSection,
                     filterForm: !!filterForm,
-                    clearFiltersButton: !!clearFiltersButton,
-                    toggleFilterButton: !!toggleFilterButton,
-                    filterSection: !!filterSection
+                    clearFiltersButton: !!clearFiltersButton
                 });
                 const errorMessageElement = document.getElementById('error-message');
                 if (errorMessageElement) {
@@ -236,6 +272,10 @@
                 }
                 return;
             }
+
+            filterButton.addEventListener('click', () => {
+                filterSection.classList.toggle('hidden');
+            });
 
             filterForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -250,10 +290,6 @@
                 allBooks = [...originalBooks];
                 currentPage = 1;
                 renderBooks(currentPage);
-            });
-
-            toggleFilterButton.addEventListener('click', () => {
-                filterSection.classList.toggle('hidden');
             });
 
             fetchDropdownOptions();

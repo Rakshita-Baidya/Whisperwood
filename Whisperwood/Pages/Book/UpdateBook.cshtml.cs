@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Whisperwood.Pages.Book
 {
-    public class AddBookModel : PageModel
+    public class UpdateBookModel : PageModel
     {
         public void OnGet()
         {
