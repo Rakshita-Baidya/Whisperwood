@@ -59,7 +59,6 @@
                 <div class="relative flex items-center space-x-4 text-lg font-semibold">
                     <a href="/" class="text-accent3 hover:text-accent4">Home</a>
                     <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
-
                     @if (isAuthenticated)
                     {
                         <div class="relative space-x-4">
@@ -85,7 +84,7 @@
                             </button>
                             <div id="user-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-36 rounded-lg border shadow-lg">
                                 <a href="/User/Profile" class="text-accent3 block px-4 py-2 hover:bg-accent2">Profile</a>
-                                <a href="/User/Review" class="text-accent3 block px-4 py-2 hover:bg-accent2">Review</a>
+                                <a href="/User/UserReview" class="text-accent3 block px-4 py-2 hover:bg-accent2">Review</a>
                                 <a href="/User/Wishlist" class="text-accent3 block px-4 py-2 hover:bg-accent2">Wishlist</a>
                                 <a href="/User/Cart" class="text-accent3 block px-4 py-2 hover:bg-accent2">Cart</a>
                                 <a href="/User/Orders" class="text-accent3 block px-4 py-2 hover:bg-accent2">Orders</a>
@@ -95,14 +94,13 @@
                         <button id="promotions-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518" xml:space="preserve"><path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" /></svg>
                         </button>
-                        
-                    }
-                    else
-                    {
                         <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
-                            @* <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" /></svg> *@
-                            Announcements
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" /></svg>
+                            @* Announcements *@
                         </button>
+                    } else
+                    {
+                        
                         <a href="/User/Login" class="text-accent3 hover:text-accent4">Login</a>
                     }
                 </div>

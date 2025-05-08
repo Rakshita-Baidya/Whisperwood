@@ -24,9 +24,9 @@ filterAnnouncements(announcements, user) {
     if (!user || !announcements) return [];
 
     const userRoles = [];
-    userRoles.push('AllUsers');
-    if (user.isStaff) userRoles.push('IsStaff');
-    if (user.isAdmin) userRoles.push('IsAdmin');
+    userRoles.push('All Users');
+    if (user.isStaff) userRoles.push('Staff');
+    if (user.isAdmin) userRoles.push('Admin');
 
     const currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -47,14 +47,6 @@ filterAnnouncements(announcements, user) {
 renderAnnouncements(announcements) {
     const listElement = document.getElementById('announcements-list');
     const noAnnouncements = document.getElementById('no-announcements');
-
-    if (!listElement || !noAnnouncements) {
-        console.error('Announcement modal elements not found:', {
-            listElement: !!listElement,
-            noAnnouncements: !!noAnnouncements
-        });
-        return;
-    }
 
     listElement.innerHTML = '';
 
@@ -82,16 +74,6 @@ init(user) {
     const modal = document.getElementById('announcements-modal');
     const closeModal = document.getElementById('close-announcements-modal');
     const errorElement = document.getElementById('announcements-error');
-
-    if (!icon || !modal || !closeModal || !errorElement) {
-        console.error('Announcement DOM elements not found:', {
-            icon: !!icon,
-            modal: !!modal,
-            closeModal: !!closeModal,
-            errorElement: !!errorElement
-        });
-        return;
-    }
 
     icon.addEventListener('click', async () => {
         errorElement.classList.add('hidden');

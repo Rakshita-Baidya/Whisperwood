@@ -30,7 +30,8 @@ namespace Whisperwood.Services
             {
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName!),
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new System.Security.Claims.Claim("IsAdmin", user.IsAdmin?.ToString() ?? "false")
+                new System.Security.Claims.Claim("IsAdmin", user.IsAdmin?.ToString() ?? "false"),
+                new System.Security.Claims.Claim("IsStaff", user.IsStaff?.ToString() ?? "false")
             };
 
             //obj that stores data to create a token
