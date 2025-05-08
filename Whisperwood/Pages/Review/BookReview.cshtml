@@ -1,0 +1,77 @@
+﻿@page
+@model Whisperwood.Pages.Review.BookReviewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Book Reviews";
+}
+
+<div class="px-4 py-8">
+    <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Book Reviews</h1>
+
+    <div class="mb-4 text-center">
+        <div onclick="history.back()" class="text-accent2 underline hover:text-accent3 hover:cursor-pointer">Back</div>
+    </div>
+
+    @if (Model.Reviews != null && Model.Reviews.Count > 0)
+    {
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var review in Model.Reviews)
+            {
+                <div class="bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition hover:shadow-lg">
+                    <p class="text-accent1 mb-1 text-sm font-medium">
+                        By <strong>@review.Users?.Name</strong>
+                    </p>
+                    <p class="text-accent3 mb-2">Rating: ★ @review.Rating</p>
+                    <p class="text-accent2 mb-3 italic">"@review.Message"</p>
+                    <p class="text-xs text-gray-500">Posted: @review.CreatedAt.ToLocalTime()</p>
+
+                    @if (review.UpdatedAt != null)
+                    {
+                        <p class="text-xs text-gray-400">Updated: @review.UpdatedAt.Value.ToLocalTime()</p>
+                    }
+
+                    @if (Model.CurrentUserId == review.UserId)
+                    {
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@review.Id">
+                            <button class="mt-2 text-sm text-red-500 hover:underline">Delete</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-accent2 mt-4 text-center text-lg">No reviews yet for this book.</div>
+    }
+
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <hr class="border-accent1 my-6" />
+        <h2 class="text-accent3 mb-4 text-center text-2xl font-semibold">Add a Review</h2>
+
+        <form method="post" class="mx-auto max-w-xl space-y-4">
+            <input type="hidden" asp-for="NewReview.BookId" value="@Model.BookId" />
+
+            <div>
+                <label class="text-accent1 mb-1 block">Rating (1–5):</label>
+                <input asp-for="NewReview.Rating" type="number" min="1" max="5"
+                       class="border-accent1 w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-accent2" required />
+            </div>
+
+            <div>
+                <label class="text-accent1 mb-1 block">Message:</label>
+                <textarea asp-for="NewReview.Message"
+                          class="border-accent1 h-24 w-full resize-none rounded border p-2 focus:outline-none focus:ring-2 focus:ring-accent2"></textarea>
+            </div>
+
+            <button type="submit" class="bg-accent3 rounded px-6 py-2 text-white transition hover:bg-accent2">
+                Submit Review
+            </button>
+        </form>
+    }
+    else
+    {
+        <div class="text-accent2 mt-6 text-center text-sm">Please <a href="/User/Login" class="underline hover:text-accent3">log in</a> to leave a review.</div>
+    }
+</div>

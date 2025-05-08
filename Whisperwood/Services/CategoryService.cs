@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddCategoryAsync(Guid userId, CategoryDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add categories.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add categories.");
+                }
             }
 
             var category = new Categories
@@ -45,11 +48,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetCategoryByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult("Only admins can view categories.");
-            }
-
             var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
             return category != null ? new OkObjectResult(category) : new NotFoundObjectResult("Category not found!");
         }
@@ -57,9 +55,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateCategoryAsync(Guid userId, Guid id, CategoryUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update categories.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update categories.");
+                }
             }
 
             var category = await dbContext.Categories.FindAsync(id);
@@ -78,9 +79,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteCategoryAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete categories.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete categories.");
+                }
             }
 
             var category = await dbContext.Categories.FindAsync(id);

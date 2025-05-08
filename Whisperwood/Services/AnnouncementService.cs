@@ -24,14 +24,24 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
             }
 
-            if (!user.IsAdmin.GetValueOrDefault(false))
+            if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult(new { message = "Only admins can create announcements." });
+                return new UnauthorizedObjectResult("Only admins or staff can add announcements.");
             }
 
             if (dto.StartDate > dto.EndDate)
             {
                 return new BadRequestObjectResult(new { message = "StartDate cannot be after EndDate." });
+            }
+            if (dto.RecipientGroups == null || !dto.RecipientGroups.Any())
+            {
+                return new BadRequestObjectResult(new { message = "At least one recipient group must be selected." });
+            }
+
+            var validGroups = new List<string> { "AllUsers", "IsStaff", "IsAdmin" };
+            if (dto.RecipientGroups.Any(g => !validGroups.Contains(g)))
+            {
+                return new BadRequestObjectResult(new { message = "Invalid recipient group specified." });
             }
 
             var announcement = new Announcements
@@ -42,9 +52,13 @@ namespace Whisperwood.Services
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 UserId = userId,
-                User = user
+                User = user,
+                RecipientGroups = dto.RecipientGroups
             };
-
+            if (announcement.StartDate < DateOnly.FromDateTime(DateTime.UtcNow))
+            {
+                return new BadRequestObjectResult(new { message = "StartDate cannot be in the past." });
+            }
             dbContext.Announcements.Add(announcement);
             await dbContext.SaveChangesAsync();
             return new OkObjectResult(announcement);
@@ -58,12 +72,6 @@ namespace Whisperwood.Services
 
         public async Task<IActionResult> GetAnnouncementByIdAsync(Guid userId, Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult(new { message = "Only admins can view announcements." });
-            }
-
             var announcement = await dbContext.Announcements.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
             return announcement != null ? new OkObjectResult(announcement) : new NotFoundObjectResult(new { message = "Announcement not found!" });
         }
@@ -71,9 +79,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateAnnouncementAsync(Guid userId, Guid id, AnnouncementUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update announcements.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update announcements.");
+                }
             }
 
             var announcement = await dbContext.Announcements.FindAsync(id);
@@ -85,6 +96,19 @@ namespace Whisperwood.Services
             if (dto.StartDate > dto.EndDate)
             {
                 return new BadRequestObjectResult("StartDate cannot be after EndDate.");
+            }
+            if (dto.RecipientGroups != null)
+            {
+                if (!dto.RecipientGroups.Any())
+                {
+                    return new BadRequestObjectResult("At least one recipient group must be selected.");
+                }
+                var validGroups = new List<string> { "AllUsers", "IsStaff", "IsAdmin" };
+                if (dto.RecipientGroups.Any(g => !validGroups.Contains(g)))
+                {
+                    return new BadRequestObjectResult("Invalid recipient group specified.");
+                }
+                announcement.RecipientGroups = dto.RecipientGroups;
             }
 
             if (dto.Title != null) announcement.Title = dto.Title;
@@ -100,16 +124,20 @@ namespace Whisperwood.Services
                 Message = announcement.Message,
                 StartDate = announcement.StartDate,
                 EndDate = announcement.EndDate,
-                UserId = announcement.UserId
+                UserId = announcement.UserId,
+                RecipientGroups = announcement.RecipientGroups
             });
         }
 
         public async Task<IActionResult> DeleteAnnouncementAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete announcements.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete announcements.");
+                }
             }
 
             var announcement = await dbContext.Announcements.FindAsync(id);

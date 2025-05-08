@@ -11,7 +11,7 @@
     <div id="loading" class="text-accent2 col-span-full text-center text-lg">Loading book details...</div>
     <div id="book-details" class="hidden">
         <div class="flex gap-8">
-            @* top *@
+            @* Top Section *@
             <div class="absolute z-50 ml-36 flex w-2/3 justify-between">
                 <div id="cover-image" class="h-96 rounded-md shadow-md"></div>
                 <div class="mt-8">
@@ -34,7 +34,8 @@
                     </div>
                 </div>
             </div>
-            @* Book Details *@
+
+            @* Book Info Section *@
             <div class="mt-80 w-full">
                 <div class="bg-accent4 mt-4 flex h-24 w-full items-center justify-end gap-2 rounded">
                     <div class="w-3/5 space-x-6">
@@ -43,6 +44,7 @@
                         <button id="add-review" class="bg-accent3 rounded px-2 py-1 text-white hover:bg-accent3">Add a Review</button>
                     </div>
                 </div>
+
                 <div class="bg-primary rounded-lg p-6 shadow-md">
                     <div class="m-4 grid grid-cols-2 gap-4">
                         <div class="rounded-lg">
@@ -60,7 +62,7 @@
                             </div>
                             <div>
                                 <h2 class="text-accent4 text-xl font-semibold">Language</h2>
-                                <p id="book-language"</p>
+                                <p id="book-language"></p>
                             </div>
                             <div>
                                 <h2 class="text-accent4 text-xl font-semibold">Format</h2>
@@ -68,6 +70,15 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                @* Review Grid *@
+                <div id="reviews-section" class="mt-10 hidden">
+                    <h2 class="text-accent3 mb-4 text-center text-2xl font-semibold">Reader Reviews</h2>
+                    <div id="reviews-grid" class="grid grid-cols-1 gap-4 px-4 md:grid-cols-2 lg:grid-cols-3">
+                        <!-- Reviews will be injected here -->
+                    </div>
+                    <p id="no-reviews" class="text-accent2 hidden text-center text-lg">No reviews yet for this book.</p>
                 </div>
             </div>
         </div>
@@ -131,34 +142,70 @@
 
                 elements.authorDetails.innerHTML = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => `
-                        <div>
-                            ${ab.author.name}<br>
-                            Nationality: ${ab.author.nationality || 'Unknown'}<br>
-                            DOB: ${ab.author.dob || 'Unknown'}<br>
-                            Contact: ${ab.author.contact || 'Unknown'}<br>
-                            Email: ${ab.author.email || 'Unknown'}
-                        </div>
-                    `).join('<hr class="border-accent2 my-2">')
+                            <div>
+                                ${ab.author.name}<br>
+                                Nationality: ${ab.author.nationality || 'Unknown'}<br>
+                                DOB: ${ab.author.dob || 'Unknown'}<br>
+                                Contact: ${ab.author.contact || 'Unknown'}<br>
+                                Email: ${ab.author.email || 'Unknown'}
+                            </div>
+                        `).join('<hr class="border-accent2 my-2">')
                     : 'No authors listed';
 
                 elements.genreDetails.textContent = book.genreBooks?.length > 0
                     ? book.genreBooks.map(gb => `${gb.genre.name} (${gb.genre.description || 'No description'})`).join(', ')
                     : 'No genres listed';
 
-                // Initialize wishlist functionality
                 initializeWishlistButton('add-to-wishlist', id);
-
-                //cart func
                 initializeCartButton('add-to-cart', book.id, book.stock);
 
                 elements.review.addEventListener('click', (e) => {
                     e.preventDefault();
-                    alert(`Add a review for ${book.title}! (Implement review form here)`);
+                    window.location.href = `/Review/BookReview?BookId=${id}`;
                 });
+
+                await fetchReviews(id);
+
             } catch (error) {
                 elements.loading.classList.add('hidden');
                 elements.error.textContent = error.message;
                 elements.error.classList.remove('hidden');
+            }
+        }
+
+        async function fetchReviews(bookId) {
+            try {
+                const response = await fetch(`https://localhost:7018/api/Review/book/${bookId}`);
+                if (!response.ok) throw new Error("Could not load reviews");
+
+                const reviews = await response.json();
+                const section = document.getElementById("reviews-section");
+                const grid = document.getElementById("reviews-grid");
+                const none = document.getElementById("no-reviews");
+
+                section.classList.remove("hidden");
+                grid.innerHTML = "";
+
+                if (reviews.length === 0) {
+                    none.classList.remove("hidden");
+                    return;
+                }
+
+                reviews.forEach((review) => {
+                    const reviewCard = document.createElement("div");
+                    reviewCard.className = "bg-primary border-[2px] border-accent1 p-4 rounded shadow-md";
+
+                    reviewCard.innerHTML = `
+                            <p class="text-accent2 mb-1 text-sm font-semibold">By: ${review.users?.name || "Anonymous"}</p>
+                            <p class="text-accent3 mb-2">Rating: ★ ${review.rating}</p>
+                            <p class="text-accent1 mb-2 italic">"${review.message || "No comment"}"</p>
+                            <p class="text-xs text-gray-500">Posted: ${new Date(review.createdAt).toLocaleString()}</p>
+                        `;
+
+                    grid.appendChild(reviewCard);
+                });
+            } catch (err) {
+                console.error(err.message);
             }
         }
 

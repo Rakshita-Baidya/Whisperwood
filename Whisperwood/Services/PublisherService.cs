@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddPublisherAsync(Guid userId, PublisherDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add publishers.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add publishers.");
+                }
             }
 
             var publisher = new Publishers
@@ -47,11 +50,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetPublisherByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult("Only admins can view publishers.");
-            }
-
             var publisher = await dbContext.Publishers.FirstOrDefaultAsync(p => p.Id == id);
             return publisher != null ? new OkObjectResult(publisher) : new NotFoundObjectResult("Publisher not found!");
         }
@@ -59,9 +57,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdatePublisherAsync(Guid userId, Guid id, PublisherUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update publishers.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update publishers.");
+                }
             }
 
             var publisher = await dbContext.Publishers.FindAsync(id);
@@ -82,9 +83,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeletePublisherAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete publishers.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete publishers.");
+                }
             }
 
             var publisher = await dbContext.Publishers.FindAsync(id);

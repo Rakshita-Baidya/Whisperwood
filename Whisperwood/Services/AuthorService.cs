@@ -19,9 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddAuthorAsync(Guid userId, AuthorDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can add authors.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can add authors.");
+                }
             }
 
             var author = new Authors
@@ -49,11 +52,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetAuthorByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult("Only admins can view authors.");
-            }
-
             var author = await dbContext.Authors.FirstOrDefaultAsync(a => a.Id == id);
             return author != null ? new OkObjectResult(author) : new NotFoundObjectResult("Author not found!");
         }
@@ -61,9 +59,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdateAuthorAsync(Guid userId, Guid id, AuthorUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can update authors.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can update authors.");
+                }
             }
 
             var author = await dbContext.Authors.FindAsync(id);
@@ -86,9 +87,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeleteAuthorAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult("Only admins can delete authors.");
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult("Only admins or staff can delete authors.");
+                }
             }
 
             var author = await dbContext.Authors.FindAsync(id);

@@ -1,4 +1,7 @@
 ﻿@using System.IdentityModel.Tokens.Jwt
+@using Whisperwood.DatabaseContext
+@inject WhisperwoodDbContext dbContext
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,16 +13,18 @@
     <script src="/js/wishlist.js"></script>
     <script src="/js/cart.js"></script>
     <script src="/js/pagination.js"></script>
+    <script src="/js/bookFilter.js"></script>
+    <script src="/js/announcement.js"></script>
+    <script src="/js/promotion.js"></script>
 </head>
 <body class="bg-primary h-screen min-h-screen font-sans">
     @{
-        // Check if the current page is Login or Register
         var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
         var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
         bool isAuthenticated = false;
         bool isAdmin = false;
         string jwtToken = null;
-        // Parse JwtToken cookie
+
         jwtToken = Context.Request.Cookies["JwtToken"];
         if (!string.IsNullOrEmpty(jwtToken))
         {
@@ -51,14 +56,20 @@
                 <div class="items-center space-x-4 text-lg font-semibold">
                     <a href="/" class="text-accent3 hover:text-accent4">Home</a>
                     <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
-                    <a href="/book/categories" class="text-accent3 hover:text-accent4">Categories</a>
-                    <a href="/book/genre" class="text-accent3 hover:text-accent4">Genres</a>
+                    
                     @if (isAuthenticated)
                     {
                         @if (isAdmin)
                         {
-                            <a href="/Dashboard" class="text-accent3 hover:text-accent4">Dashboard</a>
+                            <a href="/Promotion/AddPromotion" class="text-accent3 hover:text-accent4">Add Promotion</a>
+                            <a href="/Announcement/AddAnnouncement" class="text-accent3 hover:text-accent4">Add Announcement</a>
                         }
+                        <button id="promotions-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518" xml:space="preserve"><path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" /></svg>
+                        </button>
+                        <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" /></svg>
+                        </button>
                         <a href="/User/Logout" class="text-accent3 hover:text-accent4">Logout</a>
                     }
                     else
@@ -69,6 +80,41 @@
             </nav>
         </header>
     }
+
+    <!-- Announcements Modal -->
+    <div id="announcements-modal" class="bg-opacity-50 fixed inset-0 z-100 flex hidden items-center justify-center bg-gray-800">
+        <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-accent3 text-2xl font-bold">Announcements</h2>
+                <button id="close-announcements-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="announcements-error" class="mb-4 hidden text-center text-red-600"></div>
+            <div id="announcements-list" class="space-y-4"></div>
+            <div id="no-announcements" class="text-accent2 hidden text-center">No announcements available.</div>
+        </div>
+    </div>
+
+    <!-- Promotions Modal -->
+    <div id="promotions-modal" class="bg-opacity-50 fixed inset-0 z-100 flex hidden items-center justify-center bg-gray-800">
+        <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-accent3 text-2xl font-bold">Promotions</h2>
+                <button id="close-promotions-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="promotions-error" class="mb-4 hidden text-center text-red-600"></div>
+            <div id="promotions-list" class="space-y-4"></div>
+            <div id="no-promotions" class="text-accent2 hidden text-center">No promotions available.</div>
+        </div>
+    </div>
+
     <main class="container mx-auto p-4">
         @RenderBody()
     </main>
@@ -79,6 +125,37 @@
         </footer>
     }
 
+    @{
+        var userId = User.FindFirst("sub")?.Value;
+        var user = userId != null && Guid.TryParse(userId, out var guidUserId)
+        ? dbContext.Users.FirstOrDefault(u => u.Id == guidUserId)
+        : null;
+
+        var isStaff = user?.IsStaff.GetValueOrDefault(false) ?? false;
+    }
+
+    <script>
+        const userRoles = {
+            isStaff: @isStaff.ToString().ToLower(),
+            isAdmin: @isAdmin.ToString().ToLower()
+        };
+    </script>
+
     @RenderSection("Scripts", required: false)
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const user = {
+                isStaff: userRoles.isStaff,
+                isAdmin: userRoles.isAdmin
+            };
+
+            // Initialize announcements
+            announcement.init(user);
+
+            // Initialize promotions
+            promotion.init(user);
+        });
+    </script>
 </body>
 </html>

@@ -13,6 +13,7 @@ namespace Whisperwood.Models
         public bool IsEligibleForDiscount { get; set; } = false;
         public int OrdersCount { get; set; } = 0;
         public bool? IsAdmin { get; set; } = false;
+        public bool? IsStaff { get; set; } = false;
         public bool? IsActive { get; set; } = true;
         [JsonIgnore]
         public ICollection<Announcements> Announcements { get; set; } = [];

@@ -1,0 +1,147 @@
+﻿@page
+@model Whisperwood.Pages.Promotion.AddPromotionModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Promotion";
+}
+
+<div class="px-4 py-8">
+    <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Add Promotion</h1>
+
+    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
+    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
+
+    <div class="mx-auto max-w-2xl rounded-lg bg-primary border border-accent3 p-6 shadow-md">
+        <form id="promotion-form" class="space-y-4">
+            <div>
+                <label for="name" class="text-accent3 mb-1 block font-medium">Name</label>
+                <input type="text" id="name" name="name" class="w-full rounded border border-accent1 p-2" placeholder="Promotion Name" required>
+            </div>
+            <div>
+                <label for="description" class="text-accent3 mb-1 block font-medium">Description</label>
+                <textarea id="description" name="description" class="w-full rounded border border-accent1 p-2" rows="4" placeholder="Promotion Description" required></textarea>
+            </div>
+            <div>
+                <label for="discountPercent" class="text-accent3 mb-1 block font-medium">Discount Percent</label>
+                <input type="number" id="discountPercent" name="discountPercent" class="w-full rounded border border-accent1 p-2" min="0" max="100" placeholder="Discount Percent" required>
+            </div>
+            <div>
+                <label for="startDate" class="text-accent3 mb-1 block font-medium">Start Date</label>
+                <input type="date" id="startDate" name="startDate" class="w-full rounded border border-accent1 p-2" required>
+            </div>
+            <div>
+                <label for="endDate" class="text-accent3 mb-1 block font-medium">End Date</label>
+                <input type="date" id="endDate" name="endDate" class="w-full rounded border border-accent1 p-2" required>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Create Promotion</button>
+                <button type="button" id="clear-form" class="bg-gray-500 rounded px-4 py-2 text-white hover:bg-gray-600">Clear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function clearForm() {
+            const form = document.getElementById('promotion-form');
+            if (!form) {
+                console.error('Promotion form not found');
+                return;
+            }
+            form.reset();
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            if (errorMessage) errorMessage.classList.add('hidden');
+            if (successMessage) successMessage.classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.jwtToken) {
+                window.location.href = '/User/Login';
+                return;
+            }
+
+            const form = document.getElementById('promotion-form');
+            const clearButton = document.getElementById('clear-form');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+
+            if (!form || !clearButton || !errorMessage || !successMessage) {
+                console.error('One or more DOM elements not found:', {
+                    form: !!form,
+                    clearButton: !!clearButton,
+                    errorMessage: !!errorMessage,
+                    successMessage: !!successMessage
+                });
+                if (errorMessage) {
+                    errorMessage.textContent = 'Page setup error. Please refresh the page.';
+                    errorMessage.classList.remove('hidden');
+                }
+                return;
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const description = document.getElementById('description').value;
+                const discountPercent = parseInt(document.getElementById('discountPercent').value);
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                if (new Date(startDate) > new Date(endDate)) {
+                    errorMessage.textContent = 'Start Date cannot be after End Date.';
+                    errorMessage.classList.remove('hidden');
+                    successMessage.classList.add('hidden');
+                    return;
+                }
+                if (discountPercent < 0 || discountPercent > 100) {
+                    errorMessage.textContent = 'Discount Percent must be between 0 and 100.';
+                    errorMessage.classList.remove('hidden');
+                    successMessage.classList.add('hidden');
+                    return;
+                }
+
+                const promotionDto = {
+                    name,
+                    description,
+                    discountPercent,
+                    startDate,
+                    endDate
+                };
+
+                try {
+                    const response = await fetch('https://localhost:7018/api/Promotion/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${window.jwtToken || ''}`
+                        },
+                        body: JSON.stringify(promotionDto)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        successMessage.textContent = 'Promotion created successfully!';
+                        successMessage.classList.remove('hidden');
+                        errorMessage.classList.add('hidden');
+                        form.reset();
+                    } else {
+                        errorMessage.textContent = data.message || 'Failed to create promotion.';
+                        errorMessage.classList.remove('hidden');
+                        successMessage.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error creating promotion:', error);
+                    errorMessage.textContent = 'An error occurred while creating the promotion.';
+                    errorMessage.classList.remove('hidden');
+                    successMessage.classList.add('hidden');
+                }
+            });
+
+            clearButton.addEventListener('click', clearForm);
+        });
+    </script>
+}

@@ -19,20 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddPromotionAsync(Guid userId, PromotionDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null)
+            if (user != null)
             {
-                return new BadRequestObjectResult(new
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    message = "User not found. Are you logged in?"
-                });
-            }
-
-            if (!user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult(new
-                {
-                    message = "Only admins can create promotions."
-                });
+                    return new UnauthorizedObjectResult("Only admins or staff can add promotions.");
+                }
             }
 
             if (dto.StartDate > dto.EndDate)
@@ -70,14 +62,6 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetPromotionByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult(new
-                {
-                    message = "Only admins can view promotions by ID."
-                });
-            }
-
             var promotion = await dbContext.Promotions.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
             return promotion != null ? new OkObjectResult(promotion) : new NotFoundObjectResult(new
             {
@@ -88,12 +72,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> UpdatePromotionAsync(Guid userId, Guid id, PromotionUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult(new
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    message = "Only admins can update promotions."
-                });
+                    return new UnauthorizedObjectResult("Only admins or staff can update promotions.");
+                }
             }
 
             var promotion = await dbContext.Promotions.FindAsync(id);
@@ -126,12 +110,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> DeletePromotionAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null || !user.IsAdmin.GetValueOrDefault(false))
+            if (user != null)
             {
-                return new UnauthorizedObjectResult(new
+                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    message = "Only admins can delete promotions."
-                });
+                    return new UnauthorizedObjectResult("Only admins or staff can delete promotions.");
+                }
             }
 
             var promotion = await dbContext.Promotions.FindAsync(id);
