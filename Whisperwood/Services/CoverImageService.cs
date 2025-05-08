@@ -23,7 +23,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add cover images.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can add cover images."
+                    });
                 }
             }
 
@@ -48,7 +51,10 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             var coverImage = await dbContext.CoverImages.FirstOrDefaultAsync(c => c.Id == id);
-            return coverImage != null ? new OkObjectResult(coverImage) : new NotFoundObjectResult("Cover Image not found! Please check the id again.");
+            return coverImage != null ? new OkObjectResult(coverImage) : new NotFoundObjectResult(new
+            {
+                message = "Cover Image not found! Please check the id again."
+            });
         }
 
         public async Task<IActionResult> UpdateCoverImageAsync(Guid userId, Guid id, CoverImageUpdateDto dto)
@@ -58,14 +64,20 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update cover images.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can update cover images."
+                    });
                 }
             }
 
             var coverImage = await dbContext.CoverImages.FindAsync(id);
             if (coverImage == null)
             {
-                return new NotFoundObjectResult("Cover Image not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Cover Image not found!"
+                });
             }
 
             if (dto.CoverImageURL != null) coverImage.CoverImageURL = dto.CoverImageURL;
@@ -81,19 +93,28 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete cover images.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can delete cover images."
+                    });
                 }
             }
 
             var coverImage = await dbContext.CoverImages.FindAsync(id);
             if (coverImage == null)
             {
-                return new NotFoundObjectResult("Cover Image not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Cover Image not found!"
+                });
             }
 
             dbContext.CoverImages.Remove(coverImage);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully!");
+            return new OkObjectResult(new
+            {
+                message = "Deleted successfully!"
+            });
         }
     }
 }

@@ -20,23 +20,35 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new BadRequestObjectResult("User not found. Are you logged in?");
+                return new BadRequestObjectResult(new
+                {
+                    message = "User not found. Are you logged in?"
+                });
 
             var wishlist = await dbContext.Wishlist
                 .FirstOrDefaultAsync(w => w.UserId == userId);
 
             if (wishlist == null)
-                return new BadRequestObjectResult("Wishlist not found. Please contact support.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "Wishlist not found. Please contact support."
+                });
 
             var book = await dbContext.Books.FindAsync(dto.BookId);
             if (book == null)
-                return new BadRequestObjectResult("Book not found.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "Book not found."
+                });
 
             var existingItem = await dbContext.WishlistItem
                 .FirstOrDefaultAsync(wi => wi.WishlistId == wishlist.Id && wi.BookId == dto.BookId);
 
             if (existingItem != null)
-                return new BadRequestObjectResult("This book is already in your wishlist.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "This book is already in your wishlist."
+                });
 
             var wishlistItem = new WishlistItem
             {
@@ -68,17 +80,26 @@ namespace Whisperwood.Services
                 .FirstOrDefaultAsync(w => w.UserId == userId);
 
             if (wishlist == null)
-                return new NotFoundObjectResult("Wishlist not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Wishlist not found."
+                });
 
             var item = await dbContext.WishlistItem
                 .FirstOrDefaultAsync(wi => wi.WishlistId == wishlist.Id && wi.BookId == bookId);
 
             if (item == null)
-                return new NotFoundObjectResult("Item not found in wishlist.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Item not found in wishlist."
+                });
 
             dbContext.WishlistItem.Remove(item);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Wishlist item deleted successfully.");
+            return new OkObjectResult(new
+            {
+                message = "Wishlist item deleted successfully."
+            });
         }
 
         public async Task<Wishlist?> GetByUserIdAsync(Guid userId)

@@ -23,7 +23,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add genres.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can add genres."
+                    });
                 }
             }
 
@@ -50,7 +53,10 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
 
             var genre = await dbContext.Genres.FirstOrDefaultAsync(g => g.Id == id);
-            return genre != null ? new OkObjectResult(genre) : new NotFoundObjectResult("Genre not found!");
+            return genre != null ? new OkObjectResult(genre) : new NotFoundObjectResult(new
+            {
+                message = "Genre not found!"
+            });
         }
 
         public async Task<IActionResult> UpdateGenreAsync(Guid userId, Guid id, GenreUpdateDto dto)
@@ -60,13 +66,19 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update genres.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can update genres."
+                    });
                 }
             }
             var genre = await dbContext.Genres.FindAsync(id);
             if (genre == null)
             {
-                return new NotFoundObjectResult("Genre not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Genre not found!"
+                });
             }
 
             if (dto.Name != null) genre.Name = dto.Name;
@@ -83,19 +95,28 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete genres.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can delete genres."
+                    });
                 }
             }
 
             var genre = await dbContext.Genres.FindAsync(id);
             if (genre == null)
             {
-                return new NotFoundObjectResult("Genre not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Genre not found!"
+                });
             }
 
             dbContext.Genres.Remove(genre);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully");
+            return new OkObjectResult(new
+            {
+                message = "Deleted successfully"
+            });
         }
     }
 }

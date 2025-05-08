@@ -21,35 +21,35 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found. Are you sure you're logged in correctly?");
+                return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
             }
 
             var cart = await dbContext.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
             if (cart == null)
             {
-                return new BadRequestObjectResult("Cart not found.");
+                return new BadRequestObjectResult(new { message = "Cart not found." });
             }
 
             var book = await dbContext.Books.FindAsync(dto.BookId);
             if (book == null)
             {
-                return new BadRequestObjectResult("Book not found.");
+                return new BadRequestObjectResult(new { message = "Book not found." });
             }
 
             if (dto.Quantity <= 0)
             {
-                return new BadRequestObjectResult("Quantity must be greater than 0.");
+                return new BadRequestObjectResult(new { message = "Quantity must be greater than 0." });
             }
 
             var existingCartItem = await dbContext.CartItem.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.BookId == dto.BookId);
             if (existingCartItem != null)
             {
-                return new BadRequestObjectResult("This book is already in your cart. You can update the quantity instead.");
+                return new BadRequestObjectResult(new { message = "This book is already in your cart. You can update the quantity instead." });
             }
 
             if (dto.Quantity > book.Stock)
             {
-                return new BadRequestObjectResult("Quantity exceeds available stock.");
+                return new BadRequestObjectResult(new { message = "Quantity exceeds available stock." });
             }
 
             var subtotal = dto.Quantity * book.Price;
@@ -71,13 +71,13 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found. Are you sure you're logged in correctly?");
+                return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
             }
 
             var cart = await dbContext.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
             if (cart == null)
             {
-                return new NotFoundObjectResult("Cart not found.");
+                return new NotFoundObjectResult(new { message = "Cart not found." });
             }
 
             var cartItems = await dbContext.CartItem
@@ -92,35 +92,35 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found.");
+                return new BadRequestObjectResult(new { message = "User not found." });
             }
 
             var cart = await dbContext.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
             if (cart == null)
             {
-                return new NotFoundObjectResult("Cart not found.");
+                return new NotFoundObjectResult(new { message = "Cart not found." });
             }
 
             var cartItem = await dbContext.CartItem.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.BookId == dto.BookId);
             if (cartItem == null)
             {
-                return new NotFoundObjectResult("Cart item not found.");
+                return new NotFoundObjectResult(new { message = "Cart item not found." });
             }
 
             var book = await dbContext.Books.FindAsync(dto.BookId);
             if (book == null)
             {
-                return new BadRequestObjectResult("Book not found.");
+                return new BadRequestObjectResult(new { message = "Book not found." });
             }
 
             if (dto.Quantity <= 0)
             {
-                return new BadRequestObjectResult("Quantity must be greater than 0.");
+                return new BadRequestObjectResult(new { message = "Quantity must be greater than 0." });
             }
 
             if (dto.Quantity > book.Stock)
             {
-                return new BadRequestObjectResult("Quantity exceeds stock.");
+                return new BadRequestObjectResult(new { message = "Quantity exceeds stock." });
             }
 
             cartItem.Quantity = dto.Quantity;
@@ -137,25 +137,25 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
             {
-                return new BadRequestObjectResult("User not found.");
+                return new BadRequestObjectResult(new { message = "User not found." });
             }
 
             var cart = await dbContext.Cart.FirstOrDefaultAsync(c => c.UserId == userId);
             if (cart == null)
             {
-                return new NotFoundObjectResult("Cart not found.");
+                return new NotFoundObjectResult(new { message = "Cart not found." });
             }
 
             var cartItem = await dbContext.CartItem.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.BookId == bookId);
             if (cartItem == null)
             {
-                return new NotFoundObjectResult("Cart item not found.");
+                return new NotFoundObjectResult(new { message = "Cart item not found." });
             }
 
             dbContext.CartItem.Remove(cartItem);
             await dbContext.SaveChangesAsync();
 
-            return new OkObjectResult("Deleted successfully.");
+            return new OkObjectResult(new { message = "Deleted successfully." });
         }
 
         public async Task<Cart?> GetByUserIdAsync(Guid userId)

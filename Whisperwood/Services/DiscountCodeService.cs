@@ -54,7 +54,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can add discount codes.");
+                return new UnauthorizedObjectResult(new { message = "Only admins can add discount codes." });
             }
 
             var discountCode = new DiscountCode
@@ -82,11 +82,17 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can view discount codes.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can view discount codes."
+                });
             }
 
             var discountCode = await dbContext.DiscountCodes.FirstOrDefaultAsync(d => d.Id == id);
-            return discountCode != null ? new OkObjectResult(discountCode) : new NotFoundObjectResult("Discount code not found!");
+            return discountCode != null ? new OkObjectResult(discountCode) : new NotFoundObjectResult(new
+            {
+                message = "Discount code not found!"
+            });
         }
 
         public async Task<IActionResult> UpdateDiscountCodeAsync(Guid userId, Guid id, DiscountCodeUpdateDto dto)
@@ -94,13 +100,19 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can update discount codes.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can update discount codes."
+                });
             }
 
             var discountCode = await dbContext.DiscountCodes.FindAsync(id);
             if (discountCode == null)
             {
-                return new NotFoundObjectResult("Discount code not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Discount code not found!"
+                });
             }
 
             if (dto.Percent != null) discountCode.Percent = dto.Percent.Value;
@@ -116,18 +128,27 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null || !user.IsAdmin.GetValueOrDefault(false))
             {
-                return new UnauthorizedObjectResult("Only admins can delete discount codes.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins can delete discount codes."
+                });
             }
 
             var discountCode = await dbContext.DiscountCodes.FindAsync(id);
             if (discountCode == null)
             {
-                return new NotFoundObjectResult("Discount code not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Discount code not found!"
+                });
             }
 
             dbContext.DiscountCodes.Remove(discountCode);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully!");
+            return new OkObjectResult(new
+            {
+                message = "Deleted successfully!"
+            });
         }
     }
 }

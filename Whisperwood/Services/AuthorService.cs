@@ -23,7 +23,7 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add authors.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can add authors." });
                 }
             }
 
@@ -53,7 +53,7 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             var author = await dbContext.Authors.FirstOrDefaultAsync(a => a.Id == id);
-            return author != null ? new OkObjectResult(author) : new NotFoundObjectResult("Author not found!");
+            return author != null ? new OkObjectResult(author) : new NotFoundObjectResult(new { message = "Author not found!" });
         }
 
         public async Task<IActionResult> UpdateAuthorAsync(Guid userId, Guid id, AuthorUpdateDto dto)
@@ -63,14 +63,14 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update authors.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can update authors." });
                 }
             }
 
             var author = await dbContext.Authors.FindAsync(id);
             if (author == null)
             {
-                return new NotFoundObjectResult("Author not found!");
+                return new NotFoundObjectResult(new { message = "Author not found!" });
             }
 
             if (dto.Name != null) author.Name = dto.Name;
@@ -91,19 +91,19 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete authors.");
+                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can delete authors." });
                 }
             }
 
             var author = await dbContext.Authors.FindAsync(id);
             if (author == null)
             {
-                return new NotFoundObjectResult("Author not found!");
+                return new NotFoundObjectResult(new { message = "Author not found!" });
             }
 
             dbContext.Authors.Remove(author);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully");
+            return new OkObjectResult(new { message = "Deleted successfully" });
         }
     }
 }

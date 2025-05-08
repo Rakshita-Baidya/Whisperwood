@@ -23,7 +23,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add categories.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can add categories."
+                    });
                 }
             }
 
@@ -49,7 +52,10 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             var category = await dbContext.Categories.FirstOrDefaultAsync(c => c.Id == id);
-            return category != null ? new OkObjectResult(category) : new NotFoundObjectResult("Category not found!");
+            return category != null ? new OkObjectResult(category) : new NotFoundObjectResult(new
+            {
+                message = "Category not found!"
+            });
         }
 
         public async Task<IActionResult> UpdateCategoryAsync(Guid userId, Guid id, CategoryUpdateDto dto)
@@ -59,14 +65,20 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update categories.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can update categories."
+                    });
                 }
             }
 
             var category = await dbContext.Categories.FindAsync(id);
             if (category == null)
             {
-                return new NotFoundObjectResult("Category not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Category not found!"
+                });
             }
 
             if (dto.Name != null) category.Name = dto.Name;
@@ -83,19 +95,28 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete categories.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can delete categories."
+                    });
                 }
             }
 
             var category = await dbContext.Categories.FindAsync(id);
             if (category == null)
             {
-                return new NotFoundObjectResult("Category not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Category not found!"
+                });
             }
 
             dbContext.Categories.Remove(category);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Deleted successfully");
+            return new OkObjectResult(new
+            {
+                message = "Deleted successfully"
+            });
         }
     }
 }

@@ -20,22 +20,34 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new BadRequestObjectResult("User not found.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "User not found."
+                });
 
             var book = await dbContext.Books.FindAsync(dto.BookId);
             if (book == null)
-                return new NotFoundObjectResult("Book not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Book not found."
+                });
 
             var hasFulfilledOrder = await dbContext.OrderItem
                 .Where(oi => oi.BookId == dto.BookId && oi.Order.UserId == userId && oi.Order.Status == Orders.OrderStatus.Fulfilled)
                 .AnyAsync();
             if (!hasFulfilledOrder)
-                return new UnauthorizedObjectResult("You can only review books you have purchased and received.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "You can only review books you have purchased and received."
+                });
 
             var existingReview = await dbContext.Reviews
                 .AnyAsync(r => r.UserId == userId && r.BookId == dto.BookId);
             if (existingReview)
-                return new ConflictObjectResult("You have already submitted a review for this book.");
+                return new ConflictObjectResult(new
+                {
+                    message = "You have already submitted a review for this book."
+                });
 
 
             var review = new Reviews
@@ -68,7 +80,10 @@ namespace Whisperwood.Services
         {
             var book = await dbContext.Books.FindAsync(bookId);
             if (book == null)
-                return new NotFoundObjectResult("Book not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Book not found."
+                });
 
             var reviews = await dbContext.Reviews
                 .Where(r => r.BookId == bookId)
@@ -90,16 +105,25 @@ namespace Whisperwood.Services
         {
             var review = await dbContext.Reviews.FindAsync(id);
             if (review == null)
-                return new NotFoundObjectResult("Review not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Review not found."
+                });
 
             if (review.UserId != userId)
-                return new UnauthorizedObjectResult("You can only update your own reviews.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "You can only update your own reviews."
+                });
 
 
             if (dto.BookId != null)
             {
                 var bookExists = await dbContext.Books.AnyAsync(b => b.Id == dto.BookId);
-                if (!bookExists) return new NotFoundObjectResult("Book not found.");
+                if (!bookExists) return new NotFoundObjectResult(new
+                {
+                    message = "Book not found."
+                });
                 review.BookId = dto.BookId.Value;
             }
 
@@ -107,12 +131,18 @@ namespace Whisperwood.Services
                 .Where(oi => oi.BookId == dto.BookId && oi.Order.UserId == userId && oi.Order.Status == Orders.OrderStatus.Fulfilled)
                 .AnyAsync();
             if (!hasFulfilledOrder)
-                return new UnauthorizedObjectResult("You can only review books you have purchased and received.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "You can only review books you have purchased and received."
+                });
 
             var existingReview = await dbContext.Reviews
                 .AnyAsync(r => r.UserId == userId && r.BookId == dto.BookId);
             if (existingReview)
-                return new ConflictObjectResult("You have already submitted a review for this book.");
+                return new ConflictObjectResult(new
+                {
+                    message = "You have already submitted a review for this book."
+                });
 
             var oldBookId = review.BookId;
 
@@ -141,14 +171,23 @@ namespace Whisperwood.Services
         {
             var review = await dbContext.Reviews.FindAsync(id);
             if (review == null)
-                return new NotFoundObjectResult("Review not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Review not found."
+                });
 
             if (review.UserId != userId)
-                return new UnauthorizedObjectResult("You can only delete your own reviews.");
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "You can only delete your own reviews."
+                });
 
             dbContext.Reviews.Remove(review);
             await dbContext.SaveChangesAsync();
-            return new OkObjectResult("Review deleted successfully.");
+            return new OkObjectResult(new
+            {
+                message = "Review deleted successfully."
+            });
         }
 
         private async Task UpdateAverageRatingAsync(Guid bookId)

@@ -26,7 +26,10 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult("User not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "User not found."
+                });
 
             var cart = await dbContext.Cart
                 .Include(c => c.CartItems)
@@ -34,7 +37,10 @@ namespace Whisperwood.Services
                 .FirstOrDefaultAsync(c => c.UserId == userId);
 
             if (cart == null || !cart.CartItems.Any())
-                return new BadRequestObjectResult("Your cart is empty.");
+                return new BadRequestObjectResult(new
+                {
+                    message = "Your cart is empty."
+                });
 
             // Validate promo code
             var (appliedPromotion, promoError) = await promotionService.ValidatePromoCodeAsync(userId, dto.PromoCode);
@@ -157,7 +163,10 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult("User not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "User not found."
+                });
 
             var orders = await dbContext.Orders
                 .Where(o => o.UserId == userId)
@@ -172,21 +181,30 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult("User not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "User not found."
+                });
 
             var order = await dbContext.Orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
-            return order != null ? new OkObjectResult(order) : new NotFoundObjectResult("Order not found!");
+            return order != null ? new OkObjectResult(order) : new NotFoundObjectResult(new
+            {
+                message = "Order not found!"
+            });
         }
 
         public async Task<IActionResult> UpdateOrderAsync(Guid userId, Guid id, OrderUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult("User not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "User not found."
+                });
 
             var order = await dbContext.Orders
                 .Include(o => o.OrderItems)
@@ -196,20 +214,32 @@ namespace Whisperwood.Services
             var bill = await dbContext.Bill.FirstOrDefaultAsync(b => b.OrderId == order.Id);
 
             if (order == null)
-                return new NotFoundObjectResult("Order not found!");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Order not found!"
+                });
 
             if (dto.Status.HasValue)
             {
                 if (order.Status == Orders.OrderStatus.Cancelled || order.Status == Orders.OrderStatus.Fulfilled)
-                    return new BadRequestObjectResult("Cannot update a cancelled or fulfilled order.");
+                    return new BadRequestObjectResult(new
+                    {
+                        message = "Cannot update a cancelled or fulfilled order."
+                    });
 
                 if (dto.Status.Value == Orders.OrderStatus.Fulfilled)
                 {
                     if (string.IsNullOrEmpty(dto.ClaimCode))
-                        return new BadRequestObjectResult("Claim code is required to fulfill the order.");
+                        return new BadRequestObjectResult(new
+                        {
+                            message = "Claim code is required to fulfill the order."
+                        });
 
                     if (bill == null || bill.ClaimCode != dto.ClaimCode)
-                        return new BadRequestObjectResult("Invalid claim code.");
+                        return new BadRequestObjectResult(new
+                        {
+                            message = "Invalid claim code."
+                        });
                 }
 
                 if (dto.Status.Value == Orders.OrderStatus.Cancelled)
@@ -252,13 +282,19 @@ namespace Whisperwood.Services
             {
                 if (!requestingUser.IsAdmin.GetValueOrDefault(false) && !requestingUser.IsStaff.GetValueOrDefault(false) && requestingUserId != targetUserId)
                 {
-                    return new UnauthorizedObjectResult("Only admins, staff or own user can view user orders.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins, staff or own user can view user orders."
+                    });
                 }
             }
 
             var targetUser = await dbContext.Users.FindAsync(targetUserId);
             if (targetUser == null)
-                return new NotFoundObjectResult("Target user not found.");
+                return new NotFoundObjectResult(new
+                {
+                    message = "Target user not found."
+                });
 
             var orders = await dbContext.Orders
                 .Where(o => o.UserId == targetUserId)

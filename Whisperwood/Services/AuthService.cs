@@ -58,13 +58,13 @@ namespace Whisperwood.Services
             var user = await userManager.FindByEmailAsync(loginDto.Email!);
             if (user == null)
             {
-                return new UnauthorizedObjectResult("Invalid email or password");
+                return new UnauthorizedObjectResult(new { message = "Invalid email or password" });
             }
 
             var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password!, true);
             if (!result.Succeeded)
             {
-                return new UnauthorizedObjectResult("Invalid email or password");
+                return new UnauthorizedObjectResult(new { message = "Invalid email or password" });
             }
 
             return new OkObjectResult(new

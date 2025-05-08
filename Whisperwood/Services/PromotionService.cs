@@ -23,7 +23,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can add promotions.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can add promotions."
+                    });
                 }
             }
 
@@ -76,7 +79,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can update promotions.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can update promotions."
+                    });
                 }
             }
 
@@ -114,7 +120,10 @@ namespace Whisperwood.Services
             {
                 if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult("Only admins or staff can delete promotions.");
+                    return new UnauthorizedObjectResult(new
+                    {
+                        message = "Only admins or staff can delete promotions."
+                    });
                 }
             }
 
