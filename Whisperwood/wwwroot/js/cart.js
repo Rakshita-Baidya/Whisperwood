@@ -153,7 +153,7 @@ const updateCartItem = async (bookId, quantity, successCallback, errorCallback) 
             throw new Error(data.message || 'Failed to update cart item.');
         }
 
-        successCallback('Cart item updated successfully!');
+        successCallback('Cart item updated successfully!', true);
     } catch (error) {
         console.error('Error updating cart item:', error);
         errorCallback(error.message);
@@ -180,7 +180,7 @@ const deleteCartItem = async (bookId, successCallback, errorCallback) => {
             throw new Error(data.message || 'Failed to remove book from cart.');
         }
 
-        successCallback('Book removed from cart successfully!');
+        successCallback('Book removed from cart successfully!', true);
     } catch (error) {
         console.error('Error removing book from cart:', error);
         errorCallback(error.message);

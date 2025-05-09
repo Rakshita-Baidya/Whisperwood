@@ -5,13 +5,41 @@
     ViewData["Title"] = "Cart";
 }
 
-<div class="px-6 py-8">
+<div class="container mx-auto px-6 py-8">
     <h1 class="text-3xl font-bold text-center text-accent4 mb-6">My Cart</h1>
 
     <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
     <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
-    <div id="cart-item-list" class="space-y-2 max-w-5xl mx-auto"></div>
-    <p id="no-cart-items" class="hidden text-center text-accent2 text-lg">You haven’t added any books to your cart yet.</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Cart Items Section -->
+        <div class="col-span-2">
+            <div id="cart-item-list" class="space-y-2"></div>
+            <p id="no-cart-items" class="hidden text-center text-accent2 text-lg">You haven’t added any books to your cart yet.</p>
+        </div>
+
+        <!-- Cart Summary Section -->
+        <div class="col-span-1">
+            <div class="bg-primary border border-accent1 p-6 rounded shadow">
+                <h2 class="text-xl font-semibold text-accent4 mb-2 pb-2 border-b-2 border-accent4">Cart Summary</h2>
+                <div class="space-y-2 text-accent2">
+                    <p><span class="font-medium">Subtotal:</span> Rs. <span id="cart-subtotal">0.00</span></p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="promo-code" placeholder="Enter promo code (optional)" class="border-accent1 rounded border p-1 w-full">
+                        <button id="apply-promo" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Apply</button>
+                    </div>
+                    <div id="discount-details" class="space-y-1">
+                        <p id="promo-discount-row" class="hidden"><span class="font-medium">Promo Code Discount:</span> Rs. <span id="promo-discount">0.00</span></p>
+                        <p id="bulk-discount-row" class="hidden"><span class="font-medium">Bulk Items Discount (5%):</span> Rs. <span id="bulk-discount">0.00</span></p>
+                        <p id="loyal-discount-row" class="hidden"><span class="font-medium">Loyal Customer Discount (10%):</span> Rs. <span id="loyal-discount">0.00</span></p>
+                    </div>
+                    <p id="total-discount-row" class="hidden"><span class="font-medium">Total Discount:</span> Rs. <span id="cart-discount">0.00</span></p>
+                    <p class="text-lg text-accent4 font-semibold"><span class="font-bold">Total:</span> Rs. <span id="cart-total">0.00</span></p>
+                </div>
+                <button id="proceed-to-order" class="mt-4 w-full bg-accent3 rounded px-3 py-2 text-white hover:bg-accent2">Proceed to Order</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -20,26 +48,119 @@
         const error = document.getElementById("error-message");
         const success = document.getElementById("success-message");
         const empty = document.getElementById("no-cart-items");
+        const subtotalElement = document.getElementById("cart-subtotal");
+        const promoDiscountElement = document.getElementById("promo-discount");
+        const bulkDiscountElement = document.getElementById("bulk-discount");
+        const loyalDiscountElement = document.getElementById("loyal-discount");
+        const totalDiscountElement = document.getElementById("cart-discount");
+        const promoDiscountRow = document.getElementById("promo-discount-row");
+        const bulkDiscountRow = document.getElementById("bulk-discount-row");
+        const loyalDiscountRow = document.getElementById("loyal-discount-row");
+        const totalDiscountRow = document.getElementById("total-discount-row");
+        const totalElement = document.getElementById("cart-total");
+        const promoInput = document.getElementById("promo-code");
+        const applyPromoButton = document.getElementById("apply-promo");
+        const proceedButton = document.getElementById("proceed-to-order");
+
+        let cartItems = [];
+        let books = [];
+        let subtotal = 0;
+        let discounts = { promo: 0, bulk: 0, loyal: 0, total: 0 };
+        let orderPromotion = null;
+        let userOrdersCount = 0;
+
+        async function fetchUserOrdersCount() {
+            try {
+                const userId = window.jwtToken ? JSON.parse(atob(window.jwtToken.split('.')[1])).sub : null;
+                const response = await fetch(`https://localhost:7018/api/Auth/user`, {
+                    headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                });
+                if (!response.ok) throw new Error("Failed to fetch user.");
+                const data = await response.json();
+                console.log(data);
+                return data.ordersCount || 0;
+            } catch (err) {
+                console.error("Error fetching user order count:", err);
+                return 0;
+            }
+        }
+
+        async function validatePromoCode(promoCode) {
+            if (!promoCode) return null;
+            try {
+                const response = await fetch(`https://localhost:7018/api/Promotion/validate/${promoCode}`, {
+                    headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Invalid promo code.");
+                }
+                return await response.json();
+            } catch (err) {
+                showError(err.message);
+                return null;
+            }
+        }
+
+        function calculateDiscount(subTotal, totalItems, userOrdersCount, orderPromotion) {
+            let currentSubTotal = subTotal;
+            let promoDiscount = 0;
+            let bulkDiscount = 0;
+            let loyalDiscount = 0;
+
+            if (orderPromotion) {
+                promoDiscount = currentSubTotal * (orderPromotion.discountPercent / 100);
+                currentSubTotal -= promoDiscount;
+            }
+
+            if (totalItems >= 5) {
+                bulkDiscount = currentSubTotal * 0.05;
+                currentSubTotal -= bulkDiscount;
+            }
+
+            if (userOrdersCount >= 10) {
+                loyalDiscount = currentSubTotal * 0.10;
+            }
+
+            const totalDiscount = promoDiscount + bulkDiscount + loyalDiscount;
+            return { promo: promoDiscount, bulk: bulkDiscount, loyal: loyalDiscount, total: totalDiscount };
+        }
 
         async function loadCartItems() {
             try {
-                const cartItems = await fetchCartItems();
+                userOrdersCount = await fetchUserOrdersCount();
+                cartItems = await fetchCartItems();
                 if (!cartItems || cartItems.length === 0) {
                     empty.classList.remove("hidden");
+                    proceedButton.disabled = true;
+                    discounts = { promo: 0, bulk: 0, loyal: 0, total: 0 };
+                    updateSummary();
                     return;
                 }
 
-                const books = [];
-                for (const ci of cartItems) {
-                    const response = await fetch(`https://localhost:7018/api/Book/getbyid/${ci.bookId}`, {
-                        headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch book with ID ${ci.bookId}`);
+                books = await Promise.all(cartItems.map(async (ci) => {
+                    try {
+                        const response = await fetch(`https://localhost:7018/api/Book/getbyid/${ci.bookId}`, {
+                            headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                        });
+                        return response.ok ? await response.json() : null;
+                    } catch (error) {
+                        console.error(`Error fetching book with ID ${ci.bookId}:`, error);
+                        return null;
                     }
-                    const book = await response.json();
-                    books.push(book);
+                }));
+
+                if (books.every(book => book === null)) {
+                    showError("Failed to load book details.");
+                    return;
                 }
+
+                subtotal = cartItems.reduce((sum, ci) => sum + ci.subTotal, 0);
+                const totalItems = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
+                const promoCode = promoInput.value.trim();
+                orderPromotion = await validatePromoCode(promoCode);
+                discounts = calculateDiscount(subtotal, totalItems, userOrdersCount, orderPromotion);
+                updateSummary();
 
                 const itemsByDate = {};
                 cartItems.forEach((ci, index) => {
@@ -48,7 +169,7 @@
                     itemsByDate[date].push({ cartItem: ci, book: books[index] });
                 });
 
-                list.innerHTML = ''; 
+                list.innerHTML = '';
                 for (const [date, items] of Object.entries(itemsByDate)) {
                     const dateHeader = document.createElement("h2");
                     dateHeader.className = "text-xl font-semibold text-accent4 mt-4";
@@ -59,10 +180,7 @@
                         const { cartItem: ci, book } = item;
                         if (!book) return;
 
-                        const authorNames = book.authorBooks && book.authorBooks.length > 0
-                            ? book.authorBooks.map(ab => ab.author.name).join(', ')
-                            : 'Unknown Author';
-
+                        const authorNames = book.authorBooks?.map(ab => ab.author.name).join(', ') || 'Unknown Author';
                         const div = document.createElement("div");
                         div.className = "border border-accent1 bg-primary p-4 rounded shadow flex items-center justify-between ml-4";
                         div.innerHTML = `
@@ -87,11 +205,27 @@
             }
         }
 
-        function showSuccess(message) {
+        function updateSummary() {
+            subtotalElement.textContent = subtotal.toFixed(2);
+            promoDiscountElement.textContent = discounts.promo.toFixed(2);
+            bulkDiscountElement.textContent = discounts.bulk.toFixed(2);
+            loyalDiscountElement.textContent = discounts.loyal.toFixed(2);
+            totalDiscountElement.textContent = discounts.total.toFixed(2);
+            totalElement.textContent = (subtotal - discounts.total).toFixed(2);
+
+            promoDiscountRow.classList.toggle("hidden", discounts.promo === 0);
+            bulkDiscountRow.classList.toggle("hidden", discounts.bulk === 0);
+            loyalDiscountRow.classList.toggle("hidden", discounts.loyal === 0);
+            totalDiscountRow.classList.toggle("hidden", discounts.total === 0);
+        }
+
+        function showSuccess(message, reload = false) {
             success.textContent = message;
             success.classList.remove("hidden");
             error.classList.add("hidden");
-            location.reload();
+            if (reload) {
+                setTimeout(() => location.reload(), 500);
+            }
         }
 
         function showError(message) {
@@ -99,6 +233,40 @@
             error.classList.remove("hidden");
             success.classList.add("hidden");
         }
+        
+        applyPromoButton.addEventListener("click", async () => {
+            const promoCode = promoInput.value.trim();
+            orderPromotion = await validatePromoCode(promoCode);
+            const totalItems = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
+            if (promoCode && !orderPromotion) {
+                discounts = { promo: 0, bulk: 0, loyal: 0, total: 0 };
+            } else {
+                discounts = calculateDiscount(subtotal, totalItems, userOrdersCount, orderPromotion);
+                if (orderPromotion) {
+                    showSuccess(`Promo code "${promoCode}" applied!`);
+                } else {
+                    showSuccess("Promo code removed.");
+                }
+            }
+            updateSummary();
+        });
+
+        proceedButton.addEventListener("click", () => {
+            const orderData = {
+                cartItems: cartItems.map((ci, index) => ({
+                    bookId: ci.bookId,
+                    quantity: ci.quantity,
+                    subTotal: ci.subTotal,
+                    book: books[index]
+                })),
+                subtotal: subtotal,
+                discount: discounts.total,
+                total: subtotal - discounts.total,
+                promoCode: promoInput.value.trim()
+            };
+            localStorage.setItem('orderData', JSON.stringify(orderData));
+            window.location.href = '/User/OrderSummary';
+        });
 
         document.addEventListener("DOMContentLoaded", () => {
             if (!window.jwtToken) {

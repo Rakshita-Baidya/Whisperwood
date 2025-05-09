@@ -7,5 +7,6 @@ namespace Whisperwood.Interfaces
     {
         Task<IActionResult> RegisterUserAsync(UserDto dto);
         Task<IActionResult> LoginUserAsync(LoginDto loginDto);
+        Task<IActionResult> GetUserByIdAsync(Guid userId);
     }
 }

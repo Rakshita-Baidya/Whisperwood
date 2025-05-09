@@ -53,5 +53,17 @@ namespace Whisperwood.Controllers
             var userId = GetLoggedInUserId();
             return await promotionService.DeletePromotionAsync(userId, id);
         }
+
+        [HttpGet("validate/{promoCode}")]
+        public async Task<IActionResult> ValidatePromoCode(string promoCode)
+        {
+            var userId = GetLoggedInUserId();
+            var (promotion, error) = await promotionService.ValidatePromoCodeAsync(userId, promoCode);
+            if (error != null)
+            {
+                return new BadRequestObjectResult(new { message = error });
+            }
+            return new OkObjectResult(promotion);
+        }
     }
 }

@@ -12,5 +12,9 @@ namespace Whisperwood.Models
         public Orders Order { get; set; }
         [Precision(10, 2)]
         public decimal PromoDiscount { get; set; }
+        [Precision(10, 2)]
+        public decimal BulkDiscount { get; set; }
+        [Precision(10, 2)]
+        public decimal LoyalDiscount { get; set; }
     }
 }

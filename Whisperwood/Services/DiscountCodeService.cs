@@ -16,37 +16,41 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
-        public decimal CalculateDiscount(decimal subTotal, int totalItems, int userOrdersCount, Promotions? promotion)
+        public decimal CalculateDiscount(decimal subTotal, int totalItems, int userOrdersCount, Promotions appliedPromotion)
         {
             decimal currentSubTotal = subTotal;
-            decimal totalDiscount = 0m;
 
-            if (promotion != null)
-            {
-                decimal promoDiscount = currentSubTotal * promotion.DiscountPercent / 100;
-                totalDiscount += promoDiscount;
-                currentSubTotal -= promoDiscount;
-            }
+            decimal promoDiscount = GetPromotionDiscount(currentSubTotal, appliedPromotion);
+            currentSubTotal -= promoDiscount;
 
-            if (totalItems >= 5)
-            {
-                decimal fivePercentDiscount = currentSubTotal * 0.05m;
-                totalDiscount += fivePercentDiscount;
-                currentSubTotal -= fivePercentDiscount;
-            }
+            decimal bulkDiscount = GetBulkDiscount(currentSubTotal, totalItems);
+            currentSubTotal -= bulkDiscount;
 
-            if (userOrdersCount >= 10)
-            {
-                decimal tenPercentDiscount = currentSubTotal * 0.10m;
-                totalDiscount += tenPercentDiscount;
-            }
+            decimal loyalDiscount = GetLoyalDiscount(currentSubTotal, userOrdersCount);
 
-            return totalDiscount;
+            return promoDiscount + bulkDiscount + loyalDiscount;
         }
 
-        public decimal GetPromotionDiscount(decimal subTotal, Promotions? promotion)
+        public decimal GetPromotionDiscount(decimal subTotal, Promotions appliedPromotion)
         {
-            return promotion != null ? subTotal * promotion.DiscountPercent : 0m;
+            if (appliedPromotion == null || appliedPromotion.DiscountPercent <= 0)
+                return 0;
+
+            return subTotal * (appliedPromotion.DiscountPercent / 100);
+        }
+
+        public decimal GetBulkDiscount(decimal subTotal, int totalItems)
+        {
+            if (totalItems >= 5)
+                return subTotal * 0.05m;
+            return 0;
+        }
+
+        public decimal GetLoyalDiscount(decimal subTotal, int userOrdersCount)
+        {
+            if (userOrdersCount >= 10)
+                return subTotal * 0.10m;
+            return 0;
         }
 
         public async Task<IActionResult> AddDiscountCodeAsync(Guid userId, DiscountCodeDto dto)

@@ -73,5 +73,15 @@ namespace Whisperwood.Services
                 Token = jwtService.GenerateToken(user)
             });
         }
+
+        public async Task<IActionResult> GetUserByIdAsync(Guid userId)
+        {
+            var user = await dbContext.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return new NotFoundObjectResult(new { message = "User not found" });
+            }
+            return new OkObjectResult(user);
+        }
     }
 }

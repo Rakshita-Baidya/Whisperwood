@@ -26,10 +26,7 @@ namespace Whisperwood.Services
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult(new
-                {
-                    message = "User not found."
-                });
+                return new NotFoundObjectResult(new { message = "User not found." });
 
             var cart = await dbContext.Cart
                 .Include(c => c.CartItems)
@@ -37,10 +34,7 @@ namespace Whisperwood.Services
                 .FirstOrDefaultAsync(c => c.UserId == userId);
 
             if (cart == null || !cart.CartItems.Any())
-                return new BadRequestObjectResult(new
-                {
-                    message = "Your cart is empty."
-                });
+                return new BadRequestObjectResult(new { message = "Your cart is empty." });
 
             // Validate promo code
             var (appliedPromotion, promoError) = await promotionService.ValidatePromoCodeAsync(userId, dto.PromoCode);
@@ -77,9 +71,11 @@ namespace Whisperwood.Services
 
             // Calculate discounts
             int totalItems = cart.CartItems.Sum(i => i.Quantity);
-            decimal discount = discountService.CalculateDiscount(subTotal, totalItems, user.OrdersCount, appliedPromotion);
-            decimal promotionDiscount = discountService.GetPromotionDiscount(subTotal, appliedPromotion);
-            decimal total = subTotal - discount;
+            decimal promoDiscount = discountService.GetPromotionDiscount(subTotal, appliedPromotion);
+            decimal bulkDiscount = discountService.GetBulkDiscount(subTotal, totalItems);
+            decimal loyalDiscount = discountService.GetLoyalDiscount(subTotal, user.OrdersCount);
+            decimal totalDiscount = promoDiscount + bulkDiscount + loyalDiscount;
+            decimal total = subTotal - totalDiscount;
 
             // Create order
             var order = new Orders
@@ -88,7 +84,7 @@ namespace Whisperwood.Services
                 UserId = userId,
                 SubTotal = subTotal,
                 TotalAmount = total,
-                Discount = discount,
+                Discount = totalDiscount,
                 Status = Orders.OrderStatus.Pending,
                 Date = DateOnly.FromDateTime(DateTime.UtcNow),
                 OrderedAt = DateTime.UtcNow,
@@ -103,7 +99,9 @@ namespace Whisperwood.Services
                 ClaimCode = Guid.NewGuid().ToString().Substring(0, 6),
                 PickUpDate = order.Date.AddDays(2),
                 PromoCode = dto.PromoCode,
-                PromoDiscount = promotionDiscount
+                PromoDiscount = promoDiscount,
+                BulkDiscount = bulkDiscount,
+                LoyalDiscount = loyalDiscount
             };
 
             // Save order and bill
@@ -130,6 +128,9 @@ namespace Whisperwood.Services
                     Total = order.TotalAmount,
                     PromoCode = bill.PromoCode,
                     Discount = order.Discount,
+                    PromoDiscount = bill.PromoDiscount,
+                    BulkDiscount = bill.BulkDiscount,
+                    LoyalDiscount = bill.LoyalDiscount,
                     Status = order.Status.ToString(),
                     OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
                     ClaimCode = bill.ClaimCode,
@@ -141,12 +142,16 @@ namespace Whisperwood.Services
                     }).ToList()
                 });
             }
+
             return new OkObjectResult(new
             {
                 OrderId = order.Id,
                 Total = order.TotalAmount,
                 PromoCode = bill.PromoCode,
                 Discount = order.Discount,
+                PromoDiscount = bill.PromoDiscount,
+                BulkDiscount = bill.BulkDiscount,
+                LoyalDiscount = bill.LoyalDiscount,
                 Status = order.Status.ToString(),
                 OrderedAt = order.OrderedAt.ToString("yyyy-MM-dd HH:mm:ss"),
                 ClaimCode = bill.ClaimCode,

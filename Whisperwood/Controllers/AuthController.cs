@@ -40,7 +40,7 @@ namespace Whisperwood.Controllers
                 };
                 Response.Cookies.Append("JwtToken", token, cookieOptions);
 
-                return Ok(new { message = "Login successful" });
+                return Ok(new { message = "Login successful", token });
             }
             else if (result is UnauthorizedObjectResult unauthorizedResult)
             {
@@ -48,6 +48,14 @@ namespace Whisperwood.Controllers
             }
 
             return BadRequest(new { message = "An error occurred during login." });
+        }
+
+        [HttpGet("user")]
+        public async Task<IActionResult> GetUser()
+        {
+            var userId = GetLoggedInUserId();
+            var user = await authService.GetUserByIdAsync(userId);
+            return Ok(user);
         }
     }
 }

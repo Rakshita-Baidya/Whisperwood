@@ -83,8 +83,8 @@ namespace Whisperwood.Services
                 gfx.DrawRectangle(XPens.Black, margin, yPosition, columnWidths.Sum(), rowHeight);
                 gfx.DrawString(item.Book.Title, regularFont, XBrushes.Black, new XRect(margin + cellPadding, yPosition + cellPadding, columnWidths[0], rowHeight), XStringFormats.TopLeft);
                 gfx.DrawString(item.Quantity.ToString(), regularFont, XBrushes.Black, new XRect(margin + columnWidths[0] + cellPadding, yPosition + cellPadding, columnWidths[1], rowHeight), XStringFormats.TopLeft);
-                gfx.DrawString($"${item.UnitPrice:F2}", regularFont, XBrushes.Black, new XRect(margin + columnWidths.Take(2).Sum() + cellPadding, yPosition + cellPadding, columnWidths[2], rowHeight), XStringFormats.TopLeft);
-                gfx.DrawString($"${item.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin + columnWidths.Take(3).Sum() + cellPadding, yPosition + cellPadding, columnWidths[3], rowHeight), XStringFormats.TopLeft);
+                gfx.DrawString($"Rs. {item.UnitPrice:F2}", regularFont, XBrushes.Black, new XRect(margin + columnWidths.Take(2).Sum() + cellPadding, yPosition + cellPadding, columnWidths[2], rowHeight), XStringFormats.TopLeft);
+                gfx.DrawString($"Rs. {item.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin + columnWidths.Take(3).Sum() + cellPadding, yPosition + cellPadding, columnWidths[3], rowHeight), XStringFormats.TopLeft);
                 yPosition += rowHeight;
             }
 
@@ -98,12 +98,27 @@ namespace Whisperwood.Services
 
             yPosition += 20;
 
-            // Financial summary
-            gfx.DrawString($"Subtotal: ${order.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+            // Financial summary with detailed discounts
+            gfx.DrawString($"Subtotal: Rs. {order.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
-            gfx.DrawString($"Discount: ${order.Discount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+            if (order.Bill.PromoDiscount > 0)
+            {
+                gfx.DrawString($"Promo Discount: Rs. {order.Bill.PromoDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                yPosition += 20;
+            }
+            if (order.Bill.BulkDiscount > 0)
+            {
+                gfx.DrawString($"Bulk Discount (5%): Rs. {order.Bill.BulkDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                yPosition += 20;
+            }
+            if (order.Bill.LoyalDiscount > 0)
+            {
+                gfx.DrawString($"Loyal Customer Discount (10%): Rs. {order.Bill.LoyalDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                yPosition += 20;
+            }
+            gfx.DrawString($"Total Discount: Rs. {order.Discount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
-            gfx.DrawString($"Total: ${order.TotalAmount:F2}", boldFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+            gfx.DrawString($"Total: Rs. {order.TotalAmount:F2}", boldFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
 
             // Save to MemoryStream
             using MemoryStream stream = new MemoryStream();
