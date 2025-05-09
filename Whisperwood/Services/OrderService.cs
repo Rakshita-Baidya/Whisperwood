@@ -245,6 +245,7 @@ namespace Whisperwood.Services
                         {
                             message = "Invalid claim code."
                         });
+                    user.OrdersCount += 1;
                 }
 
                 if (dto.Status.Value == Orders.OrderStatus.Cancelled)

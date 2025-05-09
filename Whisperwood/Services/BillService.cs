@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
 using System.Net.Mail;
@@ -20,6 +21,12 @@ namespace Whisperwood.Services
             this.configuration = configuration;
         }
 
+        public async Task<IActionResult> GetBillByOrderIdAsync(Guid orderId)
+        {
+            var bill = await dbContext.Bill.FirstOrDefaultAsync(b => b.OrderId == orderId);
+            return new OkObjectResult(bill);
+        }
+
         public async Task<byte[]> GenerateBillPdfAsync(Guid orderId)
         {
             // Fetch order details
@@ -27,10 +34,10 @@ namespace Whisperwood.Services
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .Include(o => o.User)
-                .Include(o => o.Bill)
+                .Include(o => o.OrderBill)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
-            if (order == null || order.Bill == null)
+            if (order == null || order.OrderBill == null)
                 throw new InvalidOperationException("Order or bill not found.");
 
             // Create a new PDF document
@@ -63,9 +70,9 @@ namespace Whisperwood.Services
             yPosition += 20;
             gfx.DrawString($"Order Date: {order.Date:yyyy-MM-dd}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
-            gfx.DrawString($"Claim Code: {order.Bill.ClaimCode}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+            gfx.DrawString($"Claim Code: {order.OrderBill.ClaimCode}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
-            gfx.DrawString($"Pickup Date: {order.Bill.PickUpDate:yyyy-MM-dd}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+            gfx.DrawString($"Pickup Date: {order.OrderBill.PickUpDate:yyyy-MM-dd}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 30;
 
             // Table header
@@ -101,19 +108,19 @@ namespace Whisperwood.Services
             // Financial summary with detailed discounts
             gfx.DrawString($"Subtotal: Rs. {order.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
-            if (order.Bill.PromoDiscount > 0)
+            if (order.OrderBill.PromoDiscount > 0)
             {
-                gfx.DrawString($"Promo Discount: Rs. {order.Bill.PromoDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                gfx.DrawString($"Promo Discount: Rs. {order.OrderBill.PromoDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
                 yPosition += 20;
             }
-            if (order.Bill.BulkDiscount > 0)
+            if (order.OrderBill.BulkDiscount > 0)
             {
-                gfx.DrawString($"Bulk Discount (5%): Rs. {order.Bill.BulkDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                gfx.DrawString($"Bulk Discount (5%): Rs. {order.OrderBill.BulkDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
                 yPosition += 20;
             }
-            if (order.Bill.LoyalDiscount > 0)
+            if (order.OrderBill.LoyalDiscount > 0)
             {
-                gfx.DrawString($"Loyal Customer Discount (10%): Rs. {order.Bill.LoyalDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                gfx.DrawString($"Loyal Customer Discount (10%): Rs. {order.OrderBill.LoyalDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
                 yPosition += 20;
             }
             gfx.DrawString($"Total Discount: Rs. {order.Discount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);

@@ -21,11 +21,9 @@ namespace Whisperwood.Models
 
         [Column(TypeName = "varchar(20)")]
         public OrderStatus Status { get; set; }
-        //public Guid DiscountCodeId { get; set; }
-        //public DiscountCode DiscountCode { get; set; }
         public DateOnly Date { get; set; } = new DateOnly();
         public DateTime OrderedAt { get; set; } = DateTime.Now;
-        public Bill? Bill { get; set; }
+        public Bill? OrderBill { get; set; }
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public enum OrderStatus { Pending, Cancelled, Fulfilled }
 
