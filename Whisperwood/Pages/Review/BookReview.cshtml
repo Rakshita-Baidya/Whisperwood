@@ -1,77 +1,69 @@
-﻿@page
+﻿@page "{bookId:guid}"
 @model Whisperwood.Pages.Review.BookReviewModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Book Reviews";
 }
+<div class="px-6 py-8">
+    <h1 id="book-title" class="text-3xl font-bold text-center text-accent4 mb-6">Book Reviews</h1>
 
-<div class="px-4 py-8">
-    <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Book Reviews</h1>
-
-    <div class="mb-4 text-center">
-        <div onclick="history.back()" class="text-accent2 underline hover:text-accent3 hover:cursor-pointer">Back</div>
+    <div class="text-center mb-6">
+        <a href="/Book/Details/@Model.BookId" class="text-accent2 underline hover:text-accent3">← Back to Book</a>
     </div>
 
-    @if (Model.Reviews != null && Model.Reviews.Count > 0)
-    {
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            @foreach (var review in Model.Reviews)
-            {
-                <div class="bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition hover:shadow-lg">
-                    <p class="text-accent1 mb-1 text-sm font-medium">
-                        By <strong>@review.Users?.Name</strong>
-                    </p>
-                    <p class="text-accent3 mb-2">Rating: ★ @review.Rating</p>
-                    <p class="text-accent2 mb-3 italic">"@review.Message"</p>
-                    <p class="text-xs text-gray-500">Posted: @review.CreatedAt.ToLocalTime()</p>
+    
+    <div id="review-list" class="space-y-4 max-w-4xl mx-auto"></div>
+    <p id="no-reviews" class="text-center text-accent2 hidden">No reviews yet for this book.</p>
 
-                    @if (review.UpdatedAt != null)
-                    {
-                        <p class="text-xs text-gray-400">Updated: @review.UpdatedAt.Value.ToLocalTime()</p>
-                    }
-
-                    @if (Model.CurrentUserId == review.UserId)
-                    {
-                        <form method="post" asp-page-handler="Delete" asp-route-id="@review.Id">
-                            <button class="mt-2 text-sm text-red-500 hover:underline">Delete</button>
-                        </form>
-                    }
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="text-accent2 mt-4 text-center text-lg">No reviews yet for this book.</div>
-    }
-
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <hr class="border-accent1 my-6" />
-        <h2 class="text-accent3 mb-4 text-center text-2xl font-semibold">Add a Review</h2>
-
-        <form method="post" class="mx-auto max-w-xl space-y-4">
-            <input type="hidden" asp-for="NewReview.BookId" value="@Model.BookId" />
-
-            <div>
-                <label class="text-accent1 mb-1 block">Rating (1–5):</label>
-                <input asp-for="NewReview.Rating" type="number" min="1" max="5"
-                       class="border-accent1 w-full rounded border p-2 focus:outline-none focus:ring-2 focus:ring-accent2" required />
-            </div>
-
-            <div>
-                <label class="text-accent1 mb-1 block">Message:</label>
-                <textarea asp-for="NewReview.Message"
-                          class="border-accent1 h-24 w-full resize-none rounded border p-2 focus:outline-none focus:ring-2 focus:ring-accent2"></textarea>
-            </div>
-
-            <button type="submit" class="bg-accent3 rounded px-6 py-2 text-white transition hover:bg-accent2">
-                Submit Review
-            </button>
-        </form>
-    }
-    else
-    {
-        <div class="text-accent2 mt-6 text-center text-sm">Please <a href="/User/Login" class="underline hover:text-accent3">log in</a> to leave a review.</div>
-    }
+    <div class="text-center mt-6">
+        <a href="/Review/AddReview?bookId=@Model.BookId" class="bg-accent3 text-white px-6 py-2 rounded hover:bg-accent2 transition">Write a Review</a>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        const bookId = "@Model.BookId";
+
+        async function loadBookDetails() {
+            const res = await fetch(`https://localhost:7018/api/Book/getbyid/${bookId}`);
+            if (res.ok) {
+                const book = await res.json();
+                const authorNames = book.authorBooks.map(a => a.author.name).join(", ");
+                document.getElementById("book-title").textContent = `Reviews for "${book.title}" by ${authorNames}`;
+            }
+        }
+
+        async function loadReviews() {
+            const res = await fetch(`https://localhost:7018/api/Review/book/${bookId}`);
+            const reviews = await res.ok ? await res.json() : [];
+
+            const list = document.getElementById("review-list");
+            const noData = document.getElementById("no-reviews");
+
+            list.innerHTML = "";
+
+            if (reviews.length === 0) {
+                noData.classList.remove("hidden");
+                return;
+            }
+
+            reviews.forEach(r => {
+                const div = document.createElement("div");
+                div.className = "bg-primary border border-accent1 rounded p-4 shadow-md";
+                div.innerHTML = `
+                        <p class="text-sm text-accent1 mb-1">By <strong>${r.users?.name || "Anonymous"}</strong></p>
+                        <p class="text-accent3 mb-1">Rating: ★ ${r.rating}</p>
+                        <p class="text-accent2 italic mb-2">"${r.message}"</p>
+                        <p class="text-xs text-gray-500">Posted: ${new Date(r.createdAt).toLocaleDateString()}</p>
+                        ${r.updatedAt ? `<p class="text-xs text-gray-400">Updated: ${new Date(r.updatedAt).toLocaleDateString()}</p>` : ""}
+                    `;
+                list.appendChild(div);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadBookDetails();
+            loadReviews();
+        });
+    </script>
+}

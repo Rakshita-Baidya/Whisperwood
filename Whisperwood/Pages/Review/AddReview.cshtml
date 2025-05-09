@@ -1,0 +1,91 @@
+﻿@page
+@model Whisperwood.Pages.Review.AddReviewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Review";
+}
+<div class="px-6 py-8 text-accent4">
+    <h1 class="text-3xl font-bold text-center mb-2">Add Review</h1>
+    <p id="book-info" class="text-center text-accent2 text-lg mb-6">Loading book details...</p>
+
+    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
+    <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
+
+    <form id="add-review-form" class="mx-auto max-w-2xl border border-accent1 bg-primary p-6 rounded shadow-sm">
+        <input type="hidden" id="bookId" name="bookId" value="@Model.BookId" />
+
+        <div class="mb-4">
+            <label for="rating" class="block font-medium mb-1">Rating (1–5)</label>
+            <input type="number" id="rating" name="rating" min="1" max="5"
+                   class="w-full p-2 border border-accent1 rounded" required />
+        </div>
+
+        <div class="mb-6">
+            <label for="message" class="block font-medium mb-1">Message</label>
+            <textarea id="message" name="message" rows="4"
+                      class="w-full p-2 border border-accent1 rounded resize-none"
+                      placeholder="Write your honest thoughts..." required></textarea>
+        </div>
+
+        <div class="flex justify-center gap-4">
+            <button type="submit" class="bg-accent3 text-white px-6 py-2 rounded hover:bg-accent2 transition">Submit</button>
+            <a href="javascript:history.back()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const bookId = "@Model.BookId";
+        const form = document.getElementById("add-review-form");
+        const bookInfo = document.getElementById("book-info");
+        const errorEl = document.getElementById("error-message");
+        const successEl = document.getElementById("success-message");
+
+        async function fetchBookDetails() {
+            try {
+                const res = await fetch(`https://localhost:7018/api/Book/getbyid/${bookId}`);
+                if (!res.ok) throw new Error("Book not found.");
+                const book = await res.json();
+                const authorNames = book.authorBooks.map(a => a.author.name).join(", ");
+                bookInfo.textContent = `"${book.title}" by ${authorNames}`;
+            } catch (err) {
+                bookInfo.textContent = "Could not load book details.";
+            }
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorEl.classList.add("hidden");
+            successEl.classList.add("hidden");
+
+            const rating = parseInt(document.getElementById("rating").value);
+            const message = document.getElementById("message").value;
+
+            try {
+                const res = await fetch("https://localhost:7018/api/Review/add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${window.jwtToken}` // Set globally
+                    },
+                    body: JSON.stringify({ bookId, rating, message })
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.message || "Review submission failed.");
+                }
+
+                successEl.textContent = " Review submitted successfully!";
+                successEl.classList.remove("hidden");
+                form.reset();
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove("hidden");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", fetchBookDetails);
+    </script>
+}

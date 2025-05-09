@@ -1,0 +1,79 @@
+﻿@page
+@model Whisperwood.Pages.User.UserReviewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "My Reviews";
+}
+<div class="px-6 py-8">
+    <h1 class="text-3xl font-bold text-center text-accent4 mb-6">My Reviews</h1>
+
+    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
+    <div id="review-list" class="space-y-4 max-w-5xl mx-auto"></div>
+    <p id="no-reviews" class="hidden text-center text-accent2 text-lg">You haven’t posted any reviews yet.</p>
+</div>
+
+@section Scripts {
+    <script>
+        const list = document.getElementById("review-list");
+        const error = document.getElementById("error-message");
+        const empty = document.getElementById("no-reviews");
+
+        async function loadReviews() {
+            try {
+                const res = await fetch("https://localhost:7018/api/Review/getbyuserid", {
+                    headers: {
+                        "Authorization": `Bearer ${window.jwtToken}`
+                    }
+                });
+                if (!res.ok) throw new Error("Failed to fetch reviews.");
+                const reviews = await res.json();
+
+                if (reviews.length === 0) {
+                    empty.classList.remove("hidden");
+                    return;
+                }
+
+                reviews.forEach(r => {
+                    const div = document.createElement("div");
+                    div.className = "border border-accent1 bg-primary p-4 rounded shadow";
+                    div.innerHTML = `
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-lg font-semibold text-accent3">★ ${r.rating}</p>
+                                <p class="text-accent2 italic mb-2">"${r.message}"</p>
+                                <p class="text-xs text-gray-500">Posted: ${new Date(r.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <a href="/Review/EditReview/${r.id}" class="text-blue-500 hover:underline">Edit</a>
+                                <button onclick="deleteReview('${r.id}')" class="text-red-500 hover:underline">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            } catch (err) {
+                error.textContent = err.message;
+                error.classList.remove("hidden");
+            }
+        }
+
+        async function deleteReview(id) {
+            if (!confirm("Are you sure you want to delete this review?")) return;
+
+            try {
+                const res = await fetch(`https://localhost:7018/api/Review/delete/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${window.jwtToken}`
+                    }
+                });
+                if (!res.ok) throw new Error("Failed to delete.");
+                location.reload();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadReviews);
+    </script>
+}

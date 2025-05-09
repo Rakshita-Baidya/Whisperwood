@@ -38,7 +38,7 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(new { message = "At least one recipient group must be selected." });
             }
 
-            var validGroups = new List<string> { "AllUsers", "IsStaff", "IsAdmin" };
+            var validGroups = new List<string> { "All Users", "Staff", "Admin" };
             if (dto.RecipientGroups.Any(g => !validGroups.Contains(g)))
             {
                 return new BadRequestObjectResult(new { message = "Invalid recipient group specified." });
@@ -103,7 +103,7 @@ namespace Whisperwood.Services
                 {
                     return new BadRequestObjectResult(new { message = "At least one recipient group must be selected." });
                 }
-                var validGroups = new List<string> { "AllUsers", "IsStaff", "IsAdmin" };
+                var validGroups = new List<string> { "All Users", "Staff", "Admin" };
                 if (dto.RecipientGroups.Any(g => !validGroups.Contains(g)))
                 {
                     return new BadRequestObjectResult(new { message = "Invalid recipient group specified." });

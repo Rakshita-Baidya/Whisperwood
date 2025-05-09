@@ -1,0 +1,100 @@
+﻿@page "{id:guid}"
+@model Whisperwood.Pages.Review.EditReviewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit Review";
+}
+<div class="px-6 py-8 text-accent4">
+    <h1 class="text-3xl font-bold text-center mb-2">Edit Review</h1>
+    <p id="book-info" class="text-center text-accent2 text-lg mb-6">Loading book details...</p>
+
+    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
+    <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
+
+    <form id="edit-review-form" class="mx-auto max-w-2xl border border-accent1 bg-primary p-6 rounded shadow-sm">
+        <input type="hidden" id="reviewId" name="id" value="@Model.Id" />
+
+        <div class="mb-4">
+            <label for="rating" class="block font-medium mb-1">Rating (1–5)</label>
+            <input type="number" id="rating" name="rating" min="1" max="5"
+                   class="w-full p-2 border border-accent1 rounded" required />
+        </div>
+
+        <div class="mb-6">
+            <label for="message" class="block font-medium mb-1">Message</label>
+            <textarea id="message" name="message" rows="4"
+                      class="w-full p-2 border border-accent1 rounded resize-none"
+                      placeholder="Update your review..." required></textarea>
+        </div>
+
+        <div class="flex justify-center gap-4">
+            <button type="submit" class="bg-accent3 text-white px-6 py-2 rounded hover:bg-accent2 transition">Update</button>
+            <a href="javascript:history.back()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        const reviewId = "@Model.Id";
+        const form = document.getElementById("edit-review-form");
+        const bookInfo = document.getElementById("book-info");
+        const errorEl = document.getElementById("error-message");
+        const successEl = document.getElementById("success-message");
+
+        async function fetchReview() {
+            try {
+                const res = await fetch(`https://localhost:7018/api/Review/update/${reviewId}`);
+                if (!res.ok) throw new Error("Review not found.");
+                const review = await res.json();
+
+                document.getElementById("rating").value = review.rating;
+                document.getElementById("message").value = review.message;
+
+                // Optional: fetch book title
+                const bookRes = await fetch(`https://localhost:7018/api/Book/getbyid/${review.bookId}`);
+                const book = await bookRes.ok ? await bookRes.json() : null;
+                const authors = book?.authorBooks.map(a => a.author.name).join(", ") || "Unknown";
+                bookInfo.textContent = book ? `Editing review for \"${book.title}\" by ${authors}` : "Editing your review";
+
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove("hidden");
+                form.style.display = "none";
+            }
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorEl.classList.add("hidden");
+            successEl.classList.add("hidden");
+
+            const rating = parseInt(document.getElementById("rating").value);
+            const message = document.getElementById("message").value;
+
+            try {
+                const res = await fetch(`https://localhost:7018/api/Review/update/${reviewId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${window.jwtToken}`
+                    },
+                    body: JSON.stringify({ rating, message })
+                });
+
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.message || "Update failed.");
+                }
+
+                successEl.textContent = " Review updated successfully!";
+                successEl.classList.remove("hidden");
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.classList.remove("hidden");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", fetchReview);
+    </script>
+}

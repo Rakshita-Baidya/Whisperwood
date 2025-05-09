@@ -17,6 +17,6 @@ namespace Whisperwood.Models
         public Users User { get; set; }
         [Required]
         [MinLength(1)]
-        public required List<string> RecipientGroups { get; set; } = ["AllUsers"];
+        public required List<string> RecipientGroups { get; set; } = ["All Users"];
     }
 }
