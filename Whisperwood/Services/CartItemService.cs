@@ -87,7 +87,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(cartItems);
         }
 
-        public async Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemDto dto)
+        public async Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemUpdateDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
@@ -101,7 +101,8 @@ namespace Whisperwood.Services
                 return new NotFoundObjectResult(new { message = "Cart not found." });
             }
 
-            var cartItem = await dbContext.CartItem.FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.BookId == dto.BookId);
+            var cartItem = await dbContext.CartItem
+                .FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.BookId == dto.BookId);
             if (cartItem == null)
             {
                 return new NotFoundObjectResult(new { message = "Cart item not found." });

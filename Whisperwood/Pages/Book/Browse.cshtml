@@ -120,20 +120,6 @@
             const noBooksElement = document.getElementById('no-books');
             const paginationContainer = document.getElementById('pagination-container');
 
-            if (!booksContainer || !noBooksElement || !paginationContainer) {
-                console.error('One or more DOM elements not found:', {
-                    booksContainer: !!booksContainer,
-                    noBooksElement: !!noBooksElement,
-                    paginationContainer: !!paginationContainer
-                });
-                const errorMessageElement = document.getElementById('error-message');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessageElement.classList.remove('hidden');
-                }
-                return;
-            }
-
             booksContainer.innerHTML = '';
 
             if (allBooks.length === 0) {
@@ -221,21 +207,6 @@
             const clearFiltersButton = document.getElementById('clear-filters');
             const toggleFilterButton = document.getElementById('toggle-filter');
             const filterSection = document.getElementById('filter-section');
-
-            if (!filterForm || !clearFiltersButton || !toggleFilterButton || !filterSection) {
-                console.error('One or more DOM elements not found:', {
-                    filterForm: !!filterForm,
-                    clearFiltersButton: !!clearFiltersButton,
-                    toggleFilterButton: !!toggleFilterButton,
-                    filterSection: !!filterSection
-                });
-                const errorMessageElement = document.getElementById('error-message');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessageElement.classList.remove('hidden');
-                }
-                return;
-            }
 
             filterForm.addEventListener('submit', (e) => {
                 e.preventDefault();

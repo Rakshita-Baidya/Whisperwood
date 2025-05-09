@@ -119,20 +119,6 @@
             const noBooksElement = document.getElementById('no-books');
             const paginationContainer = document.getElementById('pagination-container');
 
-            if (!booksOrderedList || !noBooksElement || !paginationContainer) {
-                console.error('One or more DOM elements not found:', {
-                    booksOrderedList: !!booksOrderedList,
-                    noBooksElement: !!noBooksElement,
-                    paginationContainer: !!paginationContainer
-                });
-                const errorMessageElement = document.getElementById('error-message');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessageElement.classList.remove('hidden');
-                }
-                return;
-            }
-
             booksOrderedList.innerHTML = '';
 
             if (allBooks.length === 0) {
@@ -188,11 +174,6 @@
         async function fetchBooks() {
             const errorMessageElement = document.getElementById('error-message');
 
-            if (!errorMessageElement) {
-                console.error('Error message element not found');
-                return;
-            }
-
             errorMessageElement.classList.add('hidden');
 
             try {
@@ -218,11 +199,6 @@
 
             const errorMessageElement = document.getElementById('error-message');
             const successMessageElement = document.getElementById('success-message');
-
-            if (!errorMessageElement || !successMessageElement) {
-                console.error('Message elements not found');
-                return;
-            }
 
             errorMessageElement.classList.add('hidden');
             successMessageElement.classList.add('hidden');
@@ -257,21 +233,6 @@
             const filterSection = document.getElementById('filter-section');
             const filterForm = document.getElementById('filter-form');
             const clearFiltersButton = document.getElementById('clear-filters');
-
-            if (!filterButton || !filterSection || !filterForm || !clearFiltersButton) {
-                console.error('One or more DOM elements not found:', {
-                    filterButton: !!filterButton,
-                    filterSection: !!filterSection,
-                    filterForm: !!filterForm,
-                    clearFiltersButton: !!clearFiltersButton
-                });
-                const errorMessageElement = document.getElementById('error-message');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessageElement.classList.remove('hidden');
-                }
-                return;
-            }
 
             filterButton.addEventListener('click', () => {
                 filterSection.classList.toggle('hidden');

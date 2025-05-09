@@ -8,7 +8,7 @@ namespace Whisperwood.Interfaces
     {
         Task<IActionResult> AddCartItemAsync(Guid userId, CartItemDto dto);
         Task<IActionResult> GetAllCartItemsAsync(Guid userId);
-        Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemDto dto);
+        Task<IActionResult> UpdateCartItemAsync(Guid userId, CartItemUpdateDto dto);
         Task<IActionResult> DeleteCartItemAsync(Guid userId, Guid bookId);
         Task<Cart?> GetByUserIdAsync(Guid userId);
     }

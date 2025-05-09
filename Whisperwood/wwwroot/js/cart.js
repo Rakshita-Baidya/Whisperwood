@@ -17,9 +17,9 @@ const fetchCartItems = async () => {
             headers: { 'Authorization': `Bearer ${window.jwtToken}` }
         });
         if (!response.ok) throw new Error('Failed to fetch cart.');
-        return response.json();
+        return await response.json();
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching cart items:', error);
         return [];
     }
 };
@@ -28,17 +28,17 @@ const updateCartButtonIcon = (button, isInCart) => {
     button.innerHTML = isInCart ? cartRemoveIcon : cartAddIcon;
 };
 
-const createQuantityDialog = (isInCart, stock, currentQuantity, onConfirm) => {
+const createQuantityDialog = (stock, onConfirm) => {
     const dialog = document.createElement('dialog');
     dialog.id = 'quantity-dialog';
     dialog.className = 'bg-primary border-accent1 rounded-lg border-[2px] p-6 max-w-sm mx-auto';
     dialog.innerHTML = `
-        <h3 class="text-accent3 text-lg font-semibold mb-4">${isInCart ? 'Update Quantity' : 'Select Quantity'}</h3>
+        <h3 class="text-accent3 text-lg font-semibold mb-4">Select Quantity</h3>
         <label for="quantity-input" class="text-accent2 block mb-2">Quantity (1-${stock}):</label>
-        <input type="number" id="quantity-input" min="1" max="${stock}" value="${currentQuantity}" class="border-accent2 w-full rounded border p-2 text-gray-800 mb-4" />
+        <input type="number" id="quantity-input" min="1" max="${stock}" value="1" class="border-accent2 w-full rounded border p-2 text-gray-800 mb-4" />
         <div class="flex justify-end gap-2">
             <button id="cancel-quantity" class="bg-gray-500 rounded px-3 py-1 text-white hover:bg-gray-600">Cancel</button>
-            <button id="confirm-quantity" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">${isInCart ? 'Update Cart' : 'Add to Cart'}</button>
+            <button id="confirm-quantity" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Add to Cart</button>
         </div>
     `;
     document.body.appendChild(dialog);
@@ -50,45 +50,75 @@ const createQuantityDialog = (isInCart, stock, currentQuantity, onConfirm) => {
     return dialog;
 };
 
-const handleCartAction = async (button, bookId, stock, isInCart, currentQuantity) => {
-    const dialog = createQuantityDialog(isInCart, stock, currentQuantity, async () => {
-        const quantity = parseInt(document.getElementById('quantity-input').value);
-        if (isNaN(quantity) || quantity < 1 || quantity > stock) {
-            alert(`Please enter a valid quantity between 1 and ${stock}.`);
-            return;
-        }
+const handleCartAction = async (button, bookId, stock, isInCart) => {
+    if (isInCart) {
+        if (confirm('Are you sure you want to remove this book from your cart?')) {
+            try {
+                const response = await fetch(`https://localhost:7018/api/CartItem/delete/${bookId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    }
+                });
 
-        try {
-            const endpoint = isInCart ? 'https://localhost:7018/api/CartItem/update' : 'https://localhost:7018/api/CartItem/add';
-            const method = isInCart ? 'PUT' : 'POST';
-            const response = await fetch(endpoint, {
-                method,
-                headers: {
-                    'Authorization': `Bearer ${window.jwtToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ bookId, quantity })
-            });
+                const data = await response.json();
 
-            const data = await response.json();
-
-            if (response.ok) {
-                alert(isInCart ? 'Cart updated successfully!' : 'Book added to cart successfully!');
-                dialog.close();
-                updateCartButton(button, bookId);
-            } else {
-                alert(data.message || `Failed to ${isInCart ? 'update' : 'add to'} cart.`);
+                if (response.ok) {
+                    alert('Book removed from cart successfully!');
+                    await updateCartButton(button, bookId);
+                    if (typeof renderBooks === 'function') {
+                        renderBooks(currentPage);
+                    }
+                } else {
+                    alert(data.message || 'Failed to remove book from cart.');
+                }
+            } catch (error) {
+                console.error('Error removing book from cart:', error);
+                alert('An error occurred while removing the book from the cart.');
             }
-        } catch (error) {
-            alert(`An error occurred while ${isInCart ? 'updating' : 'adding to'} the cart.`);
         }
-    });
+    } else {
+        const dialog = createQuantityDialog(stock, async () => {
+            const quantity = parseInt(document.getElementById('quantity-input').value);
+            if (isNaN(quantity) || quantity < 1 || quantity > stock) {
+                alert(`Please enter a valid quantity between 1 and ${stock}.`);
+                return;
+            }
+
+            try {
+                const response = await fetch('https://localhost:7018/api/CartItem/add', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookId, quantity })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Book added to cart successfully!');
+                    dialog.close();
+                    await updateCartButton(button, bookId);
+                    if (typeof renderBooks === 'function') {
+                        renderBooks(currentPage);
+                    }
+                } else {
+                    alert(data.message || 'Failed to add book to cart.');
+                }
+            } catch (error) {
+                console.error('Error adding book to cart:', error);
+                alert('An error occurred while adding the book to the cart.');
+            }
+        });
+    }
 };
 
 const updateCartButton = async (button, bookId) => {
     if (!window.isAuthenticated) {
         button.innerHTML = cartAddIcon;
-        return;
+        return null;
     }
 
     const cartItems = await fetchCartItems();
@@ -98,9 +128,71 @@ const updateCartButton = async (button, bookId) => {
     return cartItem;
 };
 
+const updateCartItem = async (bookId, quantity, successCallback, errorCallback) => {
+    if (isNaN(quantity) || quantity < 1) {
+        errorCallback('Quantity must be at least 1.');
+        return;
+    }
+
+    try {
+        const response = await fetch('https://localhost:7018/api/CartItem/update', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.jwtToken || ''}`
+            },
+            body: JSON.stringify({ bookId, quantity })
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/User/Login';
+                return;
+            }
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to update cart item.');
+        }
+
+        successCallback('Cart item updated successfully!');
+    } catch (error) {
+        console.error('Error updating cart item:', error);
+        errorCallback(error.message);
+    }
+};
+
+const deleteCartItem = async (bookId, successCallback, errorCallback) => {
+    if (!confirm('Are you sure you want to remove this book from your cart?')) return;
+
+    try {
+        const response = await fetch(`https://localhost:7018/api/CartItem/delete/${bookId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${window.jwtToken || ''}`
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/User/Login';
+                return;
+            }
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to remove book from cart.');
+        }
+
+        successCallback('Book removed from cart successfully!');
+    } catch (error) {
+        console.error('Error removing book from cart:', error);
+        errorCallback(error.message);
+    }
+};
+
 const initializeCartButton = async (buttonId, bookId, stock) => {
     const button = document.getElementById(buttonId);
-    if (!button) return;
+    if (!button) {
+        console.error(`Button not found: ${buttonId}`);
+        return;
+    }
 
     await updateCartButton(button, bookId);
 
@@ -113,11 +205,10 @@ const initializeCartButton = async (buttonId, bookId, stock) => {
 
         const cartItem = await updateCartButton(button, bookId);
         const isInCart = !!cartItem;
-        const currentQuantity = cartItem ? cartItem.quantity : 1;
 
-        handleCartAction(button, bookId, stock, isInCart, currentQuantity);
+        console.log(`Cart button clicked for bookId: ${bookId}, isInCart: ${isInCart}`);
+        handleCartAction(button, bookId, stock, isInCart);
     });
 };
 
-// Attach to window to make it globally available
 window.initializeCartButton = initializeCartButton;

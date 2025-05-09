@@ -33,15 +33,13 @@ namespace Whisperwood.Controllers
         }
 
         [HttpPut("update")]
-        [Authorize]
-        public async Task<IActionResult> UpdateCartItem(CartItemDto dto)
+        public async Task<IActionResult> UpdateCartItem(CartItemUpdateDto dto)
         {
             var userId = GetLoggedInUserId();
             return await cartItemService.UpdateCartItemAsync(userId, dto);
         }
 
         [HttpDelete("delete/{bookId}")]
-        [Authorize]
         public async Task<IActionResult> DeleteCartItem(Guid bookId)
         {
             var userId = GetLoggedInUserId();
