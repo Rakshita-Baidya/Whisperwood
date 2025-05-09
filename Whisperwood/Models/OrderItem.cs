@@ -16,7 +16,6 @@ namespace Whisperwood.Models
 
         [ForeignKey("Book")]
         public Guid BookId { get; set; }
-        [JsonIgnore]
         public Books Book { get; set; }
 
         [Precision(10, 2)]
