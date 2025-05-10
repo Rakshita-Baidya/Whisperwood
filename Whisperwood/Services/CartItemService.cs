@@ -16,6 +16,21 @@ namespace Whisperwood.Services
             this.dbContext = dbContext;
         }
 
+        private decimal CalculateEffectivePrice(Books book)
+        {
+            if (book.IsOnSale && book.DiscountPercentage > 0)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                bool isSaleActive = (!book.DiscountStartDate.HasValue || book.DiscountStartDate <= today) &&
+                                   (!book.DiscountEndDate.HasValue || book.DiscountEndDate >= today);
+                if (isSaleActive)
+                {
+                    return book.Price * (1 - book.DiscountPercentage / 100);
+                }
+            }
+            return book.Price;
+        }
+
         public async Task<IActionResult> AddCartItemAsync(Guid userId, CartItemDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
@@ -36,6 +51,11 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(new { message = "Book not found." });
             }
 
+            if (!book.AvailabilityStatus || book.Stock <= 0)
+            {
+                return new BadRequestObjectResult(new { message = "Book is out of stock." });
+            }
+
             if (dto.Quantity <= 0)
             {
                 return new BadRequestObjectResult(new { message = "Quantity must be greater than 0." });
@@ -49,10 +69,11 @@ namespace Whisperwood.Services
 
             if (dto.Quantity > book.Stock)
             {
-                return new BadRequestObjectResult(new { message = "Quantity exceeds available stock." });
+                return new BadRequestObjectResult(new { message = $"Only {book.Stock} items in stock." });
             }
 
-            var subtotal = dto.Quantity * book.Price;
+            var effectivePrice = CalculateEffectivePrice(book);
+            var subtotal = dto.Quantity * effectivePrice;
             var cartItem = new CartItem
             {
                 BookId = dto.BookId,
@@ -114,6 +135,11 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(new { message = "Book not found." });
             }
 
+            if (!book.AvailabilityStatus || book.Stock <= 0)
+            {
+                return new BadRequestObjectResult(new { message = "Book is out of stock." });
+            }
+
             if (dto.Quantity <= 0)
             {
                 return new BadRequestObjectResult(new { message = "Quantity must be greater than 0." });
@@ -121,11 +147,12 @@ namespace Whisperwood.Services
 
             if (dto.Quantity > book.Stock)
             {
-                return new BadRequestObjectResult(new { message = "Quantity exceeds stock." });
+                return new BadRequestObjectResult(new { message = $"Only {book.Stock} items in stock." });
             }
 
+            var effectivePrice = CalculateEffectivePrice(book);
             cartItem.Quantity = dto.Quantity;
-            cartItem.SubTotal = dto.Quantity * book.Price;
+            cartItem.SubTotal = dto.Quantity * effectivePrice;
 
             dbContext.CartItem.Update(cartItem);
             await dbContext.SaveChangesAsync();

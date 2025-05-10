@@ -36,9 +36,16 @@ namespace Whisperwood.Models
         public int SalesCount { get; set; } = 0;
         public string? Language { get; set; }
         public BookFormat Format { get; set; }
-
+        [Range(0, 100)]
+        [Precision(5, 2)]
+        public decimal DiscountPercentage { get; set; } = 0;
+        public bool IsOnSale { get; set; } = false;
+        public DateOnly? DiscountStartDate { get; set; }
+        public DateOnly? DiscountEndDate { get; set; }
         public int? Edition { get; set; }
         public bool AvailabilityStatus { get; set; } = true;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];

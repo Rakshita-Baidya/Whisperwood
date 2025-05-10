@@ -22,6 +22,21 @@ namespace Whisperwood.Services
             this.discountService = discountService;
         }
 
+        private decimal CalculateEffectivePrice(Books book)
+        {
+            if (book.IsOnSale && book.DiscountPercentage > 0)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                bool isSaleActive = (!book.DiscountStartDate.HasValue || book.DiscountStartDate <= today) &&
+                                   (!book.DiscountEndDate.HasValue || book.DiscountEndDate >= today);
+                if (isSaleActive)
+                {
+                    return book.Price * (1 - book.DiscountPercentage / 100m);
+                }
+            }
+            return book.Price;
+        }
+
         public async Task<IActionResult> AddOrderAsync(Guid userId, OrderDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
@@ -43,6 +58,7 @@ namespace Whisperwood.Services
 
             // Validate stock and calculate subtotal
             decimal subTotal = 0;
+            decimal bookDiscount = 0;
             var orderItems = new List<OrderItem>();
 
             foreach (var cartItem in cart.CartItems)
@@ -51,16 +67,19 @@ namespace Whisperwood.Services
                 if (cartItem.Quantity > book.Stock)
                     return new BadRequestObjectResult($"Not enough stock for: {book.Title}");
 
+                decimal effectivePrice = CalculateEffectivePrice(book);
                 decimal originalPrice = book.Price;
-                decimal itemSubtotal = originalPrice * cartItem.Quantity;
+                decimal itemBookDiscount = (originalPrice - effectivePrice) * cartItem.Quantity;
+                decimal itemSubtotal = effectivePrice * cartItem.Quantity;
 
                 subTotal += itemSubtotal;
+                bookDiscount += itemBookDiscount;
 
                 orderItems.Add(new OrderItem
                 {
                     BookId = book.Id,
                     Quantity = cartItem.Quantity,
-                    UnitPrice = originalPrice,
+                    UnitPrice = effectivePrice,
                     SubTotal = itemSubtotal
                 });
 
@@ -69,13 +88,18 @@ namespace Whisperwood.Services
                 if (book.Stock == 0) book.AvailabilityStatus = false;
             }
 
-            // Calculate discounts
+            // Calculate additional discounts
             int totalItems = cart.CartItems.Sum(i => i.Quantity);
-            decimal promoDiscount = discountService.GetPromotionDiscount(subTotal, appliedPromotion);
-            decimal bulkDiscount = discountService.GetBulkDiscount(subTotal, totalItems);
-            decimal loyalDiscount = discountService.GetLoyalDiscount(subTotal, user.OrdersCount);
-            decimal totalDiscount = promoDiscount + bulkDiscount + loyalDiscount;
-            decimal total = subTotal - totalDiscount;
+            decimal totalDiscount = discountService.CalculateDiscount(subTotal, totalItems, user.OrdersCount, appliedPromotion);
+            decimal total = subTotal - (totalDiscount - bookDiscount);
+
+            // Calculate stacked discounts for bill
+            decimal currentSubTotal = subTotal;
+            decimal promoDiscount = discountService.GetPromotionDiscount(currentSubTotal, appliedPromotion);
+            currentSubTotal -= promoDiscount;
+            decimal bulkDiscount = discountService.GetBulkDiscount(currentSubTotal, totalItems);
+            currentSubTotal -= bulkDiscount;
+            decimal loyalDiscount = discountService.GetLoyalDiscount(currentSubTotal, user.OrdersCount);
 
             // Create order
             var order = new Orders
@@ -101,7 +125,8 @@ namespace Whisperwood.Services
                 PromoCode = dto.PromoCode,
                 PromoDiscount = promoDiscount,
                 BulkDiscount = bulkDiscount,
-                LoyalDiscount = loyalDiscount
+                LoyalDiscount = loyalDiscount,
+                BookDiscount = bookDiscount
             };
 
             // Save order and bill
@@ -128,6 +153,7 @@ namespace Whisperwood.Services
                     Total = order.TotalAmount,
                     PromoCode = bill.PromoCode,
                     Discount = order.Discount,
+                    BookDiscount = bill.BookDiscount,
                     PromoDiscount = bill.PromoDiscount,
                     BulkDiscount = bill.BulkDiscount,
                     LoyalDiscount = bill.LoyalDiscount,
@@ -149,6 +175,7 @@ namespace Whisperwood.Services
                 Total = order.TotalAmount,
                 PromoCode = bill.PromoCode,
                 Discount = order.Discount,
+                BookDiscount = bill.BookDiscount,
                 PromoDiscount = bill.PromoDiscount,
                 BulkDiscount = bill.BulkDiscount,
                 LoyalDiscount = bill.LoyalDiscount,

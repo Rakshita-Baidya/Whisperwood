@@ -11,8 +11,8 @@
     <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
     <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-3">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
             <div class="overflow-x-auto">
                 <table id="order-item-table" class="w-full border-collapse border border-accent1">
                     <thead>
@@ -33,9 +33,13 @@
             <div class="bg-primary border border-accent1 p-6 rounded shadow">
                 <h2 class="text-xl font-semibold text-accent4 mb-4">Order Summary</h2>
                 <div class="space-y-2 text-accent2">
-                    <p><span class="font-medium">Subtotal:</span> Rs. <span id="order-subtotal">0.00</span></p>
+                    <p><span class="font-medium">Subtotal (after book discounts):</span> Rs. <span id="order-subtotal">0.00</span></p>
+                    <p id="book-discount-row" class="hidden"><span class="font-medium">Book Discounts (included in subtotal):</span> Rs. <span id="book-discount">0.00</span></p>
                     <p id="promo-row" class="hidden"><span class="font-medium">Promo Code:</span> <span id="promo-code"></span></p>
-                    <p id="discount-row" class="hidden"><span class="font-medium">Discount:</span> Rs. <span id="order-discount">0.00</span></p>
+                    <p id="promo-discount-row" class="hidden"><span class="font-medium">Promo Code Discount:</span> Rs. <span id="promo-discount">0.00</span></p>
+                    <p id="bulk-discount-row" class="hidden"><span class="font-medium">Bulk Items Discount (5%):</span> Rs. <span id="bulk-discount">0.00</span></p>
+                    <p id="loyal-discount-row" class="hidden"><span class="font-medium">Loyal Customer Discount (10%):</span> Rs. <span id="loyal-discount">0.00</span></p>
+                    <p id="total-discount-row" class="hidden"><span class="font-medium">Total Additional Discount:</span> Rs. <span id="total-discount">0.00</span></p>
                     <p class="text-lg font-semibold"><span class="font-medium">Total:</span> Rs. <span id="order-total">0.00</span></p>
                 </div>
                 <button id="confirm-order" class="mt-4 w-full bg-accent3 rounded px-3 py-2 text-white hover:bg-accent2 hover:text-white">Confirm Order</button>
@@ -51,8 +55,16 @@
         const success = document.getElementById("success-message");
         const empty = document.getElementById("no-order-items");
         const subtotalElement = document.getElementById("order-subtotal");
-        const discountElement = document.getElementById("order-discount");
-        const discountRow = document.getElementById("discount-row");
+        const bookDiscountElement = document.getElementById("book-discount");
+        const promoDiscountElement = document.getElementById("promo-discount");
+        const bulkDiscountElement = document.getElementById("bulk-discount");
+        const loyalDiscountElement = document.getElementById("loyal-discount");
+        const totalDiscountElement = document.getElementById("total-discount");
+        const bookDiscountRow = document.getElementById("book-discount-row");
+        const promoDiscountRow = document.getElementById("promo-discount-row");
+        const bulkDiscountRow = document.getElementById("bulk-discount-row");
+        const loyalDiscountRow = document.getElementById("loyal-discount-row");
+        const totalDiscountRow = document.getElementById("total-discount-row");
         const promoElement = document.getElementById("promo-code");
         const promoRow = document.getElementById("promo-row");
         const totalElement = document.getElementById("order-total");
@@ -86,13 +98,16 @@
                     ? item.book.authorBooks.map(ab => ab.author.name).join(', ')
                     : 'Unknown Author';
 
+                const effectivePrice = window.calculateBookPrice ? window.calculateBookPrice(item.book) : item.book.price;
+                const isOnSale = effectivePrice < item.book.price;
+
                 const row = document.createElement("tr");
                 row.className = "border-b border-accent1 bg-primary";
                 row.innerHTML = `
                     <td class="border border-accent1 p-3">
                         <p class="text-lg font-semibold text-accent3">${item.book.title} <span class="text-accent1 font-normal italic"> by ${authorNames}</span></p>
                     </td>
-                    <td class="border border-accent1 p-3 text-accent1">Rs. ${item.book.price}</td>
+                    <td class="border border-accent1 p-3 text-accent1">${isOnSale ? `<span class="text-red-500">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${item.book.price.toFixed(2)}</span>` : `Rs. ${item.book.price.toFixed(2)}`}</td>
                     <td class="border border-accent1 p-3 text-accent1">${item.quantity}</td>
                     <td class="border border-accent1 p-3 text-accent1">Rs. ${item.subTotal.toFixed(2)}</td>
                 `;
@@ -100,13 +115,23 @@
             });
 
             subtotalElement.textContent = orderData.subtotal.toFixed(2);
-            discountElement.textContent = orderData.discount.toFixed(2);
+            bookDiscountElement.textContent = orderData.bookDiscount.toFixed(2);
+            promoDiscountElement.textContent = orderData.discounts.promo.toFixed(2);
+            bulkDiscountElement.textContent = orderData.discounts.bulk.toFixed(2);
+            loyalDiscountElement.textContent = orderData.discounts.loyal.toFixed(2);
+            totalDiscountElement.textContent = orderData.discounts.total.toFixed(2);
             totalElement.textContent = orderData.total.toFixed(2);
+
             if (orderData.promoCode) {
                 promoElement.textContent = orderData.promoCode;
                 promoRow.classList.remove("hidden");
             }
-            discountRow.classList.toggle("hidden", orderData.discount === 0);
+
+            bookDiscountRow.classList.toggle("hidden", orderData.bookDiscount === 0);
+            promoDiscountRow.classList.toggle("hidden", orderData.discounts.promo === 0);
+            bulkDiscountRow.classList.toggle("hidden", orderData.discounts.bulk === 0);
+            loyalDiscountRow.classList.toggle("hidden", orderData.discounts.loyal === 0);
+            totalDiscountRow.classList.toggle("hidden", orderData.discounts.total === 0);
         }
 
         function showSuccess(message) {

@@ -14,6 +14,10 @@ namespace Whisperwood.DTOs
         public required string ISBN { get; set; }
         [Required]
         public required decimal Price { get; set; }
+        public decimal DiscountPercentage { get; set; } = 0;
+        public bool IsOnSale { get; set; } = false;
+        public DateOnly? DiscountStartDate { get; set; }
+        public DateOnly? DiscountEndDate { get; set; }
         public string? Synopsis { get; set; }
         public Guid? CoverImageId { get; set; }
         [Required]
@@ -24,13 +28,13 @@ namespace Whisperwood.DTOs
         public BookFormat? Format { get; set; }
         public int? Edition { get; set; }
         [Required]
-        public required List<Guid> AuthorIds { get; set; }
+        public required List<Guid>? AuthorIds { get; set; }
         [Required]
-        public required List<Guid> GenreIds { get; set; }
+        public required List<Guid>? GenreIds { get; set; }
         [Required]
-        public required List<Guid> CategoryIds { get; set; }
+        public required List<Guid>? CategoryIds { get; set; }
         [Required]
-        public required List<Guid> PublisherIds { get; set; }
+        public required List<Guid>? PublisherIds { get; set; }
     }
 
     public class BookUpdateDto
@@ -40,6 +44,10 @@ namespace Whisperwood.DTOs
         [RegularExpression(@"^\d{10}(\d{3})?$", ErrorMessage = "ISBN must be 10 or 13 digits.")]
         public string? ISBN { get; set; }
         public decimal? Price { get; set; }
+        public decimal? DiscountPercentage { get; set; } = 0;
+        public bool? IsOnSale { get; set; } = false;
+        public DateOnly? DiscountStartDate { get; set; }
+        public DateOnly? DiscountEndDate { get; set; }
         public string? Synopsis { get; set; }
         public Guid? CoverImageId { get; set; }
         public DateOnly? PublishedDate { get; set; }
@@ -61,10 +69,12 @@ namespace Whisperwood.DTOs
         public bool? IsAvailable { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
+        public bool? IsOnSale { get; set; } = false;
         public decimal? MinRating { get; set; }
         public string? Language { get; set; }
         public List<Books.BookFormat>? Formats { get; set; }
         public List<Guid>? PublisherIds { get; set; }
+        public List<Guid>? CategoryIds { get; set; }
 
         // Search
         public string? SearchTerm { get; set; }

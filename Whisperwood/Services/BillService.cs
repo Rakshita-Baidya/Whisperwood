@@ -108,6 +108,11 @@ namespace Whisperwood.Services
             // Financial summary with detailed discounts
             gfx.DrawString($"Subtotal: Rs. {order.SubTotal:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
             yPosition += 20;
+            if (order.OrderBill.BookDiscount > 0)
+            {
+                gfx.DrawString($"Book Discount: Rs. {order.OrderBill.BookDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);
+                yPosition += 20;
+            }
             if (order.OrderBill.PromoDiscount > 0)
             {
                 gfx.DrawString($"Promo Discount: Rs. {order.OrderBill.PromoDiscount:F2}", regularFont, XBrushes.Black, new XRect(margin, yPosition, page.Width - 2 * margin, 20), XStringFormats.TopLeft);

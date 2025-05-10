@@ -16,5 +16,7 @@ namespace Whisperwood.Models
         public decimal BulkDiscount { get; set; }
         [Precision(10, 2)]
         public decimal LoyalDiscount { get; set; }
+        [Precision(10, 2)]
+        public decimal BookDiscount { get; set; }
     }
 }

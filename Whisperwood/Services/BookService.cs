@@ -31,6 +31,11 @@ namespace Whisperwood.Services
             {
                 return new BadRequestObjectResult(new { message = "A book with this ISBN already exists." });
             }
+            if (dto.DiscountStartDate.HasValue && dto.DiscountEndDate.HasValue && dto.DiscountStartDate > dto.DiscountEndDate)
+            {
+                return new BadRequestObjectResult(new { message = "Discount start date cannot be after end date." });
+            }
+
 
             var book = new Books
             {
@@ -38,15 +43,20 @@ namespace Whisperwood.Services
                 Title = dto.Title,
                 ISBN = dto.ISBN,
                 Price = dto.Price,
+                DiscountPercentage = dto.DiscountPercentage,
+                DiscountStartDate = dto.DiscountStartDate,
+                DiscountEndDate = dto.DiscountEndDate,
                 Synopsis = dto.Synopsis,
                 CoverImageId = dto.CoverImageId,
                 PublishedDate = dto.PublishedDate,
                 Stock = dto.Stock,
                 Language = dto.Language,
                 Format = dto.Format ?? Books.BookFormat.Paperback,
-                Edition = dto.Edition ?? 1
+                Edition = dto.Edition ?? 1,
+                AvailabilityStatus = dto.Stock > 0,
             };
 
+            book.IsOnSale = CalculateIsOnSale(book.DiscountPercentage, book.DiscountStartDate, book.DiscountEndDate);
             book.AuthorBooks = dto.AuthorIds.Select(id => new AuthorBooks { AuthorId = id, BookId = book.Id }).ToList();
             book.GenreBooks = dto.GenreIds.Select(id => new GenreBooks { GenreId = id, BookId = book.Id }).ToList();
             book.PublisherBooks = dto.PublisherIds.Select(id => new PublisherBooks { PublisherId = id, BookId = book.Id }).ToList();
@@ -99,6 +109,10 @@ namespace Whisperwood.Services
             {
                 return new BadRequestObjectResult(new { message = "A book with this ISBN already exists." });
             }
+            if (dto.DiscountStartDate.HasValue && dto.DiscountEndDate.HasValue && dto.DiscountStartDate > dto.DiscountEndDate)
+            {
+                return new BadRequestObjectResult(new { message = "Discount start date cannot be after end date." });
+            }
 
             var book = await dbContext.Books
                 .Include(b => b.AuthorBooks)
@@ -113,10 +127,17 @@ namespace Whisperwood.Services
             if (dto.Title != null) book.Title = dto.Title;
             if (dto.ISBN != null) book.ISBN = dto.ISBN;
             if (dto.Price.HasValue) book.Price = dto.Price.Value;
+            if (dto.DiscountPercentage.HasValue) book.DiscountPercentage = dto.DiscountPercentage.Value;
+            if (dto.DiscountStartDate.HasValue) book.DiscountStartDate = dto.DiscountStartDate;
+            if (dto.DiscountEndDate.HasValue) book.DiscountEndDate = dto.DiscountEndDate;
             if (dto.Synopsis != null) book.Synopsis = dto.Synopsis;
             if (dto.CoverImageId.HasValue) book.CoverImageId = dto.CoverImageId;
             if (dto.PublishedDate.HasValue) book.PublishedDate = dto.PublishedDate.Value;
-            if (dto.Stock.HasValue) book.Stock = dto.Stock.Value;
+            if (dto.Stock.HasValue)
+            {
+                book.Stock = dto.Stock.Value;
+                book.AvailabilityStatus = dto.Stock.Value > 0;
+            }
             if (dto.Language != null) book.Language = dto.Language;
             if (dto.Format.HasValue) book.Format = dto.Format.Value;
             if (dto.Edition.HasValue) book.Edition = dto.Edition.Value;
@@ -141,6 +162,8 @@ namespace Whisperwood.Services
                 book.CategoryBooks.Clear();
                 book.CategoryBooks = dto.CategoryIds.Select(idVal => new CategoryBooks { CategoryId = idVal, BookId = book.Id }).ToList();
             }
+            book.IsOnSale = CalculateIsOnSale(book.DiscountPercentage, book.DiscountStartDate, book.DiscountEndDate);
+
 
             await dbContext.SaveChangesAsync();
             return new OkObjectResult(book);
@@ -168,12 +191,20 @@ namespace Whisperwood.Services
             return new OkObjectResult(new { message = "Deleted successfully." });
         }
 
+        private bool CalculateIsOnSale(decimal? discountPercentage, DateOnly? startDate, DateOnly? endDate)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            return discountPercentage > 0 &&
+                   (!startDate.HasValue || startDate <= today) &&
+                   (!endDate.HasValue || endDate >= today);
+        }
         public async Task<IActionResult> GetFilteredBooksAsync(BookFilterDto filter)
         {
             var query = dbContext.Books
                 .Include(b => b.AuthorBooks).ThenInclude(ab => ab.Author)
                 .Include(b => b.GenreBooks).ThenInclude(gb => gb.Genre)
                 .Include(b => b.PublisherBooks).ThenInclude(pb => pb.Publisher)
+                .Include(b => b.CategoryBooks).ThenInclude(cb => cb.Category)
                 .AsNoTracking();
 
             // Apply Filters
@@ -220,6 +251,19 @@ namespace Whisperwood.Services
             if (filter.PublisherIds != null && filter.PublisherIds.Any())
             {
                 query = query.Where(b => b.PublisherBooks.Any(pb => filter.PublisherIds.Contains(pb.PublisherId)));
+            }
+
+            if (filter.CategoryIds != null && filter.CategoryIds.Any())
+            {
+                query = query.Where(b => b.CategoryBooks.Any(cb => filter.CategoryIds.Contains(cb.CategoryId)));
+            }
+
+            if (filter.IsOnSale.HasValue && filter.IsOnSale.Value)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                query = query.Where(b => b.IsOnSale && b.DiscountPercentage > 0 &&
+                    (!b.DiscountStartDate.HasValue || b.DiscountStartDate <= today) &&
+                    (!b.DiscountEndDate.HasValue || b.DiscountEndDate >= today));
             }
 
             // Apply Search

@@ -36,7 +36,6 @@
                 <label for="stock" class="mb-1 block font-medium">Stock</label>
                 <input type="number" id="stock" name="stock" class="border-accent1 w-full rounded border p-2" placeholder="Enter stock quantity" min="0" required>
             </div>
-
             <div>
                 <label for="language" class="mb-1 block font-medium">Language</label>
                 <input type="text" id="language" name="language" class="border-accent1 w-full rounded border p-2" placeholder="e.g., English" required>
@@ -45,7 +44,6 @@
                 <label for="edition" class="mb-1 block font-medium">Edition</label>
                 <input type="number" id="edition" name="edition" class="border-accent1 w-full rounded border p-2" placeholder="Enter edition number" min="1" required>
             </div>
-
             <div>
                 <label for="format" class="mb-1 block font-medium">Format</label>
                 <select id="format" name="format" class="border-accent1 w-full rounded border p-[10px]" required>
@@ -66,6 +64,26 @@
                 <input type="date" id="publishedDate" name="publishedDate" class="border-accent1 w-full rounded border p-[6px]" required>
             </div>
             <div class="col-start-1">
+                <label for="discountPercentage" class="mb-1 block font-medium">Discount (%)</label>
+                <input type="number" id="discountPercentage" name="discountPercentage" class="border-accent1 w-full rounded border p-2" placeholder="e.g., 10" min="0" max="100" step="0.01">
+            </div>
+            <div>
+                <label for="isOnSale" class="mb-1 block font-medium">On Sale</label>
+                <select id="isOnSale" name="isOnSale" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </div>
+            <div>
+                <label for="discountStartDate" class="mb-1 block font-medium">Discount Start Date</label>
+                <input type="date" id="discountStartDate" name="discountStartDate" class="border-accent1 w-full rounded border p-[6px]">
+            </div>
+            <div>
+                <label for="discountEndDate" class="mb-1 block font-medium">Discount End Date</label>
+                <input type="date" id="discountEndDate" name="discountEndDate" class="border-accent1 w-full rounded border p-[6px]">
+            </div>
+            
+            <div class="col-start-1">
                 <label for="authors" class="mb-1 block font-medium">Authors</label>
                 <select id="authors" name="authorIds" multiple class="border-accent1 w-full rounded border p-2" required>
                 </select>
@@ -85,7 +103,6 @@
                 <select id="publishers" name="publisherIds" multiple class="border-accent1 w-full rounded border p-2" required>
                 </select>
             </div>
-            
             <div class="md:col-span-full">
                 <label for="synopsis" class="mb-1 block font-medium">Synopsis</label>
                 <textarea id="synopsis" name="synopsis" class="border-accent1 w-full rounded border p-2" rows="3" placeholder="Enter book synopsis" required></textarea>
@@ -173,10 +190,10 @@
                         const selectedCover = coverImages.find(ci => ci.id === selectedId);
                         if (selectedCover && selectedCover.coverImageURL) {
                             coverImagePreview.src = selectedCover.coverImageURL;
-                            coverImagePreview.style.display = 'block';
+                            coverImagePreview.classList.remove('hidden');
                         } else {
                             coverImagePreview.src = '';
-                            coverImagePreview.style.display = 'none';
+                            coverImagePreview.classList.add('hidden');
                         }
                     });
                 }
@@ -204,6 +221,10 @@
                 document.getElementById('isbn').value = book.isbn || '';
                 document.getElementById('price').value = book.price || '';
                 document.getElementById('stock').value = book.stock || 0;
+                document.getElementById('discountPercentage').value = book.discountPercentage || 0;
+                document.getElementById('isOnSale').value = book.isOnSale.toString();
+                document.getElementById('discountStartDate').value = book.discountStartDate ? new Date(book.discountStartDate).toISOString().split('T')[0] : '';
+                document.getElementById('discountEndDate').value = book.discountEndDate ? new Date(book.discountEndDate).toISOString().split('T')[0] : '';
                 document.getElementById('language').value = book.language || '';
                 document.getElementById('edition').value = book.edition || 1;
                 document.getElementById('format').value = book.format || 0;
@@ -265,7 +286,7 @@
                         const selectedCover = coverImages.find(ci => ci.id === book.coverImageId);
                         if (selectedCover && selectedCover.coverImageURL) {
                             coverImagePreview.src = selectedCover.coverImageURL;
-                            coverImagePreview.style.display = 'block';
+                            coverImagePreview.classList.remove('hidden');
                         }
                     }
                 }
@@ -304,10 +325,23 @@
                 successMessageElement.classList.add('hidden');
 
                 const formData = new FormData(form);
+                const discountStartDate = formData.get('discountStartDate');
+                const discountEndDate = formData.get('discountEndDate');
+
+                if (discountStartDate && discountEndDate && new Date(discountStartDate) > new Date(discountEndDate)) {
+                    errorMessageElement.textContent = 'Discount start date cannot be after end date.';
+                    errorMessageElement.classList.remove('hidden');
+                    return;
+                }
+
                 const bookData = {
                     title: formData.get('title'),
                     isbn: formData.get('isbn'),
                     price: parseFloat(formData.get('price')),
+                    discountPercentage: parseFloat(formData.get('discountPercentage')) || 0,
+                    isOnSale: formData.get('isOnSale') === 'true',
+                    discountStartDate: discountStartDate || null,
+                    discountEndDate: discountEndDate || null,
                     synopsis: formData.get('synopsis'),
                     publishedDate: formData.get('publishedDate'),
                     stock: parseInt(formData.get('stock')),

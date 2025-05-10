@@ -49,7 +49,7 @@ namespace Whisperwood.Services
         public decimal GetLoyalDiscount(decimal subTotal, int userOrdersCount)
         {
             if (userOrdersCount >= 10)
-                return subTotal * 0.10m;
+                return subTotal * 0.1m;
             return 0;
         }
 
