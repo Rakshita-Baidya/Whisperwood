@@ -12,13 +12,11 @@
     <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Cart Items Section -->
         <div class="col-span-2">
             <div id="cart-item-list" class="space-y-2"></div>
             <p id="no-cart-items" class="hidden text-center text-accent2 text-lg">You haven’t added any books to your cart yet.</p>
         </div>
 
-        <!-- Cart Summary Section -->
         <div class="col-span-1">
             <div class="bg-primary border border-accent1 p-6 rounded shadow">
                 <h2 class="text-xl font-semibold text-accent4 mb-2 pb-2 border-b-2 border-accent4">Cart Summary</h2>
@@ -141,12 +139,6 @@
         }
 
         async function loadCartItems() {
-            if (!window.calculateBookPrice) {
-                showError("Cart functionality is not fully loaded. Please refresh the page.");
-                console.error("calculateBookPrice is not defined.");
-                return;
-            }
-
             try {
                 userOrdersCount = await fetchUserOrdersCount();
                 cartItems = await fetchCartItems();
@@ -247,14 +239,14 @@
             promoDiscountElement.textContent = discounts.promo.toFixed(2);
             bulkDiscountElement.textContent = discounts.bulk.toFixed(2);
             loyalDiscountElement.textContent = discounts.loyal.toFixed(2);
-            totalDiscountElement.textContent = discounts.total.toFixed(2); // Only promo + bulk + loyal
+            totalDiscountElement.textContent = discounts.total.toFixed(2);
             totalElement.textContent = (subtotal - discounts.total).toFixed(2);
 
             bookDiscountRow.classList.toggle("hidden", bookDiscount === 0);
             promoDiscountRow.classList.toggle("hidden", discounts.promo === 0);
             bulkDiscountRow.classList.toggle("hidden", discounts.bulk === 0);
             loyalDiscountRow.classList.toggle("hidden", discounts.loyal === 0);
-            totalDiscountRow.classList.toggle("hidden", discounts.total === 0); // Only show if additional discounts exist
+            totalDiscountRow.classList.toggle("hidden", discounts.total === 0);
         }
 
         function showSuccess(message, reload = false) {

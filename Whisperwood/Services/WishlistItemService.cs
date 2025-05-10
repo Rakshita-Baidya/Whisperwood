@@ -107,6 +107,7 @@ namespace Whisperwood.Services
             return await dbContext.Wishlist
                 .Include(w => w.WishListItems)
                 .ThenInclude(i => i.Book)
+                .ThenInclude(c => c.CoverImage)
                 .FirstOrDefaultAsync(w => w.UserId == userId);
         }
     }
