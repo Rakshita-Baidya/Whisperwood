@@ -160,15 +160,6 @@
             const errorMessageElement = document.getElementById('error-message');
             const successMessageElement = document.getElementById('success-message');
 
-            if (!form || !errorMessageElement || !successMessageElement) {
-                console.error('One or more DOM elements not found:', {
-                    form: !!form,
-                    errorMessageElement: !!errorMessageElement,
-                    successMessageElement: !!successMessageElement
-                });
-                return;
-            }
-
             fetchDropdownOptions();
 
             form.addEventListener('submit', async (e) => {

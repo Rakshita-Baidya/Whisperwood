@@ -16,12 +16,11 @@
     <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
     <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
     <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
-        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
                 <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
                 <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by title or message">
             </div>
-            
             <div>
                 <label for="sortBy" class="text-accent3 mb-1 block font-medium">Sort By</label>
                 <select id="sortBy" name="sortBy" class="border-accent1 w-full rounded border p-[10px]">
@@ -38,22 +37,6 @@
                 </select>
             </div>
             <div>
-                <div class="mb-1">
-                    <label for="minStartDate" class="text-accent3 block font-medium">Start Date Range</label>
-                    <div class="flex gap-2">
-                        <input type="date" id="minStartDate" name="minStartDate" class="border-accent1 w-1/2 rounded border p-1">
-                        <input type="date" id="maxStartDate" name="maxStartDate" class="border-accent1 w-1/2 rounded border p-1">
-                    </div>
-                </div>
-                <div>
-                    <label for="minEndDate" class="text-accent3 block font-medium">End Date Range</label>
-                    <div class="flex gap-2">
-                        <input type="date" id="minEndDate" name="minEndDate" class="border-accent1 w-1/2 rounded border p-1">
-                        <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-1/2 rounded border p-1">
-                    </div>
-                </div>
-            </div>
-            <div>
                 <label for="recipientGroups" class="text-accent3 mb-1 block font-medium">Recipient Groups</label>
                 <select id="recipientGroups" name="recipientGroups" multiple class="border-accent1 w-full rounded border p-2">
                     <option value="Admin">Admin</option>
@@ -61,15 +44,37 @@
                     <option value="All Users">Everyone</option>
                 </select>
             </div>
-            <div class="flex items-end justify-end gap-2">
+            <div>
+                <label for="minStartDate" class="text-accent3 mb-1 block font-medium">Min Start Date</label>
+                <input type="date" id="minStartDate" name="minStartDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div>
+                <label for="maxEndDate" class="text-accent3 mb-1 block font-medium">Max End Date</label>
+                <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div class="flex items-end col-start-4 justify-end gap-2">
                 <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
                 <button type="button" id="clear-filters" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear Filters</button>
             </div>
         </form>
     </div>
 
-    <div id="announcement-list" class="space-y-4">
-        <ol id="announcements-ordered-list" class="border-accent4 list-inside list-decimal border-b"></ol>
+    <div id="announcement-list" class="hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-accent2 border border-accent1">
+                <thead>
+                    <tr class="bg-accent3 text-white">
+                        <th class="p-2 text-left">Title</th>
+                        <th class="p-2 text-left">Message</th>
+                        <th class="p-2 text-left">Recipient Groups</th>
+                        <th class="p-2 text-left">Start Date</th>
+                        <th class="p-2 text-left">End Date</th>
+                        <th class="p-2 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="announcements-table-body"></tbody>
+            </table>
+        </div>
     </div>
 
     <div id="no-announcements" class="text-accent2 mt-4 hidden text-center text-lg">No announcements found.</div>
@@ -84,15 +89,30 @@
         let allAnnouncements = [];
         let originalAnnouncements = [];
 
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function formatDate(dateStr) {
+            return dateStr ? new Date(dateStr).toLocaleDateString() : '-';
+        }
+
         function renderAnnouncements(page) {
-            const announcementsOrderedList = document.getElementById('announcements-ordered-list');
+            const announcementsTableBody = document.getElementById('announcements-table-body');
             const noAnnouncementsElement = document.getElementById('no-announcements');
             const paginationContainer = document.getElementById('pagination-container');
+            const announcementList = document.getElementById('announcement-list');
 
-            announcementsOrderedList.innerHTML = '';
+            announcementsTableBody.innerHTML = '';
 
             if (allAnnouncements.length === 0) {
                 noAnnouncementsElement.classList.remove('hidden');
+                announcementList.classList.add('hidden');
                 paginationContainer.innerHTML = '';
                 return;
             }
@@ -102,24 +122,26 @@
             const paginatedAnnouncements = allAnnouncements.slice(startIndex, endIndex);
 
             if (paginatedAnnouncements.length > 0) {
+                announcementList.classList.remove('hidden');
+                noAnnouncementsElement.classList.add('hidden');
+
                 paginatedAnnouncements.forEach(announcement => {
-                    const announcementElement = document.createElement('li');
-                    announcementElement.className = 'flex items-center space-x-4 w-full border-t border-accent4';
-                    announcementElement.innerHTML = `
-                        <div class="flex w-full items-center space-x-4 py-4">
-                            <div class="flex-1">
-                                <h2 class="text-accent3 text-xl font-semibold">${announcement.title}</h2>
-                                <p class="text-accent1 text-lg">${announcement.message}</p>
-                                <p class="text-accent1">To: ${announcement.recipientGroups}</p>
-                                <p class="text-accent1">${announcement.startDate} - ${announcement.endDate}</p>
-                            </div>
-                            <div class="flex space-x-2">
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-accent1';
+                    row.innerHTML = `
+                        <td class="p-2 truncate">${escapeHtml(announcement.title)}</td>
+                        <td class="p-2 truncate">${escapeHtml(announcement.message)}</td>
+                        <td class="p-2">${escapeHtml(announcement.recipientGroups.join(', '))}</td>
+                        <td class="p-2">${formatDate(announcement.startDate)}</td>
+                        <td class="p-2">${formatDate(announcement.endDate)}</td>
+                        <td class="p-2">
+                            <div class="flex space-x-2 justify-center">
                                 <a href="/Announcement/UpdateAnnouncement/${announcement.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
-                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" onclick="deleteAnnouncement('${announcement.id}', '${announcement.title}')">Delete</button>
+                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" onclick="deleteAnnouncement('${announcement.id}', '${escapeHtml(announcement.title)}')">Delete</button>
                             </div>
-                        </div>
+                        </td>
                     `;
-                    announcementsOrderedList.appendChild(announcementElement);
+                    announcementsTableBody.appendChild(row);
                 });
 
                 const totalPages = Math.ceil(allAnnouncements.length / pageSize);
@@ -129,6 +151,7 @@
                 });
             } else {
                 noAnnouncementsElement.classList.remove('hidden');
+                announcementList.classList.add('hidden');
                 paginationContainer.innerHTML = '';
             }
         }
@@ -203,8 +226,6 @@
             return {
                 search: document.getElementById('search').value.toLowerCase(),
                 minStartDate: document.getElementById('minStartDate').value,
-                maxStartDate: document.getElementById('maxStartDate').value,
-                minEndDate: document.getElementById('minEndDate').value,
                 maxEndDate: document.getElementById('maxEndDate').value,
                 recipientGroups: Array.from(document.getElementById('recipientGroups').selectedOptions).map(option => option.value),
                 sortBy: document.getElementById('sortBy').value,
@@ -223,23 +244,21 @@
                 );
             }
 
-            // Filter by start date range
-            if (params.minStartDate || params.maxStartDate) {
+            // Filter by minStartDate
+            if (params.minStartDate) {
                 filtered = filtered.filter(a => {
                     const startDate = new Date(a.startDate);
-                    const minDate = params.minStartDate ? new Date(params.minStartDate) : null;
-                    const maxDate = params.maxStartDate ? new Date(params.maxStartDate) : null;
-                    return (!minDate || startDate >= minDate) && (!maxDate || startDate <= maxDate);
+                    const minDate = new Date(params.minStartDate);
+                    return startDate >= minDate;
                 });
             }
 
-            // Filter by end date range
-            if (params.minEndDate || params.maxEndDate) {
+            // Filter by maxEndDate
+            if (params.maxEndDate) {
                 filtered = filtered.filter(a => {
                     const endDate = new Date(a.endDate);
-                    const minDate = params.minEndDate ? new Date(params.minEndDate) : null;
-                    const maxDate = params.maxEndDate ? new Date(params.maxEndDate) : null;
-                    return (!minDate || endDate >= minDate) && (!maxDate || endDate <= maxDate);
+                    const maxDate = new Date(params.maxEndDate);
+                    return endDate <= maxDate;
                 });
             }
 
@@ -269,8 +288,6 @@
         function clearFilters() {
             document.getElementById('search').value = '';
             document.getElementById('minStartDate').value = '';
-            document.getElementById('maxStartDate').value = '';
-            document.getElementById('minEndDate').value = '';
             document.getElementById('maxEndDate').value = '';
             document.getElementById('recipientGroups').selectedIndex = -1;
             document.getElementById('sortBy').value = 'title';

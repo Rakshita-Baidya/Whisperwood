@@ -51,10 +51,6 @@
     <script>
         function clearForm() {
             const form = document.getElementById('announcement-form');
-            if (!form) {
-                console.error('Announcement form not found');
-                return;
-            }
             form.reset();
             const errorMessage = document.getElementById('error-message');
             const successMessage = document.getElementById('success-message');
@@ -73,20 +69,6 @@
             const errorMessage = document.getElementById('error-message');
             const successMessage = document.getElementById('success-message');
 
-            if (!form || !clearButton || !errorMessage || !successMessage) {
-                console.error('One or more DOM elements not found:', {
-                    form: !!form,
-                    clearButton: !!clearButton,
-                    errorMessage: !!errorMessage,
-                    successMessage: !!successMessage
-                });
-                if (errorMessage) {
-                    errorMessage.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessage.classList.remove('hidden');
-                }
-                return;
-            }
-
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
@@ -96,7 +78,6 @@
                 const endDate = document.getElementById('endDate').value;
                 const recipientGroups = Array.from(document.getElementById('recipientGroups').selectedOptions).map(option => option.value);
 
-                // Client-side validation
                 if (new Date(startDate) > new Date(endDate)) {
                     errorMessage.textContent = 'Start Date cannot be after End Date.';
                     errorMessage.classList.remove('hidden');
@@ -110,13 +91,7 @@
                     return;
                 }
 
-                const announcementDto = {
-                    title,
-                    message,
-                    startDate,
-                    endDate,
-                    recipientGroups
-                };
+                const announcementDto = { title,message,startDate,endDate,recipientGroups};
 
                 try {
                     const response = await fetch('https://localhost:7018/api/Announcement/add', {

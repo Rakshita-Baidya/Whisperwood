@@ -6,29 +6,83 @@
 }
 
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold text-center text-accent4 mb-6">Manage Orders</h1>
+    <div class="mb-4 flex justify-between">
+        <h1 class="text-3xl font-bold text-center text-accent4">Manage Orders</h1>
+        <div class="flex space-x-4 text-white">
+            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Filter</button>
+        </div>
+    </div>
 
     <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
     <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
     <div id="loading-message" class="text-center text-accent2 text-lg">Loading orders...</div>
 
-    <div id="order-list" class="hidden">
-        <table class="w-full text-accent2 border border-accent1">
-            <thead>
-                <tr class="bg-accent3 text-white">
-                    <th class="p-2 text-left">Order ID</th>
-                    <th class="p-2 text-left">User</th>
-                    <th class="p-2 text-left">Date</th>
-                    <th class="p-2 text-left">Status</th>
-                    <th class="p-2 text-left">Total</th>
-                    <th class="p-2 text-left">Claim Code</th>
-                    <th class="p-2 text-left">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="order-table-body"></tbody>
-        </table>
+    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
+        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
+                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by user name or order ID">
+            </div>
+            <div>
+                <label for="status" class="text-accent3 mb-1 block font-medium">Status</label>
+                <select id="status" name="status" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="">All</option>
+                    <option value="0">Pending</option>
+                    <option value="1">Cancelled</option>
+                    <option value="2">Fulfilled</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortBy" class="text-accent3 mb-1 block font-medium">Sort By</label>
+                <select id="sortBy" name="sortBy" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="orderedAt">Order Date</option>
+                    <option value="userName">User Name</option>
+                    <option value="totalAmount">Total Amount</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortOrder" class="text-accent3 mb-1 block font-medium">Sort Order</label>
+                <select id="sortOrder" name="sortOrder" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <div>
+                <label for="minStartDate" class="text-accent3 mb-1 block font-medium">Min Order Date</label>
+                <input type="date" id="minStartDate" name="minStartDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div>
+                <label for="maxEndDate" class="text-accent3 mb-1 block font-medium">Max Order Date</label>
+                <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div class="flex items-end col-start-4 justify-end gap-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
+                <button type="button" id="clear-filters" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear Filters</button>
+            </div>
+        </form>
     </div>
-    <p id="no-orders" class="hidden text-center text-accent2 text-lg">No orders found.</p>
+
+    <div id="order-list" class="hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-accent2 border border-accent1">
+                <thead>
+                    <tr class="bg-accent3 text-white">
+                        <th class="p-2 text-left">Order ID</th>
+                        <th class="p-2 text-left">User</th>
+                        <th class="p-2 text-left">Date</th>
+                        <th class="p-2 text-left">Status</th>
+                        <th class="p-2 text-left">Total</th>
+                        <th class="p-2 text-left">Claim Code</th>
+                        <th class="p-2 text-left">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="order-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <p id="no-orders" class="hidden text-center text-accent2 text-lg mt-4">No orders found.</p>
+    <div id="pagination-container" class="mt-6 flex justify-center gap-2"></div>
 </div>
 
 @section Scripts {
@@ -39,7 +93,12 @@
         const success = document.getElementById("success-message");
         const noOrders = document.getElementById("no-orders");
         const loading = document.getElementById("loading-message");
+        const paginationContainer = document.getElementById("pagination-container");
 
+        let currentPage = 1;
+        const pageSize = 10;
+        let allOrders = [];
+        let originalOrders = [];
         const billCache = {};
 
         async function fetchBill(orderId) {
@@ -69,6 +128,7 @@
             success.classList.add("hidden");
             loading.classList.add("hidden");
             orderList.classList.add("hidden");
+            noOrders.classList.add("hidden");
         }
 
         function showSuccess(message) {
@@ -118,7 +178,7 @@
         function getStatusText(status) {
             return status === 0 ? "Pending" : status === 1 ? "Cancelled" : status === 2 ? "Fulfilled" : "Unknown";
         }
-        
+
         function escapeHtml(unsafe) {
             return unsafe
                 .replace(/&/g, "&amp;")
@@ -128,42 +188,115 @@
                 .replace(/'/g, "&#039;");
         }
 
-        async function loadOrders() {
-            if (!window.isAuthenticated || (!window.isAdmin && !window.isStaff)) {
-                showError("Access restricted to admins and staff.");
-                setTimeout(() => window.location.href = '/', 1000);
-                return;
+        function getFilterParams() {
+            return {
+                search: document.getElementById('search').value.toLowerCase(),
+                status: document.getElementById('status').value,
+                minStartDate: document.getElementById('minStartDate').value,
+                maxEndDate: document.getElementById('maxEndDate').value,
+                sortBy: document.getElementById('sortBy').value,
+                sortOrder: document.getElementById('sortOrder').value
+            };
+        }
+
+        function filterOrders(orders, params) {
+            let filtered = [...orders];
+
+            // Filter by search (user name or order ID)
+            if (params.search) {
+                filtered = filtered.filter(o =>
+                    (o.user?.name?.toLowerCase() || '').includes(params.search) ||
+                    o.id.toLowerCase().includes(params.search)
+                );
             }
 
-            const orders = await fetchOrders();
-            if (!orders || orders.length === 0) {
-                loading.classList.add("hidden");
+            // Filter by status
+            if (params.status !== '') {
+                const status = parseInt(params.status);
+                filtered = filtered.filter(o => o.status === status);
+            }
+
+            // Filter by minStartDate
+            if (params.minStartDate) {
+                filtered = filtered.filter(o => {
+                    const orderDate = new Date(o.orderedAt);
+                    const minDate = new Date(params.minStartDate);
+                    return orderDate >= minDate;
+                });
+            }
+
+            // Filter by maxEndDate
+            if (params.maxEndDate) {
+                filtered = filtered.filter(o => {
+                    const orderDate = new Date(o.orderedAt);
+                    const maxDate = new Date(params.maxEndDate);
+                    return orderDate <= maxDate;
+                });
+            }
+
+            // Sort
+            filtered.sort((a, b) => {
+                const fieldA = params.sortBy === 'userName' ? (a.user?.name?.toLowerCase() || '') :
+                              params.sortBy === 'orderedAt' ? new Date(a.orderedAt) :
+                              params.sortBy === 'totalAmount' ? a.totalAmount :
+                              a.status;
+                const fieldB = params.sortBy === 'userName' ? (b.user?.name?.toLowerCase() || '') :
+                              params.sortBy === 'orderedAt' ? new Date(b.orderedAt) :
+                              params.sortBy === 'totalAmount' ? b.totalAmount :
+                              b.status;
+                const comparison = fieldA > fieldB ? 1 : fieldA < fieldB ? -1 : 0;
+                return params.sortOrder === 'asc' ? comparison : -comparison;
+            });
+
+            return filtered;
+        }
+
+        function clearFilters() {
+            document.getElementById('search').value = '';
+            document.getElementById('status').value = '';
+            document.getElementById('minStartDate').value = '';
+            document.getElementById('maxEndDate').value = '';
+            document.getElementById('sortBy').value = 'orderedAt';
+            document.getElementById('sortOrder').value = 'asc';
+        }
+
+        function renderOrders(page, orders) {
+            orderTableBody.innerHTML = '';
+            noOrders.classList.add("hidden");
+            paginationContainer.innerHTML = '';
+
+            if (orders.length === 0) {
                 noOrders.classList.remove("hidden");
                 return;
             }
 
-            // Fetch bill details for each order
-            const bills = {};
-            for (const order of orders) {
-                bills[order.id] = await fetchBill(order.id);
-            }
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, orders.length);
+            const paginatedOrders = orders.slice(startIndex, endIndex);
 
-            loading.classList.add("hidden");
-            orderList.classList.remove("hidden");
-            orderTableBody.innerHTML = orders.map(order => `
+            orderTableBody.innerHTML = paginatedOrders.map(order => `
                 <tr class="border-b border-accent1">
                     <td class="p-2">${order.id}</td>
                     <td class="p-2">${order.user?.name || 'Unknown User'}</td>
                     <td class="p-2">${new Date(order.orderedAt).toLocaleDateString()}</td>
                     <td class="p-2">${getStatusText(order.status)}</td>
                     <td class="p-2">Rs. ${order.totalAmount.toFixed(2)}</td>
-                    <td class="p-2">${bills[order.id].claimCode || '-'}</td>
-                    
+                    <td class="p-2">${billCache[order.id]?.claimCode || '-'}</td>
                     <td class="p-2">
-                        ${order.status == 0 ? `<button class="edit-order text-accent3 hover:text-accent4" data-order-id="${escapeHtml(order.id)}" data-status="${order.status}" data-claim-code="${escapeHtml(bills[order.id].claimCode || '')}">Edit</button>` : ''}
+                        ${order.status === 0 ? `
+                            <div class="flex space-x-2">
+                                <button class="edit-order bg-accent3 text-white px-3 py-1 rounded hover:bg-accent4" data-order-id="${escapeHtml(order.id)}" data-status="${order.status}" data-claim-code="${escapeHtml(billCache[order.id]?.claimCode || '')}">Edit</button>
+                            </div>
+                        ` : ''}
                     </td>
                 </tr>
             `).join('');
+
+            const totalPages = Math.ceil(orders.length / pageSize);
+            createPaginationControls('pagination-container', totalPages, page, (newPage) => {
+                currentPage = newPage;
+                renderOrders(newPage, allOrders);
+            });
 
             document.querySelectorAll('.edit-order').forEach(button => {
                 button.addEventListener('click', () => {
@@ -189,7 +322,7 @@
                                 <input id="edit-claim-code" type="text" value="${currentClaimCode}" class="w-full p-2 border border-accent1 rounded" maxlength="6">
                             </div>
                             <div class="flex justify-end space-x-2">
-                                <button id="save-order" class="bg-accent3 text-white px-4 py-2 rounded hover:bg-accent2">Save</button>
+                                <button id="save-order" class="bg-accent3 text-white px-4 py-2 rounded hover:bg-accent4">Save</button>
                                 <button id="cancel-edit" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
                             </div>
                             <p id="edit-error" class="hidden text-red-600 mt-2"></p>
@@ -215,7 +348,7 @@
                         if (success) {
                             document.body.removeChild(editForm);
                             showSuccess("Order updated successfully.");
-                            setTimeout(() => location.reload(), 1000);
+                            setTimeout(() => loadOrders(), 1000);
                         }
                     });
 
@@ -226,6 +359,59 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", loadOrders);
+        async function loadOrders() {
+            if (!window.isAuthenticated || (!window.isAdmin && !window.isStaff)) {
+                showError("Access restricted to admins and staff.");
+                setTimeout(() => window.location.href = '/', 1000);
+                return;
+            }
+
+            const orders = await fetchOrders();
+            if (!orders || orders.length === 0) {
+                loading.classList.add("hidden");
+                noOrders.classList.remove("hidden");
+                return;
+            }
+
+            // Fetch bill details for each order
+            for (const order of orders) {
+                billCache[order.id] = await fetchBill(order.id);
+            }
+
+            originalOrders = [...orders];
+            allOrders = [...orders];
+
+            loading.classList.add("hidden");
+            orderList.classList.remove("hidden");
+            renderOrders(currentPage, allOrders);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const filterButton = document.getElementById('filter-button');
+            const filterSection = document.getElementById('filter-section');
+            const filterForm = document.getElementById('filter-form');
+            const clearFiltersButton = document.getElementById('clear-filters');
+
+            filterButton.addEventListener('click', () => {
+                filterSection.classList.toggle('hidden');
+            });
+
+            filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const params = getFilterParams();
+                allOrders = filterOrders(originalOrders, params);
+                currentPage = 1;
+                renderOrders(currentPage, allOrders);
+            });
+
+            clearFiltersButton.addEventListener('click', () => {
+                clearFilters();
+                allOrders = [...originalOrders];
+                currentPage = 1;
+                renderOrders(currentPage, allOrders);
+            });
+
+            loadOrders();
+        });
     </script>
 }

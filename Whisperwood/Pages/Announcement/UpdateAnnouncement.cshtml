@@ -41,7 +41,7 @@
             </div>
             <div class="flex justify-end gap-2">
                 <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Update Announcement</button>
-                <div onclick="history.back()" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</div>
+                <a href="/Announcement/ManageAnnouncement" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</a>
             </div>
         </form>
     </div>
@@ -91,19 +91,6 @@
             const form = document.getElementById('announcement-form');
             const errorMessage = document.getElementById('error-message');
             const successMessage = document.getElementById('success-message');
-
-            if (!form || !errorMessage || !successMessage) {
-                console.error('One or more DOM elements not found:', {
-                    form: !!form,
-                    errorMessage: !!errorMessage,
-                    successMessage: !!successMessage
-                });
-                if (errorMessage) {
-                    errorMessage.textContent = 'Page setup error. Please refresh the page.';
-                    errorMessage.classList.remove('hidden');
-                }
-                return;
-            }
 
             const announcementId = window.location.pathname.split('/').pop();
             if (!announcementId) {
