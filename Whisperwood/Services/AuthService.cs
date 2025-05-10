@@ -81,7 +81,25 @@ namespace Whisperwood.Services
             {
                 return new NotFoundObjectResult(new { message = "User not found" });
             }
-            return new OkObjectResult(user);
+
+            var dto = new UserResponseDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                ImageURL = user.ImageURL,
+                MembershipId = user.MembershipId,
+                OrdersCount = user.OrdersCount,
+                IsAdmin = user.IsAdmin,
+                IsStaff = user.IsStaff,
+                IsActive = user.IsActive
+            };
+
+            return new OkObjectResult(dto);
         }
+
+
     }
 }

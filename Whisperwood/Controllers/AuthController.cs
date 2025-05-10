@@ -54,8 +54,9 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetUser()
         {
             var userId = GetLoggedInUserId();
-            var user = await authService.GetUserByIdAsync(userId);
-            return Ok(user);
+            return await authService.GetUserByIdAsync(userId);
         }
+
+
     }
 }

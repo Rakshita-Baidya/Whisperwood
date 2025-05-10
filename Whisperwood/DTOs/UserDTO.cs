@@ -35,4 +35,20 @@ namespace Whisperwood.DTOs
         public bool? IsAdmin { get; set; }
         public bool? IsActive { get; set; }
     }
+    public class UserResponseDto
+    {
+        public Guid Id { get; set; }
+        public string UserName { get; set; } = default!;
+        public string Name { get; set; } = default!;
+        public string Email { get; set; } = default!;
+        public string? PhoneNumber { get; set; }
+        public string? ImageURL { get; set; }
+
+        public Guid MembershipId { get; set; }
+        public int OrdersCount { get; set; }
+        public bool? IsAdmin { get; set; }
+        public bool? IsStaff { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
 }

@@ -10,7 +10,6 @@ namespace Whisperwood.Models
         public required string Name { get; set; }
         public string? ImageURL { get; set; }
         public Guid MembershipId { get; set; } = Guid.NewGuid();
-        public bool IsEligibleForDiscount { get; set; } = false;
         public int OrdersCount { get; set; } = 0;
         public bool? IsAdmin { get; set; } = false;
         public bool? IsStaff { get; set; } = false;
