@@ -1,0 +1,303 @@
+﻿@page
+@model Whisperwood.Pages.Promotion.ManagePromotionModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Manage Promotions";
+}
+
+<div class="px-4 py-8">
+    <div class="mb-4 flex justify-between">
+        <h1 class="text-accent4 text-center text-4xl font-bold">Manage Promotions</h1>
+        <div class="flex space-x-4 text-white">
+            <a href="/Promotion/AddPromotion" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Promotion</a>
+            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Filter</button>
+        </div>
+    </div>
+    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
+    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
+    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
+        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
+                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by name or code">
+            </div>
+            <div>
+                <label for="sortBy" class="text-accent3 mb-1 block font-medium">Sort By</label>
+                <select id="sortBy" name="sortBy" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="name">Name</option>
+                    <option value="startDate">Start Date</option>
+                    <option value="endDate">End Date</option>
+                    <option value="discountPercent">Discount Percent</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortOrder" class="text-accent3 mb-1 block font-medium">Sort Order</label>
+                <select id="sortOrder" name="sortOrder" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <div>
+                <label for="isActive" class="text-accent3 mb-1 block font-medium">Status</label>
+                <select id="isActive" name="isActive" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="">All</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+            <div>
+                <label for="minStartDate" class="text-accent3 mb-1 block font-medium">Min Start Date</label>
+                <input type="date" id="minStartDate" name="minStartDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div>
+                <label for="maxEndDate" class="text-accent3 mb-1 block font-medium">Max End Date</label>
+                <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div class="flex items-end col-start-4 justify-end gap-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
+                <button type="button" id="clear-filters" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="promotion-list" class="space-y-4">
+        <div class="overflow-x-auto">
+            <table id="promotions-table" class="min-w-full border-accent4 border-b">
+                <thead>
+                    <tr class="bg-accent3 text-white">
+                        <th class="px-4 py-2 text-left">Name</th>
+                        <th class="px-4 py-2 text-left">Description</th>
+                        <th class="px-4 py-2 text-left">Code</th>
+                        <th class="px-4 py-2 text-left">Discount (%)</th>
+                        <th class="px-4 py-2 text-left">Start Date</th>
+                        <th class="px-4 py-2 text-left">End Date</th>
+                        <th class="px-4 py-2 text-left">Status</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="promotions-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="no-promotions" class="text-accent2 mt-4 hidden text-center text-lg">No promotions found.</div>
+
+    <div id="pagination-container" class="mt-6 flex justify-center gap-2"></div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPage = 1;
+        const pageSize = 10;
+        let allPromotions = [];
+        let originalPromotions = [];
+
+        function renderPromotions(page) {
+            const promotionsTableBody = document.getElementById('promotions-table-body');
+            const noPromotionsElement = document.getElementById('no-promotions');
+            const paginationContainer = document.getElementById('pagination-container');
+
+            promotionsTableBody.innerHTML = '';
+
+            if (allPromotions.length === 0) {
+                noPromotionsElement.classList.remove('hidden');
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            noPromotionsElement.classList.add('hidden');
+
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allPromotions.length);
+            const paginatedPromotions = allPromotions.slice(startIndex, endIndex);
+
+            if (paginatedPromotions.length > 0) {
+                paginatedPromotions.forEach(promotion => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-t border-accent4';
+                    row.innerHTML = `
+                        <td class="px-4 py-2 text-accent3 font-semibold truncate">${promotion.name}</td>
+                        <td class="px-4 py-2 text-accent1 truncate">${promotion.description || ''}</td>
+                        <td class="px-4 py-2 text-accent1">${promotion.code}</td>
+                        <td class="px-4 py-2 text-accent1">${promotion.discountPercent}</td>
+                        <td class="px-4 py-2 text-accent1">${promotion.startDate}</td>
+                        <td class="px-4 py-2 text-accent1">${promotion.endDate}</td>
+                        <td class="px-4 py-2 text-accent1">${promotion.isActive ? 'Active' : 'Inactive'}</td>
+                        <td class="px-4 py-2">
+                            <div class="flex space-x-2 justify-center">
+                                <a href="/Promotion/UpdatePromotion/${promotion.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
+                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" onclick="deletePromotion('${promotion.id}', '${promotion.name}')">Delete</button>
+                            </div>
+                        </td>
+                    `;
+                    promotionsTableBody.appendChild(row);
+                });
+
+                const totalPages = Math.ceil(allPromotions.length / pageSize);
+                createPaginationControls('pagination-container', totalPages, page, (newPage) => {
+                    currentPage = newPage;
+                    renderPromotions(newPage);
+                });
+            } else {
+                noPromotionsElement.classList.remove('hidden');
+                paginationContainer.innerHTML = '';
+            }
+        }
+
+        async function fetchPromotions() {
+            const errorMessageElement = document.getElementById('error-message');
+
+            errorMessageElement.classList.add('hidden');
+
+            try {
+                const response = await fetch('https://localhost:7018/api/Promotion/getall');
+                if (!response.ok) {
+                    throw new Error('Failed to load promotions. Please try again later.');
+                }
+
+                originalPromotions = await response.json();
+                allPromotions = [...originalPromotions];
+                renderPromotions(currentPage);
+            } catch (error) {
+                console.error('Error fetching promotions:', error);
+                errorMessageElement.textContent = error.message;
+                errorMessageElement.classList.remove('hidden');
+            }
+        }
+
+        async function deletePromotion(promotionId, promotionName) {
+            if (!confirm(`Are you sure you want to delete ${promotionName}?`)) {
+                return;
+            }
+
+            const errorMessageElement = document.getElementById('error-message');
+            const successMessageElement = document.getElementById('success-message');
+
+            errorMessageElement.classList.add('hidden');
+            successMessageElement.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://localhost:7018/api/Promotion/delete/${promotionId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete promotion.');
+                }
+
+                successMessageElement.textContent = 'Promotion deleted successfully!';
+                successMessageElement.classList.remove('hidden');
+
+                await fetchPromotions();
+            } catch (error) {
+                console.error('Error deleting promotion:', error);
+                errorMessageElement.textContent = error.message;
+                errorMessageElement.classList.remove('hidden');
+            }
+        }
+
+        function getFilterParams() {
+            return {
+                search: document.getElementById('search').value.toLowerCase(),
+                minStartDate: document.getElementById('minStartDate').value,
+                maxEndDate: document.getElementById('maxEndDate').value,
+                isActive: document.getElementById('isActive').value,
+                sortBy: document.getElementById('sortBy').value,
+                sortOrder: document.getElementById('sortOrder').value
+            };
+        }
+
+        function filterPromotions(promotions, params) {
+            let filtered = [...promotions];
+
+            // Filter by name or code
+            if (params.search) {
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(params.search) ||
+                    p.code.toLowerCase().includes(params.search)
+                );
+            }
+
+            // Filter by minStartDate
+            if (params.minStartDate) {
+                filtered = filtered.filter(p => {
+                    const startDate = new Date(p.startDate);
+                    const minDate = new Date(params.minStartDate);
+                    return startDate >= minDate;
+                });
+            }
+
+            // Filter by maxEndDate
+            if (params.maxEndDate) {
+                filtered = filtered.filter(p => {
+                    const endDate = new Date(p.endDate);
+                    const maxDate = new Date(params.maxEndDate);
+                    return endDate <= maxDate;
+                });
+            }
+
+            // Filter by isActive
+            if (params.isActive !== '') {
+                const isActive = params.isActive === 'true';
+                filtered = filtered.filter(p => p.isActive === isActive);
+            }
+
+            // Sort
+            filtered.sort((a, b) => {
+                const fieldA = params.sortBy === 'name' ? a.name.toLowerCase() :
+                              params.sortBy === 'startDate' ? new Date(a.startDate) :
+                              params.sortBy === 'endDate' ? new Date(a.endDate) :
+                              a.discountPercent;
+                const fieldB = params.sortBy === 'name' ? b.name.toLowerCase() :
+                              params.sortBy === 'startDate' ? new Date(b.startDate) :
+                              params.sortBy === 'endDate' ? new Date(b.endDate) :
+                              b.discountPercent;
+                const comparison = fieldA > fieldB ? 1 : fieldA < fieldB ? -1 : 0;
+                return params.sortOrder === 'asc' ? comparison : -comparison;
+            });
+
+            return filtered;
+        }
+
+        function clearFilters() {
+            document.getElementById('search').value = '';
+            document.getElementById('minStartDate').value = '';
+            document.getElementById('maxEndDate').value = '';
+            document.getElementById('isActive').value = '';
+            document.getElementById('sortBy').value = 'name';
+            document.getElementById('sortOrder').value = 'asc';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterButton = document.getElementById('filter-button');
+            const filterSection = document.getElementById('filter-section');
+            const filterForm = document.getElementById('filter-form');
+            const clearFiltersButton = document.getElementById('clear-filters');
+
+            filterButton.addEventListener('click', () => {
+                filterSection.classList.toggle('hidden');
+            });
+
+            filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const params = getFilterParams();
+                allPromotions = filterPromotions(originalPromotions, params);
+                currentPage = 1;
+                renderPromotions(currentPage);
+            });
+
+            clearFiltersButton.addEventListener('click', () => {
+                clearFilters();
+                allPromotions = [...originalPromotions];
+                currentPage = 1;
+                renderPromotions(currentPage);
+            });
+
+            fetchPromotions();
+        });
+    </script>
+}

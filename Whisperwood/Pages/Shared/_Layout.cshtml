@@ -18,7 +18,7 @@
     <script src="/js/announcement.js"></script>
     <script src="/js/promotion.js"></script>
 </head>
-<body class="bg-primary h-screen min-h-screen font-sans">
+<body class="bg-primary font-sans flex flex-col min-h-screen">
     @{
         var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
         var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
@@ -58,7 +58,7 @@
 
     @if (!hideNavbar)
     {
-        <header class="bg-primary border-accent4 border-b-[1.6px] p-4 text-white">
+        <header class="bg-primary border-accent4 border-b-[1.6px] sticky top-0 z-50 p-4 text-white">
             <nav class="flex items-center justify-between px-12">
                 <h1 class="text-accent3 text-4xl font-bold">Whisperwood</h1>
                 <div class="relative flex items-center space-x-4 text-lg font-semibold">
@@ -102,12 +102,10 @@
                         </button>
                         <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" /></svg>
-                            @* Announcements *@
                         </button>
                     }
                     else
                     {
-
                         <a href="/User/Login" class="text-accent3 hover:text-accent4">Login</a>
                     }
                 </div>
@@ -149,9 +147,10 @@
         </div>
     </div>
 
-    <main class="container mx-auto p-4">
+    <main class="container mx-auto p-4 flex-grow">
         @RenderBody()
     </main>
+
     @if (!hideNavbar)
     {
         <footer class="bg-accent4 text-center text-white">
@@ -234,13 +233,10 @@
                 }
             });
 
-            // Initialize announcements
-            announcement.init(user);
-
             if (window.isAuthenticated) {
+                announcement.init(window.isAuthenticated);
                 promotion.init(window.isAuthenticated);
             }
-
         });
     </script>
 </body>

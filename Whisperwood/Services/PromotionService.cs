@@ -59,6 +59,23 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetAllPromotionsAsync()
         {
             var promotions = await dbContext.Promotions.Include(p => p.User).ToListAsync();
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            bool hasChanges = false;
+
+            foreach (var promotion in promotions)
+            {
+                bool shouldBeActive = promotion.StartDate <= currentDate && currentDate <= promotion.EndDate;
+                if (promotion.IsActive != shouldBeActive)
+                {
+                    promotion.IsActive = shouldBeActive;
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                await dbContext.SaveChangesAsync();
+            }
             return new OkObjectResult(promotions);
         }
 
@@ -142,6 +159,12 @@ namespace Whisperwood.Services
             {
                 message = "Promotion deleted successfully"
             });
+        }
+
+        private bool CalculateIsActive(DateOnly startDate, DateOnly endDate)
+        {
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            return startDate <= currentDate && currentDate <= endDate;
         }
 
         public async Task<(Promotions? Promotion, string? Error)> ValidatePromoCodeAsync(Guid userId, string? promoCode)
