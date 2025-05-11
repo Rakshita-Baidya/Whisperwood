@@ -50,7 +50,7 @@ namespace Whisperwood.Services
                 UserId = userId,
                 User = user
             };
-
+            RecalculateIsActive(promotion);
             dbContext.Promotions.Add(promotion);
             await dbContext.SaveChangesAsync();
             return new OkObjectResult(promotion);
@@ -59,15 +59,14 @@ namespace Whisperwood.Services
         public async Task<IActionResult> GetAllPromotionsAsync()
         {
             var promotions = await dbContext.Promotions.Include(p => p.User).ToListAsync();
-            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
             bool hasChanges = false;
 
             foreach (var promotion in promotions)
             {
-                bool shouldBeActive = promotion.StartDate <= currentDate && currentDate <= promotion.EndDate;
-                if (promotion.IsActive != shouldBeActive)
+                bool previousState = promotion.IsActive;
+                RecalculateIsActive(promotion);
+                if (promotion.IsActive != previousState)
                 {
-                    promotion.IsActive = shouldBeActive;
                     hasChanges = true;
                 }
             }
@@ -76,18 +75,34 @@ namespace Whisperwood.Services
             {
                 await dbContext.SaveChangesAsync();
             }
+
             return new OkObjectResult(promotions);
         }
+
 
         public async Task<IActionResult> GetPromotionByIdAsync(Guid userId, Guid id)
         {
             var user = await dbContext.Users.FindAsync(userId);
             var promotion = await dbContext.Promotions.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
-            return promotion != null ? new OkObjectResult(promotion) : new NotFoundObjectResult(new
+
+            if (promotion == null)
             {
-                message = "Promotion not found!"
-            });
+                return new NotFoundObjectResult(new
+                {
+                    message = "Promotion not found!"
+                });
+            }
+
+            var previousState = promotion.IsActive;
+            RecalculateIsActive(promotion);
+            if (promotion.IsActive != previousState)
+            {
+                await dbContext.SaveChangesAsync();
+            }
+
+            return new OkObjectResult(promotion);
         }
+
 
         public async Task<IActionResult> UpdatePromotionAsync(Guid userId, Guid id, PromotionUpdateDto dto)
         {
@@ -126,6 +141,7 @@ namespace Whisperwood.Services
             if (dto.StartDate != null) promotion.StartDate = (DateOnly)dto.StartDate;
             if (dto.EndDate != null) promotion.EndDate = (DateOnly)dto.EndDate;
 
+            RecalculateIsActive(promotion);
             await dbContext.SaveChangesAsync();
             return new OkObjectResult(promotion);
         }
@@ -161,11 +177,12 @@ namespace Whisperwood.Services
             });
         }
 
-        private bool CalculateIsActive(DateOnly startDate, DateOnly endDate)
+        private void RecalculateIsActive(Promotions promotion)
         {
-            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
-            return startDate <= currentDate && currentDate <= endDate;
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+            promotion.IsActive = promotion.StartDate <= currentDate && currentDate <= promotion.EndDate;
         }
+
 
         public async Task<(Promotions? Promotion, string? Error)> ValidatePromoCodeAsync(Guid userId, string? promoCode)
         {

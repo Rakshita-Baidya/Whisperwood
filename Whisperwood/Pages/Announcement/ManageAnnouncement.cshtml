@@ -10,7 +10,7 @@
         <h1 class="text-accent4 text-center text-4xl font-bold">Manage Announcements</h1>
         <div class="flex space-x-4 text-white">
             <a href="/Announcement/AddAnnouncement" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Announcement</a>
-            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Filter</button>
+            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Filter Announcement</button>
         </div>
     </div>
     <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
@@ -181,11 +181,12 @@
         const deleteAnnouncement = async (announcementId, announcementTitle) => {
             // confirm deletion
             const result = await Swal.fire({
-                title: `Are you sure you want to delete the announcement ${announcementTitle}?`,
+                title: `Are you sure you want to delete the announcement "${announcementTitle}"?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Delete',
-                cancelButtonText: 'Cancel'
+                confirmButtonColor: 'red',
+                cancelButtonColor: 'grey',
+                confirmButtonText: 'Delete'
             });
 
             if (!result.isConfirmed) return;
