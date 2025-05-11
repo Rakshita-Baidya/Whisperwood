@@ -8,6 +8,7 @@ using Whisperwood.DatabaseContext;
 using Whisperwood.Interfaces;
 using Whisperwood.Models;
 using Whisperwood.Services;
+using Whisperwood.Signals;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
-
+builder.Services.AddSignalR();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -53,17 +54,16 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 builder.Services.AddDbContext<WhisperwoodDbContext>(
     (optionsBuilder) =>
     {
         optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
     }
-    );
+);
 
 builder.Services.Configure<JwtTokenInfo>(
     builder.Configuration.GetSection("jwt")
-    );
+);
 
 builder.Services.AddIdentity<Users, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<WhisperwoodDbContext>()
@@ -85,7 +85,6 @@ builder.Services.AddScoped<IPromotionService, PromotionService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IWishlistItemService, WishlistItemService>();
-
 
 JwtTokenInfo? tokenInfo = builder.Configuration.GetSection("jwt").Get<JwtTokenInfo>();
 
@@ -114,8 +113,7 @@ builder.Services.AddAuthentication(
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenInfo.Key!))
             };
         }
-
-    );
+);
 
 var app = builder.Build();
 
@@ -140,11 +138,15 @@ app.UseAuthorization();
 app.MapGet("/", async context =>
 {
     context.Response.Redirect("/Index");
-
     await Task.CompletedTask;
 });
 
-app.MapControllers();
-app.MapRazorPages();
+// Map endpoints
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<OrderHub>("/orderHub");
+    endpoints.MapControllers();
+    endpoints.MapRazorPages();
+});
 
 app.Run();

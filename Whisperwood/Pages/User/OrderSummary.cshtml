@@ -6,33 +6,33 @@
 }
 
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold text-center text-accent4 mb-6">Order Summary</h1>
+    <h1 class="text-accent4 mb-6 text-center text-3xl font-bold">Order Summary</h1>
 
-    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
-    <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
+    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
+    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="lg:col-span-2">
             <div class="overflow-x-auto">
-                <table id="order-item-table" class="w-full border-collapse border border-accent1">
+                <table id="order-item-table" class="border-accent1 w-full border-collapse border">
                     <thead>
                         <tr class="bg-accent4 text-white">
-                            <th class="border border-accent1 p-3 text-left">Book</th>
-                            <th class="border border-accent1 p-3 text-left">Unit Cost</th>
-                            <th class="border border-accent1 p-3 text-left">Quantity</th>
-                            <th class="border border-accent1 p-3 text-left">Price</th>
+                            <th class="border-accent1 border p-3 text-left">Book</th>
+                            <th class="border-accent1 border p-3 text-left">Unit Cost</th>
+                            <th class="border-accent1 border p-3 text-left">Quantity</th>
+                            <th class="border-accent1 border p-3 text-left">Price</th>
                         </tr>
                     </thead>
                     <tbody id="order-item-list" class="space-y-2"></tbody>
                 </table>
             </div>
-            <p id="no-order-items" class="hidden text-center text-accent2 text-lg mt-4">No items in your order.</p>
+            <p id="no-order-items" class="text-accent2 mt-4 hidden text-center text-lg">No items in your order.</p>
         </div>
 
         <div class="lg:col-span-1">
-            <div class="bg-primary border border-accent1 p-6 rounded shadow">
-                <h2 class="text-xl font-semibold text-accent4 mb-4">Order Summary</h2>
-                <div class="space-y-2 text-accent2">
+            <div class="bg-primary border-accent1 rounded border p-6 shadow">
+                <h2 class="text-accent4 mb-4 text-xl font-semibold">Order Summary</h2>
+                <div class="text-accent2 space-y-2">
                     <p><span class="font-medium">Subtotal (after book discounts):</span> Rs. <span id="order-subtotal">0.00</span></p>
                     <p id="book-discount-row" class="hidden"><span class="font-medium">Book Discounts (included in subtotal):</span> Rs. <span id="book-discount">0.00</span></p>
                     <p id="promo-row" class="hidden"><span class="font-medium">Promo Code:</span> <span id="promo-code"></span></p>
@@ -42,7 +42,7 @@
                     <p id="total-discount-row" class="hidden"><span class="font-medium">Total Additional Discount:</span> Rs. <span id="total-discount">0.00</span></p>
                     <p class="text-lg font-semibold"><span class="font-medium">Total:</span> Rs. <span id="order-total">0.00</span></p>
                 </div>
-                <button id="confirm-order" class="mt-4 w-full bg-accent3 rounded px-3 py-2 text-white hover:bg-accent2 hover:text-white">Confirm Order</button>
+                <button id="confirm-order" class="bg-accent3 mt-4 w-full rounded px-3 py-2 text-white hover:bg-accent2 hover:text-white">Confirm Order</button>
             </div>
         </div>
     </div>
@@ -104,12 +104,12 @@
                 const row = document.createElement("tr");
                 row.className = "border-b border-accent1 bg-primary";
                 row.innerHTML = `
-                    <td class="border border-accent1 p-3">
-                        <p class="text-lg font-semibold text-accent3">${item.book.title} <span class="text-accent1 font-normal italic"> by ${authorNames}</span></p>
+                    <td class="border-accent1 border p-3">
+                        <p class="text-accent3 text-lg font-semibold">${item.book.title} <span class="text-accent1 font-normal italic"> by ${authorNames}</span></p>
                     </td>
-                    <td class="border border-accent1 p-3 text-accent1">${isOnSale ? `<span class="text-red-500">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${item.book.price.toFixed(2)}</span>` : `Rs. ${item.book.price.toFixed(2)}`}</td>
-                    <td class="border border-accent1 p-3 text-accent1">${item.quantity}</td>
-                    <td class="border border-accent1 p-3 text-accent1">Rs. ${item.subTotal.toFixed(2)}</td>
+                    <td class="border-accent1 text-accent1 border p-3">${isOnSale ? `<span class="text-red-500">Rs. ${effectivePrice.toFixed(2)}</span> <span class="text-accent1 line-through">Rs. ${item.book.price.toFixed(2)}</span>` : `Rs. ${item.book.price.toFixed(2)}`}</td>
+                    <td class="border-accent1 text-accent1 border p-3">${item.quantity}</td>
+                    <td class="border-accent1 text-accent1 border p-3">Rs. ${item.subTotal.toFixed(2)}</td>
                 `;
                 list.appendChild(row);
             });
@@ -167,7 +167,7 @@
                 localStorage.removeItem('orderData');
                 setTimeout(() => {
                     window.location.href = '/User/UserCart';
-                }, 2000);
+                }, 5000);
             } catch (err) {
                 console.error('Error placing order:', err);
                 showError(err.message);

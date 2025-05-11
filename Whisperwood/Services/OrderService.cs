@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
 using Whisperwood.DTOs;
 using Whisperwood.Interfaces;
 using Whisperwood.Models;
+using Whisperwood.Signals;
 
 namespace Whisperwood.Services
 {
@@ -13,13 +15,15 @@ namespace Whisperwood.Services
         private readonly IBillService billService;
         private readonly IPromotionService promotionService;
         private readonly IDiscountCodeService discountService;
+        private readonly IHubContext<OrderHub> hubContext;
 
-        public OrderService(WhisperwoodDbContext dbContext, IBillService billService, IPromotionService promotionService, IDiscountCodeService discountService)
+        public OrderService(WhisperwoodDbContext dbContext, IBillService billService, IPromotionService promotionService, IDiscountCodeService discountService, IHubContext<OrderHub> hubContext)
         {
             this.dbContext = dbContext;
             this.billService = billService;
             this.promotionService = promotionService;
             this.discountService = discountService;
+            this.hubContext = hubContext;
         }
 
         private decimal CalculateEffectivePrice(Books book)
@@ -39,6 +43,8 @@ namespace Whisperwood.Services
 
         public async Task<IActionResult> AddOrderAsync(Guid userId, OrderDto dto)
         {
+            Console.WriteLine($"OrderService: Processing order for user {userId}");
+
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
                 return new NotFoundObjectResult(new { message = "User not found." });
@@ -57,6 +63,7 @@ namespace Whisperwood.Services
                 return new BadRequestObjectResult(promoError);
 
             // Validate stock and calculate subtotal
+            var orderedBooks = new List<string>();
             decimal subTotal = 0;
             decimal bookDiscount = 0;
             var orderItems = new List<OrderItem>();
@@ -66,6 +73,8 @@ namespace Whisperwood.Services
                 var book = cartItem.Book;
                 if (cartItem.Quantity > book.Stock)
                     return new BadRequestObjectResult($"Not enough stock for: {book.Title}");
+
+                orderedBooks.Add(book.Title);
 
                 decimal effectivePrice = CalculateEffectivePrice(book);
                 decimal originalPrice = book.Price;
@@ -136,6 +145,11 @@ namespace Whisperwood.Services
             user.OrdersCount += 1;
             await dbContext.SaveChangesAsync();
 
+            // Broadcast order announcement via notifier
+            string message = $"New order placed with books: {string.Join(", ", orderedBooks)}";
+            await hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", message);
+
+            Console.WriteLine(message);
             // Generate bill
             var pdfBytes = await billService.GenerateBillPdfAsync(order.Id);
 
