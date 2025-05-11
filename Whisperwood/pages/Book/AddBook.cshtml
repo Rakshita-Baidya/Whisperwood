@@ -8,22 +8,19 @@
 <div class="px-4 py-8">
     <h1 class="text-accent4 mb-6 text-center text-4xl font-bold">Add New Book</h1>
 
-    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
-    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
-
     <form id="add-book-form" class="bg-primary border-accent3 mx-auto rounded-lg border p-6 shadow-md">
-        <div class="text-accent4 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div class="text-accent4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
                 <label for="title" class="mb-1 block font-medium">Title</label>
                 <input type="text" id="title" name="title" class="border-accent1 w-full rounded border p-2" placeholder="Enter book title" required>
             </div>
             <div>
                 <label for="isbn" class="mb-1 block font-medium">ISBN</label>
-                <input type="text" id="isbn" name="isbn" class="border-accent1 w-full rounded border p-2" placeholder="e.g., 1551977867" required>
+                <input type="text" id="isbn" name="isbn" class="border-accent1 w-full rounded border p-2" placeholder="e.g., 9781234567890" required>
             </div>
             <div>
                 <label for="price" class="mb-1 block font-medium">Price</label>
-                <input type="number" id="price" name="price" class="border-accent1 w-full rounded border p-2" placeholder="Enter price" min="1" step="0.01" required>
+                <input type="number" id="price" name="price" class="border-accent1 w-full rounded border p-2" placeholder="Enter price" min="0.01" step="0.01" required>
             </div>
             <div>
                 <label for="stock" class="mb-1 block font-medium">Stock</label>
@@ -95,153 +92,199 @@
                 <select id="publishers" name="publisherIds" multiple class="border-accent1 w-full rounded border p-2">
                 </select>
             </div>
-            <div class="md:col-span-full">
+            <div class="col-span-full">
                 <label for="synopsis" class="mb-1 block font-medium">Synopsis</label>
-                <textarea id="synopsis" name="synopsis" class="border-accent1 w-full rounded border p-2" rows="4" placeholder="Enter book synopsis" required></textarea>
+                <textarea id="synopsis" name="synopsis" class="border-accent1 w-full rounded border p-2" rows="4" placeholder="Enter book synopsis"></textarea>
             </div>
         </div>
         <div class="mt-6 flex justify-center gap-4">
-            <button type="submit" class="bg-accent3 rounded px-6 py-2 text-white hover:bg-accent2">Add Book</button>
-            <div onclick="history.back()" class="rounded bg-gray-500 px-6 py-2 text-white hover:bg-gray-600">Cancel</div>
+            <button type="submit" class="bg-accent3 rounded px-6 py-2 text-white hover:bg-accent4">Add Book</button>
+            <button type="button" onclick="history.back()" class="rounded bg-gray-500 px-6 py-2 text-white hover:bg-gray-600">Cancel</button>
         </div>
     </form>
 </div>
 
 @section Scripts {
     <script>
-        async function fetchDropdownOptions() {
-            try {
-                // Fetch authors
-                const authorsResponse = await fetch('https://localhost:7018/api/Author/getall');
-                if (authorsResponse.ok) {
-                    const authors = await authorsResponse.json();
-                    const authorSelect = document.getElementById('authors');
-                    authors.forEach(author => {
-                        const option = document.createElement('option');
-                        option.value = author.id;
-                        option.textContent = author.name;
-                        authorSelect.appendChild(option);
-                    });
-                }
-
-                // Fetch genres
-                const genresResponse = await fetch('https://localhost:7018/api/Genre/getall');
-                if (genresResponse.ok) {
-                    const genres = await genresResponse.json();
-                    const genreSelect = document.getElementById('genres');
-                    genres.forEach(genre => {
-                        const option = document.createElement('option');
-                        option.value = genre.id;
-                        option.textContent = genre.name;
-                        genreSelect.appendChild(option);
-                    });
-                }
-
-                // Fetch categories
-                const categoriesResponse = await fetch('https://localhost:7018/api/Category/getall');
-                if (categoriesResponse.ok) {
-                    const categories = await categoriesResponse.json();
-                    const categorySelect = document.getElementById('categories');
-                    categories.forEach(category => {
-                        const option = document.createElement('option');
-                        option.value = category.id;
-                        option.textContent = category.name;
-                        categorySelect.appendChild(option);
-                    });
-                }
-
-                // Fetch publishers
-                const publishersResponse = await fetch('https://localhost:7018/api/Publisher/getall');
-                if (publishersResponse.ok) {
-                    const publishers = await publishersResponse.json();
-                    const publisherSelect = document.getElementById('publishers');
-                    publishers.forEach(publisher => {
-                        const option = document.createElement('option');
-                        option.value = publisher.id;
-                        option.textContent = publisher.name;
-                        publisherSelect.appendChild(option);
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching dropdown options:', error);
-                const errorMessageElement = document.getElementById('error-message');
-                if (errorMessageElement) {
-                    errorMessageElement.textContent = 'Failed to load dropdown options. Please try again later.';
-                    errorMessageElement.classList.remove('hidden');
-                }
+        // checks authentication and redirects if unauthorized
+        const checkAuth = () => {
+            if (!window.jwtToken) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please log in to add books'
+                }).then(() => {
+                    window.location.href = '/User/Login';
+                });
+                return false;
             }
-        }
+            return true;
+        };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('add-book-form');
-            const errorMessageElement = document.getElementById('error-message');
-            const successMessageElement = document.getElementById('success-message');
+        // validates form inputs
+        const validateForm = (formData) => {
+            const title = formData.get('title')?.trim();
+            if (!title) {
+                Toast.fire({ icon: 'error', title: 'Title is required' });
+                return false;
+            }
 
-            fetchDropdownOptions();
+            const isbn = formData.get('isbn')?.trim();
+            if (!isbn || !/^\d{10}$|^\d{13}$/.test(isbn)) {
+                Toast.fire({ icon: 'error', title: 'ISBN must be 10 or 13 digits' });
+                return false;
+            }
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            const price = parseFloat(formData.get('price'));
+            if (!price || price < 0.01) {
+                Toast.fire({ icon: 'error', title: 'Price must be at least 0.01' });
+                return false;
+            }
 
-                errorMessageElement.classList.add('hidden');
-                successMessageElement.classList.add('hidden');
+            const stock = parseInt(formData.get('stock'), 10);
+            if (isNaN(stock) || stock < 0) {
+                Toast.fire({ icon: 'error', title: 'Stock must be non-negative' });
+                return false;
+            }
 
-                const formData = new FormData(form);
-                const discountStartDate = formData.get('discountStartDate');
-                const discountEndDate = formData.get('discountEndDate');
+            const discount = parseFloat(formData.get('discountPercentage'));
+            if (discount && (discount < 0 || discount > 100)) {
+                Toast.fire({ icon: 'error', title: 'Discount must be between 0 and 100' });
+                return false;
+            }
 
-                // Client-side validation for discount dates
-                if (discountStartDate && discountEndDate && new Date(discountStartDate) > new Date(discountEndDate)) {
-                    errorMessageElement.textContent = 'Discount start date cannot be after end date.';
-                    errorMessageElement.classList.remove('hidden');
+            const language = formData.get('language')?.trim();
+            if (!language || !/^[a-zA-Z\s]+$/.test(language)) {
+                Toast.fire({ icon: 'error', title: 'Language must contain only letters' });
+                return false;
+            }
+
+            const edition = parseInt(formData.get('edition'), 10);
+            if (!edition || edition < 1) {
+                Toast.fire({ icon: 'error', title: 'Edition must be a positive number' });
+                return false;
+            }
+
+            const format = parseInt(formData.get('format'), 10);
+            if (isNaN(format)) {
+                Toast.fire({ icon: 'error', title: 'Format is required' });
+                return false;
+            }
+
+            const publishedDate = formData.get('publishedDate');
+            if (!publishedDate || new Date(publishedDate) > new Date()) {
+                Toast.fire({ icon: 'error', title: 'Published date must not be in the future' });
+                return false;
+            }
+
+            const synopsis = formData.get('synopsis')?.trim();
+            const authorIds = formData.getAll('authorIds');
+            const genreIds = formData.getAll('genreIds');
+            const categoryIds = formData.getAll('categoryIds');
+            const publisherIds = formData.getAll('publisherIds');
+            
+            const discountStartDate = formData.get('discountStartDate');
+            const discountEndDate = formData.get('discountEndDate');
+            if (discountStartDate && discountEndDate && new Date(discountStartDate) > new Date(discountEndDate)) {
+                Toast.fire({ icon: 'error', title: 'Discount start date cannot be after end date' });
+                return false;
+            }
+            if ((discountStartDate || discountEndDate) && new Date(discountStartDate || discountEndDate) < new Date().setHours(0, 0, 0, 0)) {
+                Toast.fire({ icon: 'error', title: 'Discount dates cannot be in the past' });
+                return false;
+            }
+
+            return true;
+        };
+
+        // submits book data to api
+        const submitForm = async (form) => {
+            if (!checkAuth()) return;
+
+            const formData = new FormData(form);
+            if (!validateForm(formData)) return;
+
+            const bookData = {
+                title: formData.get('title').trim(),
+                isbn: formData.get('isbn').trim(),
+                price: parseFloat(formData.get('price')),
+                discountPercentage: parseFloat(formData.get('discountPercentage')) || 0,
+                isOnSale: formData.get('isOnSale') === 'true',
+                discountStartDate: formData.get('discountStartDate') || null,
+                discountEndDate: formData.get('discountEndDate') || null,
+                synopsis: formData.get('synopsis').trim(),
+                publishedDate: formData.get('publishedDate'),
+                stock: parseInt(formData.get('stock'), 10),
+                language: formData.get('language').trim(),
+                format: parseInt(formData.get('format'), 10),
+                edition: parseInt(formData.get('edition'), 10),
+                authorIds: formData.getAll('authorIds').map(String),
+                genreIds: formData.getAll('genreIds').map(String),
+                categoryIds: formData.getAll('categoryIds').map(String),
+                publisherIds: formData.getAll('publisherIds').map(String),
+                coverImageId: "6ea3171c-6311-4203-9972-d87c8f06733c"
+            };
+
+            try {
+                const response = await fetch('https://localhost:7018/api/Book/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    },
+                    body: JSON.stringify(bookData)
+                });
+
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to add books'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
                     return;
                 }
 
-                const bookData = {
-                    title: formData.get('title'),
-                    isbn: formData.get('isbn'),
-                    price: parseFloat(formData.get('price')),
-                    discountPercentage: parseFloat(formData.get('discountPercentage')) || 0,
-                    isOnSale: formData.get('isOnSale') === 'true',
-                    discountStartDate: discountStartDate || null,
-                    discountEndDate: discountEndDate || null,
-                    synopsis: formData.get('synopsis'),
-                    publishedDate: formData.get('publishedDate'),
-                    stock: parseInt(formData.get('stock')),
-                    language: formData.get('language'),
-                    format: parseInt(formData.get('format')),
-                    edition: parseInt(formData.get('edition')),
-                    authorIds: Array.from(formData.getAll('authorIds')),
-                    genreIds: Array.from(formData.getAll('genreIds')),
-                    categoryIds: Array.from(formData.getAll('categoryIds')),
-                    publisherIds: Array.from(formData.getAll('publisherIds')),
-                    coverImageId: "6ea3171c-6311-4203-9972-d87c8f06733c"
-                };
-
-                try {
-                    const response = await fetch('https://localhost:7018/api/Book/add', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${window.jwtToken}`
-                        },
-                        body: JSON.stringify(bookData)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Failed to add book.');
-                    }
-
-                    successMessageElement.textContent = 'Book added successfully!';
-                    successMessageElement.classList.remove('hidden');
-
-                    form.reset();
-                } catch (error) {
-                    console.error('Error adding book:', error);
-                    errorMessageElement.textContent = error.message;
-                    errorMessageElement.classList.remove('hidden');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to add book');
                 }
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Book added successfully'
+                }).then(() => {
+                    window.location.href = '/Book/ManageBook';
+                });
+                clearForm();
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to add book'
+                });
+            }
+        };
+
+        // initializes event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = {
+                form: document.getElementById('add-book-form')
+            };
+
+            if (!elements.form) {
+                console.warn('form element missing');
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to initialize form'
+                });
+                return;
+            }
+
+            elements.form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitForm(elements.form);
             });
+
+            fetchBookDropdownOptions();
         });
     </script>
 }

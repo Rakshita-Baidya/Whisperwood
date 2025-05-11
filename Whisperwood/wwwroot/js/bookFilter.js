@@ -1,177 +1,216 @@
-﻿function getFilterParams() {
+﻿// gets book filter parameters from form
+function getBookFilterParams() {
     const form = document.getElementById('filter-form');
     if (!form) {
-        console.error('Filter form not found');
+        console.warn('filter form not found');
         return {};
     }
 
     const formData = new FormData(form);
     return {
-        authorIds: formData.getAll('authorIds'),
-        genreIds: formData.getAll('genreIds'),
-        publisherIds: formData.getAll('publisherIds'),
+        authorIds: formData.getAll('authorIds').map(String),
+        genreIds: formData.getAll('genreIds').map(String),
+        publisherIds: formData.getAll('publisherIds').map(String),
         formats: formData.getAll('formats').map(Number),
-        searchTerm: formData.get('search') || null,
+        searchTerm: formData.get('search')?.trim().toLowerCase() || null,
         minPrice: formData.get('minPrice') ? parseFloat(formData.get('minPrice')) : null,
         maxPrice: formData.get('maxPrice') ? parseFloat(formData.get('maxPrice')) : null,
         minRating: formData.get('minRating') ? parseFloat(formData.get('minRating')) : null,
-        language: formData.get('language') || null,
+        language: formData.get('language')?.trim().toLowerCase() || null,
         isAvailable: formData.get('isAvailable') ? formData.get('isAvailable') === 'true' : null,
-        sortBy: formData.get('sortBy') ? parseInt(formData.get('sortBy')) : null,
-        sortOrder: formData.get('sortOrder') ? parseInt(formData.get('sortOrder')) : null
+        sortBy: formData.get('sortBy') ? parseInt(formData.get('sortBy'), 10) : null,
+        sortOrder: formData.get('sortOrder') ? parseInt(formData.get('sortOrder'), 10) : null
     };
 }
 
+// validates book filter parameters
+function validateBookFilterParams(params) {
+    if (params.minPrice !== null && params.minPrice < 0) {
+        Toast.fire({ icon: 'error', title: 'Min price cannot be negative' });
+        return false;
+    }
+    if (params.maxPrice !== null && params.maxPrice < 0) {
+        Toast.fire({ icon: 'error', title: 'Max price cannot be negative' });
+        return false;
+    }
+    if (params.minPrice !== null && params.maxPrice !== null && params.maxPrice < params.minPrice) {
+        Toast.fire({ icon: 'error', title: 'Max price must be greater than or equal to min price' });
+        return false;
+    }
+    if (params.minRating !== null && (params.minRating < 0 || params.minRating > 5)) {
+        Toast.fire({ icon: 'error', title: 'Min rating must be between 0 and 5' });
+        return false;
+    }
+    if (params.language && !/^[a-zA-Z\s]+$/.test(params.language)) {
+        Toast.fire({ icon: 'error', title: 'Language must contain only letters' });
+        return false;
+    }
+    if (params.authorIds.length === 0 && document.getElementById('authors')?.selectedOptions.length > 0) {
+        Toast.fire({ icon: 'error', title: 'At least one author must be selected' });
+        return false;
+    }
+    if (params.genreIds.length === 0 && document.getElementById('genres')?.selectedOptions.length > 0) {
+        Toast.fire({ icon: 'error', title: 'At least one genre must be selected' });
+        return false;
+    }
+    if (params.publisherIds.length === 0 && document.getElementById('publishers')?.selectedOptions.length > 0) {
+        Toast.fire({ icon: 'error', title: 'At least one publisher must be selected' });
+        return false;
+    }
+    return true;
+}
+
+// filters books based on parameters
 function filterBooks(books, params) {
-    let filteredBooks = [...books];
-
-    // Apply filters
-    if (params.authorIds.length > 0) {
-        filteredBooks = filteredBooks.filter(book =>
-            book.authorBooks.some(ab => params.authorIds.includes(ab.author.id.toString()))
-        );
-    }
-
-    if (params.genreIds.length > 0) {
-        filteredBooks = filteredBooks.filter(book =>
-            book.genreBooks.some(gb => params.genreIds.includes(gb.genre.id.toString()))
-        );
-    }
-
-    if (params.publisherIds.length > 0) {
-        filteredBooks = filteredBooks.filter(book =>
-            params.publisherIds.includes(book.publisherId.toString())
-        );
-    }
-
-    if (params.formats.length > 0) {
-        filteredBooks = filteredBooks.filter(book =>
-            params.formats.includes(book.format)
-        );
-    }
-
-    if (params.searchTerm) {
-        const searchLower = params.searchTerm.toLowerCase();
-        filteredBooks = filteredBooks.filter(book =>
-            book.title.toLowerCase().includes(searchLower) ||
-            book.isbn.includes(searchLower) ||
-            book.synopsis.toLowerCase().includes(searchLower)   
-        );
-    }
-
-    if (params.minPrice !== null) {
-        filteredBooks = filteredBooks.filter(book => book.price >= params.minPrice);
-    }
-
-    if (params.maxPrice !== null) {
-        filteredBooks = filteredBooks.filter(book => book.price <= params.maxPrice);
-    }
-
-    if (params.minRating !== null) {
-        filteredBooks = filteredBooks.filter(book => book.averageRating >= params.minRating);
-    }
-
-    if (params.language) {
-        filteredBooks = filteredBooks.filter(book =>
-            book.language && book.language.toLowerCase() === params.language.toLowerCase()
-        );
-    }
-
-    if (params.isAvailable !== null) {
-        filteredBooks = filteredBooks.filter(book => book.stock > 0 === params.isAvailable);
-    }
-
-    // Apply sorting
-    if (params.sortBy !== null) {
-        filteredBooks.sort((a, b) => {
+    return books
+        .filter(book => params.authorIds.length === 0 || book.authorBooks?.some(ab => params.authorIds.includes(ab.author.id.toString())))
+        .filter(book => params.genreIds.length === 0 || book.genreBooks?.some(gb => params.genreIds.includes(gb.genre.id.toString())))
+        .filter(book => params.publisherIds.length === 0 || book.publisherBooks?.some(pb => params.publisherIds.includes(pb.publisher.id.toString())))
+        .filter(book => params.formats.length === 0 || params.formats.includes(book.format))
+        .filter(book => {
+            if (params.searchTerm) {
+                const searchLower = params.searchTerm.toLowerCase();
+                return book.title.toLowerCase().includes(searchLower) ||
+                    book.isbn?.toLowerCase().includes(searchLower) ||
+                    book.synopsis?.toLowerCase().includes(searchLower);
+            }
+            return true;
+        })
+        .filter(book => params.minPrice === null || book.price >= params.minPrice)
+        .filter(book => params.maxPrice === null || book.price <= params.maxPrice)
+        .filter(book => params.minRating === null || (book.averageRating || 0) >= params.minRating)
+        .filter(book => params.language === null || book.language?.toLowerCase() === params.language)
+        .filter(book => params.isAvailable === null || book.stock > 0 === params.isAvailable)
+        .sort((a, b) => {
+            if (params.sortBy === null) return 0;
             let valueA, valueB;
             switch (params.sortBy) {
-                case 0: // Title
+                case 0: // title
                     valueA = a.title.toLowerCase();
                     valueB = b.title.toLowerCase();
                     break;
-                case 1: // Publication Date
+                case 1: // publication date
                     valueA = new Date(a.publicationDate);
                     valueB = new Date(b.publicationDate);
                     break;
-                case 2: // Price
+                case 2: // price
                     valueA = a.price;
                     valueB = b.price;
                     break;
-                case 3: // Popularity
+                case 3: // popularity
                     valueA = a.averageRating || 0;
                     valueB = b.averageRating || 0;
                     break;
             }
-            if (params.sortOrder === 0) { // Ascending
-                return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-            } else { // Descending
-                return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
-            }
+            const comparison = valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+            return params.sortOrder === 0 ? comparison : -comparison;
         });
-    }
-
-    return filteredBooks;
 }
 
-async function fetchDropdownOptions() {
+// fetches dropdown options for book filters
+async function fetchBookDropdownOptions() {
+    // check authentication
+    if (!window.jwtToken) {
+        Toast.fire({
+            icon: 'error',
+            title: 'Please log in to view dropdown options'
+        }).then(() => {
+            window.location.href = '/User/Login';
+        });
+        return;
+    }
+
+    const authorsSelect = document.getElementById('authors');
+    const genresSelect = document.getElementById('genres');
+    const categoriesSelect = document.getElementById('categories');
+    const publishersSelect = document.getElementById('publishers');
+
+    if (!authorsSelect || !genresSelect || !publishersSelect) {
+        console.warn('dropdown elements not found');
+        Toast.fire({
+            icon: 'error',
+            title: 'Failed to initialize filter options'
+        });
+        return;
+    }
+
     try {
-        // Fetch authors
-        const authorsResponse = await fetch('https://localhost:7018/api/Author/getall');
+        // fetch authors
+        const authorsResponse = await fetch('https://localhost:7018/api/Author/getall', {
+            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
+        });
+        if (authorsResponse.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to view dropdown options'
+            }).then(() => {
+                window.location.href = '/User/Login';
+            });
+            return;
+        }
         if (!authorsResponse.ok) throw new Error('Failed to fetch authors');
         const authors = await authorsResponse.json();
-        const authorsSelect = document.getElementById('authors');
-        if (authorsSelect) {
-            authors.forEach(author => {
-                const option = document.createElement('option');
-                option.value = author.id;
-                option.textContent = author.name;
-                authorsSelect.appendChild(option);
-            });
-        }
+        authorsSelect.innerHTML = authors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
 
-        // Fetch genres
-        const genresResponse = await fetch('https://localhost:7018/api/Genre/getall');
+        // fetch genres
+        const genresResponse = await fetch('https://localhost:7018/api/Genre/getall', {
+            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
+        });
+        if (genresResponse.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to view dropdown options'
+            }).then(() => {
+                window.location.href = '/User/Login';
+            });
+            return;
+        }
         if (!genresResponse.ok) throw new Error('Failed to fetch genres');
         const genres = await genresResponse.json();
-        const genresSelect = document.getElementById('genres');
-        if (genresSelect) {
-            genres.forEach(genre => {
-                const option = document.createElement('option');
-                option.value = genre.id;
-                option.textContent = genre.name;
-                genresSelect.appendChild(option);
+        genresSelect.innerHTML = genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+
+        // fetch categories
+        if (categoriesSelect) {
+            const categoriesResponse = await fetch('https://localhost:7018/api/Category/getall', {
+                headers: { 'Authorization': `Bearer ${window.jwtToken}` }
             });
+            if (categoriesResponse.status === 401) throw new Error('Unauthorized');
+            if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+            const categories = await categoriesResponse.json();
+            categoriesSelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
-        // Fetch publishers
-        const publishersResponse = await fetch('https://localhost:7018/api/Publisher/getall');
+        // fetch publishers
+        const publishersResponse = await fetch('https://localhost:7018/api/Publisher/getall', {
+            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
+        });
+        if (publishersResponse.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to view dropdown options'
+            }).then(() => {
+                window.location.href = '/User/Login';
+            });
+            return;
+        }
         if (!publishersResponse.ok) throw new Error('Failed to fetch publishers');
         const publishers = await publishersResponse.json();
-        const publishersSelect = document.getElementById('publishers');
-        if (publishersSelect) {
-            publishers.forEach(publisher => {
-                const option = document.createElement('option');
-                option.value = publisher.id;
-                option.textContent = publisher.name;
-                publishersSelect.appendChild(option);
-            });
-        }
+        publishersSelect.innerHTML = publishers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
     } catch (error) {
-        console.error('Error fetching dropdown options:', error);
-        const errorMessageElement = document.getElementById('error-message');
-        if (errorMessageElement) {
-            errorMessageElement.textContent = 'Failed to load filter options.';
-            errorMessageElement.classList.remove('hidden');
-        }
+        Toast.fire({
+            icon: 'error',
+            title: error.message || 'Failed to load dropdown options'
+        });
     }
 }
 
-function clearFilters() {
+// clears book filter form inputs
+function clearBookFilters() {
     const form = document.getElementById('filter-form');
+    if (!form) {
+        console.warn('filter form not found');
+        return;
+    }
     form.reset();
-    const selects = form.querySelectorAll('select[multiple]');
-    selects.forEach(select => {
-        Array.from(select.options).forEach(option => option.selected = false);
-    });
 }
