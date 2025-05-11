@@ -8,28 +8,25 @@
 <div class="px-4 py-8">
     <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Add Announcement</h1>
 
-    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
-    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
-
     <div class="bg-primary border-accent3 mx-auto max-w-2xl rounded-lg border p-6 shadow-md">
         <form id="announcement-form" class="space-y-4">
             <div>
                 <label for="title" class="text-accent3 mb-1 block font-medium">Title</label>
-                <input type="text" id="title" name="title" class="border-accent1 w-full rounded border p-2" placeholder="Announcement Title" required>
+                <input type="text" id="title" name="title" class="border-accent1 w-full rounded border p-2" placeholder="Announcement Title" required />
             </div>
             <div>
                 <label for="message" class="text-accent3 mb-1 block font-medium">Message</label>
-                <textarea id="message" name="message" class="border-accent1 w-full rounded border p-2" rows="3" placeholder="Announcement Message" required></textarea>
+                <textarea id="message" name="message" class="border-accent1 w-full rounded border p-2" rows="3" placeholder="Announcement Message"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label for="startDate" class="text-accent3 mb-1 block font-medium">Start Date</label>
-                <input type="date" id="startDate" name="startDate" class="border-accent1 w-full rounded border p-2" required>
-            </div>
-            <div>
-                <label for="endDate" class="text-accent3 mb-1 block font-medium">End Date</label>
-                <input type="date" id="endDate" name="endDate" class="border-accent1 w-full rounded border p-2" required>
-            </div>
+                <div>
+                    <label for="startDate" class="text-accent3 mb-1 block font-medium">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="border-accent1 w-full rounded border p-2" required />
+                </div>
+                <div>
+                    <label for="endDate" class="text-accent3 mb-1 block font-medium">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="border-accent1 w-full rounded border p-2" required />
+                </div>
             </div>
             <div>
                 <label for="recipientGroups" class="text-accent3 mb-1 block font-medium">Recipient Groups</label>
@@ -49,80 +46,115 @@
 
 @section Scripts {
     <script>
-        function clearForm() {
-            const form = document.getElementById('announcement-form');
-            form.reset();
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message');
-            if (errorMessage) errorMessage.classList.add('hidden');
-            if (successMessage) successMessage.classList.add('hidden');
-        }
+        // clears the form and resets UI state
+        const clearForm = () => {
+            document.getElementById('announcement-form').reset();
+        };
 
+        // initializes form event listeners on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-
-            if (!window.jwtToken) {
-                window.location.href = '/User/Login';
-                return;
-            }
             const form = document.getElementById('announcement-form');
             const clearButton = document.getElementById('clear-form');
-            const errorMessage = document.getElementById('error-message');
-            const successMessage = document.getElementById('success-message');
 
+            // handle form submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const title = document.getElementById('title').value;
-                const message = document.getElementById('message').value;
+                // check authentication
+                if (!window.jwtToken) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to create an announcement.'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return;
+                }
+
+                // collect form data
+                const title = document.getElementById('title').value.trim();
+                const message = document.getElementById('message').value.trim();
                 const startDate = document.getElementById('startDate').value;
                 const endDate = document.getElementById('endDate').value;
                 const recipientGroups = Array.from(document.getElementById('recipientGroups').selectedOptions).map(option => option.value);
 
-                if (new Date(startDate) > new Date(endDate)) {
-                    errorMessage.textContent = 'Start Date cannot be after End Date.';
-                    errorMessage.classList.remove('hidden');
-                    successMessage.classList.add('hidden');
-                    return;
-                }
-                if (!recipientGroups.length) {
-                    errorMessage.textContent = 'At least one recipient group must be selected.';
-                    errorMessage.classList.remove('hidden');
-                    successMessage.classList.add('hidden');
+                // validate start date (not in past)
+                const today = new Date().setHours(0, 0, 0, 0);
+                const start = new Date(startDate);
+                if (isNaN(start) || start < today) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Start date must be today or in the future.'
+                    });
                     return;
                 }
 
-                const announcementDto = { title,message,startDate,endDate,recipientGroups};
+                // validate end date (after start date)
+                const end = new Date(endDate);
+                if (isNaN(end) || end < start) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'End date must be after start date.'
+                    });
+                    return;
+                }
+
+                // validate recipient groups (at least one selected)
+                if (!recipientGroups.length) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'At least one recipient group must be selected.'
+                    });
+                    return;
+                }
+
+                // prepare API payload
+                const announcementDto = {
+                    title,
+                    message,
+                    startDate,
+                    endDate,
+                    recipientGroups
+                };
 
                 try {
+                    // send announcement creation request
                     const response = await fetch('https://localhost:7018/api/Announcement/add', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${window.jwtToken || ''}`
+                            'Authorization': `Bearer ${window.jwtToken}`
                         },
                         body: JSON.stringify(announcementDto)
                     });
 
-                    const data = await response.json();
-
                     if (response.ok) {
-                        successMessage.textContent = 'Announcement created successfully!';
-                        successMessage.classList.remove('hidden');
-                        errorMessage.classList.add('hidden');
-                        form.reset();
+                        // show success toast and redirect
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Announcement created successfully!'
+                        }).then(() => {
+                            window.location.href = '/Announcement/ManageAnnouncement';
+                        });
+                        clearForm();
                     } else {
-                        errorMessage.textContent = data.message || 'Failed to create announcement.';
-                        errorMessage.classList.remove('hidden');
-                        successMessage.classList.add('hidden');
+                        // handle API error
+                        const data = await response.json();
+                        Toast.fire({
+                            icon: 'error',
+                            title: data.message || 'Failed to create announcement.'
+                        });
                     }
                 } catch (error) {
-                    console.error('Error creating announcement:', error);
-                    errorMessage.textContent = 'An error occurred while creating the announcement.';
-                    errorMessage.classList.remove('hidden');
-                    successMessage.classList.add('hidden');
+                    // handle network error
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Failed to connect to the server. Please try again.'
+                    });
                 }
             });
 
+            // handle clear button click
             clearButton.addEventListener('click', clearForm);
         });
     </script>
