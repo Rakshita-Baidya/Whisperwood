@@ -19,6 +19,26 @@
     <script src="/js/bookFilter.js"></script>
     <script src="/js/announcement.js"></script>
     <script src="/js/promotion.js"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #FFF5E6;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #d69f50;
+            border-radius: 8px;
+            border: 2px solid #d69f50;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #9d6c3b;
+        }
+    </style>
 </head>
 <body class="bg-[#FFF5E6] flex min-h-screen flex-col font-sans">
     @{
@@ -57,9 +77,6 @@
             }
         }
     }
-    <script>
-       
-    </script>
 
     @if (!hideNavbar)
     {

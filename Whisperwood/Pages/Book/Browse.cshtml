@@ -111,15 +111,6 @@
         let allBooks = [];
         let originalBooks = [];
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&")
-                .replace(/</g, "<")
-                .replace(/>/g, ">")
-                .replace(/"/g, "''")
-                .replace(/'/g, "'");
-        }
-
         function renderBooks(page) {
             const booksContainer = document.getElementById('books-container');
             const noBooksElement = document.getElementById('no-books');
@@ -153,11 +144,11 @@
                     bookElement.className = 'block bg-primary border-accent1 rounded-lg border-[2px] p-4 shadow-md transition-shadow hover:shadow-xl';
                     bookElement.innerHTML = `
                         ${book.coverImage && book.coverImage.coverImageURL
-                            ? `<img src="${book.coverImage.coverImageURL}" alt="${escapeHtml(book.title)}" class="mb-4 h-64 w-full rounded-md object-cover" />`
+                            ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-64 w-full rounded-md object-cover" />`
                             : `<div class="text-accent3 mb-4 h-64 w-full rounded-md flex items-center justify-center">No Image</div>`
                         }
-                        <h2 class="text-accent3 truncate text-xl font-semibold">${escapeHtml(book.title)}</h2>
-                        <p class="text-accent1 font-medium">${escapeHtml(authorNames)}</p>
+                        <h2 class="text-accent3 truncate text-xl font-semibold">${book.title}</h2>
+                        <p class="text-accent1 font-medium">${authorNames}</p>
                         <div class="mb-3 flex justify-between">
                             <p class="text-accent3">★ ${book.averageRating.toFixed(1)}</p>
                             <div class="text-right">
@@ -170,9 +161,6 @@
                         </div>
                         <div class="flex gap-2">
                             <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4"></button>
-                            <a href="/Review/BookReview?BookId=${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
-                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M12 4 9.22 9.27 3 10.11l4.5 4.1L6.44 20 12 17.27 17.56 20l-1.06-5.79 4.5-4.1-6.22-.84z"/></svg>
-                            </a>
                             <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4"></button>
                         </div>
                     `;
@@ -224,19 +212,19 @@
                 if (!authorResponse.ok) throw new Error('Failed to load authors.');
                 const authors = await authorResponse.json();
                 const authorSelect = document.getElementById('authors');
-                authorSelect.innerHTML = authors.map(author => `<option value="${author.id}">${escapeHtml(author.name)}</option>`).join('');
+                authorSelect.innerHTML = authors.map(author => `<option value="${author.id}">${author.name}</option>`).join('');
 
                 const genreResponse = await fetch('https://localhost:7018/api/Genre/getall');
                 if (!genreResponse.ok) throw new Error('Failed to load genres.');
                 const genres = await genreResponse.json();
                 const genreSelect = document.getElementById('genres');
-                genreSelect.innerHTML = genres.map(genre => `<option value="${genre.id}">${escapeHtml(genre.name)}</option>`).join('');
+                genreSelect.innerHTML = genres.map(genre => `<option value="${genre.id}">${genre.name}</option>`).join('');
 
                 const publisherResponse = await fetch('https://localhost:7018/api/Publisher/getall');
                 if (!publisherResponse.ok) throw new Error('Failed to load publishers.');
                 const publishers = await publisherResponse.json();
                 const publisherSelect = document.getElementById('publishers');
-                publisherSelect.innerHTML = publishers.map(publisher => `<option value="${publisher.id}">${escapeHtml(publisher.name)}</option>`).join('');
+                publisherSelect.innerHTML = publishers.map(publisher => `<option value="${publisher.id}">${publisher.name}</option>`).join('');
             } catch (error) {
                 console.error('Error fetching dropdown options:', error);
                 document.getElementById('error-message').textContent = error.message;

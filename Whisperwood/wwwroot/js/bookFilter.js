@@ -169,10 +169,6 @@ async function fetchDropdownOptions() {
 
 function clearFilters() {
     const form = document.getElementById('filter-form');
-    if (!form) {
-        console.error('Filter form not found');
-        return;
-    }
     form.reset();
     const selects = form.querySelectorAll('select[multiple]');
     selects.forEach(select => {

@@ -179,15 +179,6 @@
             return status === 0 ? "Pending" : status === 1 ? "Cancelled" : status === 2 ? "Fulfilled" : "Unknown";
         }
 
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
         function getFilterParams() {
             return {
                 search: document.getElementById('search').value.toLowerCase(),
@@ -285,7 +276,7 @@
                     <td class="p-2">
                         ${order.status === 0 ? `
                             <div class="flex space-x-2">
-                                <button class="edit-order bg-accent3 text-white px-3 py-1 rounded hover:bg-accent4" data-order-id="${escapeHtml(order.id)}" data-status="${order.status}" data-claim-code="${escapeHtml(billCache[order.id]?.claimCode || '')}">Edit</button>
+                                <button class="edit-order bg-accent3 text-white px-3 py-1 rounded hover:bg-accent4" data-order-id="${order.id}" data-status="${order.status}" data-claim-code="${billCache[order.id]?.claimCode || ''}">Edit</button>
                             </div>
                         ` : ''}
                     </td>

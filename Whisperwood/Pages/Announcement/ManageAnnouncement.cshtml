@@ -64,7 +64,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-accent2 border border-accent1">
                 <thead>
-                    <tr class="bg-accent3 text-white">
+                    <tr class="bg-accent4 text-white">
                         <th class="p-2 text-left">Title</th>
                         <th class="p-2 text-left">Message</th>
                         <th class="p-2 text-left">Recipient Groups</th>
@@ -90,18 +90,6 @@
         let currentPage = 1;
         let allAnnouncements = [];
         let originalAnnouncements = [];
-
-        // escapes HTML characters to prevent XSS
-        const escapeHtml = (unsafe) => {
-            const htmlEntities = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&apos;'
-            };
-            return unsafe.replace(/[&<>"']/g, match => htmlEntities[match]);
-        };
 
         // formats date string to locale date
         const formatDate = (dateStr) => {
@@ -278,15 +266,15 @@
                     const row = document.createElement('tr');
                     row.className = 'border-b border-accent1';
                     row.innerHTML = `
-                        <td class="p-2 truncate">${escapeHtml(announcement.title)}</td>
-                        <td class="p-2 truncate">${escapeHtml(announcement.message)}</td>
-                        <td class="p-2">${escapeHtml(announcement.recipientGroups.join(', '))}</td>
+                        <td class="p-2 truncate">${announcement.title}</td>
+                        <td class="p-2 truncate">${announcement.message}</td>
+                        <td class="p-2">${announcement.recipientGroups.join(', ')}</td>
                         <td class="p-2">${formatDate(announcement.startDate)}</td>
                         <td class="p-2">${formatDate(announcement.endDate)}</td>
                         <td class="p-2">
                             <div class="flex space-x-2 justify-center">
                                 <a href="/Announcement/UpdateAnnouncement/${announcement.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
-                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4 delete-btn" data-id="${announcement.id}" data-title="${escapeHtml(announcement.title)}">Delete</button>
+                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4 delete-btn" data-id="${announcement.id}" data-title="${announcement.title}">Delete</button>
                             </div>
                         </td>
                     `;
