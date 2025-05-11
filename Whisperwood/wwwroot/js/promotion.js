@@ -1,18 +1,4 @@
 ﻿const promotion = {
-    // checks authentication and redirects if unauthorized
-    checkAuth: () => {
-        if (!window.jwtToken) {
-            Toast.fire({
-                icon: 'error',
-                title: 'Please log in to view promotions'
-            }).then(() => {
-                window.location.href = '/User/Login';
-            });
-            return false;
-        }
-        return true;
-    },
-
     // fetches promotions from api
     fetchPromotions: async () => {
         if (!promotion.checkAuth()) return [];
@@ -92,6 +78,7 @@
 
     // initializes promotion modal
     init: (user) => {
+        if (!window.checkAuth('view promotions')) return;
         const elements = {
             icon: document.getElementById('promotions-icon'),
             modal: document.getElementById('promotions-modal'),

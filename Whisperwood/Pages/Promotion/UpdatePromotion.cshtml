@@ -41,23 +41,9 @@
 
 @section Scripts {
     <script>
-        // checks authentication and redirects if unauthorized
-        const checkAuth = () => {
-            if (!window.jwtToken) {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Please log in to update promotions'
-                }).then(() => {
-                    window.location.href = '/User/Login';
-                });
-                return false;
-            }
-            return true;
-        };
-
         // fetches promotion details from api
         const fetchPromotionDetails = async (promotionId) => {
-            if (!checkAuth()) return null;
+            if (!window.checkAuth('update promotions')) return null;
 
             try {
                 const response = await fetch(`https://localhost:7018/api/Promotion/getbyid/${promotionId}`, {
@@ -129,7 +115,7 @@
 
         // submits updated promotion to api
         const submitForm = async (form, promotionId) => {
-            if (!checkAuth()) return;
+            if (!window.checkAuth('update promotions')) return;
 
             const formData = new FormData(form);
             if (!validateForm(formData)) return;
@@ -198,7 +184,7 @@
                 cancelButton: document.getElementById('cancel-form')
             };
 
-            if (!checkAuth()) return;
+            if (!window.checkAuth('update promotions')) return;
 
             const promotionId = window.location.pathname.split('/').pop();
             if (!promotionId) {

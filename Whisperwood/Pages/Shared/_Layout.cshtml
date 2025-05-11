@@ -245,6 +245,20 @@
                 toast.addEventListener('mouseleave', Swal.resumeTimer);
             }
         });
+            
+        window.checkAuth = (action = 'access this feature') => {
+            if (!window.jwtToken) {
+                Toast.fire({
+                    icon: 'error',
+                    title: `Please log in to ${action}`
+                }).then(() => {
+                    window.location.href = '/User/Login';
+                });
+                return false;
+            }
+            return true;
+        };
+
 
         // initializing user roles
         const userRoles = {
