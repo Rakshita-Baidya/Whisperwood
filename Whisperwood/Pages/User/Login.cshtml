@@ -5,63 +5,89 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="mx-auto max-w-md text-center">
-    <h1 class="text-accent3 mb-4 text-4xl font-bold">Login</h1>
-    <div id="error-message" class="mb-4 hidden text-red-600"></div>
-    <form id="login-form" method="post">
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="email">Email</label>
-            <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="password">Password</label>
-            <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-        </div>
-        <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Login</button>
-        <p class="text-accent2 mt-4">
-            Don't have an account? <a href="/User/Register" class="text-accent1 hover:text-accent3">Register</a>
-        </p>
-    </form>
+<div class="min-h-screen flex items-center justify-center">
+    <div class="mx-auto w-1/4 text-center bg-primary p-6 border border-accent2 rounded shadow-md">
+        <h1 class="text-accent4 mb-4 text-4xl font-bold">Login</h1>
+        <form id="login-form" method="post" class="space-y-4">
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="email">Email</label>
+                <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="password">Password</label>
+                <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+            </div>
+            <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white w-full hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Login</button>
+            <p class="text-accent4">
+                Don't have an account? <a href="/User/Register" class="text-accent1 hover:text-accent3">Register</a>
+            </p>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <script>
+        // handling form submission
         document.getElementById('login-form').addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            // collecting form data
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorMessageDiv = document.getElementById('error-message');
 
+            // validating inputs
             if (!email || !password) {
-                errorMessageDiv.textContent = 'Please provide valid email and password.';
-                errorMessageDiv.classList.remove('hidden');
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please provide valid email and password.'
+                });
                 return;
             }
 
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email, password }),
-                    credentials: 'include'
-                });
+            // sending login request
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+                credentials: 'include'
+            });
 
-                const data = await response.json();
+            let data = await response.json();
 
-                if (response.ok) {
-                    alert("You have successfully logged in!");
-                    window.location.href = '/Index';
-                } else {
-                    errorMessageDiv.textContent = data.message || 'An error occurred during login.';
-                    errorMessageDiv.classList.remove('hidden');
+            // parsing data if stringified
+            if (typeof data === 'string') {
+                try {
+                    data = JSON.parse(data);
+                } catch {
+                    data = {};
                 }
-            } catch (error) {
-                errorMessageDiv.textContent = 'An error occurred during login.';
-                errorMessageDiv.classList.remove('hidden');
             }
+
+            if (response.ok) {
+                // showing success toast
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Successfully logged in!'
+                }).then(() => {
+                    window.location.href = '/Index';
+                });
+            } else {
+                // extracting error message
+                let errorText = 'Invalid email or password.';
+                if (data.message && typeof data.message === 'string') {
+                    // handle cases like "{ message = Invalid email or password }"
+                    errorText = data.message.replace(/^\{.*=\s*(.*)\}$/, '$1').trim();
+                } else if (data.errors && Array.isArray(data.errors)) {
+                    errorText = data.errors.join(', ');
+                }
+                Toast.fire({
+                    icon: 'error',
+                    title: errorText
+                });
+            }
+
         });
     </script>
 }

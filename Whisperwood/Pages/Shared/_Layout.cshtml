@@ -11,6 +11,7 @@
     <title>Whisperwood - @ViewData["Title"]</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/tailwind.config.js"></script>
     <script src="/js/wishlist.js"></script>
     <script src="/js/cart.js"></script>
@@ -19,24 +20,31 @@
     <script src="/js/announcement.js"></script>
     <script src="/js/promotion.js"></script>
 </head>
-<body class="bg-primary flex min-h-screen flex-col font-sans">
+<body class="bg-[#FFF5E6] flex min-h-screen flex-col font-sans">
     @{
+        // getting current page
         var currentPage = ViewContext.RouteData.Values["Page"]?.ToString()?.ToLower();
         var hideNavbar = currentPage == "/user/login" || currentPage == "/user/register";
+
+        // initializing user state
         bool isAuthenticated = false;
         bool isAdmin = false;
         bool isStaff = false;
-        string jwtToken = Context.Request.Cookies["JwtToken"];
         string userId = null;
 
+        // validating jwt token
+        string jwtToken = Context.Request.Cookies["JwtToken"];
         if (!string.IsNullOrEmpty(jwtToken))
         {
             try
             {
+                // parsing jwt token
                 var handler = new JwtSecurityTokenHandler();
                 var token = handler.ReadJwtToken(jwtToken);
                 isAuthenticated = token != null && token.ValidTo > DateTime.UtcNow;
-                userId = token?.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+                // getting user from jwt
+                userId = token?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
                 isStaff = token?.Claims.Any(c => c.Type == "IsStaff" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
             }
@@ -50,12 +58,7 @@
         }
     }
     <script>
-        window.isAuthenticated = @isAuthenticated.ToString().ToLower();
-        window.isAdmin = @isAdmin.ToString().ToLower();
-        window.isStaff = @isStaff.ToString().ToLower();
-        window.jwtToken = @Html.Raw(Json.Serialize(jwtToken));
-        window.userId = @Html.Raw(Json.Serialize(userId));
-        console.log('Client: User ID:', window.userId, 'isAdmin:', window.isAdmin, 'isStaff:', window.isStaff);
+       
     </script>
 
     @if (!hideNavbar)
@@ -74,7 +77,7 @@
                             {
                                 <button id="admin-button" class="text-accent3 hover:text-accent4 focus:outline-none">
                                     Admin
-                                    <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </button>
@@ -87,7 +90,7 @@
                             }
                             <button id="user-button" class="text-accent3 hover:text-accent4 focus:outline-none">
                                 User
-                                <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -101,10 +104,14 @@
                             </div>
                         </div>
                         <button id="promotions-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518" xml:space="preserve"><path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518">
+                                <path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" />
+                            </svg>
                         </button>
                         <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" /></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H6l-4 4V4c0-1.1.9-2 2-2m1.17 14H20V4H4v13.17zM11 5h2v6h-2zm2 8h-2v2h2z" fill="currentColor" />
+                            </svg>
                         </button>
                     }
                     else
@@ -118,16 +125,16 @@
 
     @if (isAdmin || isStaff)
     {
-        <div id="order-updates" class="z[9999] fixed top-20 right-4 space-y-2"></div>
+        <div id="order-updates" class="fixed top-20 right-4 z-[9999] space-y-2"></div>
     }
 
     <!-- Announcements Modal -->
-    <div id="announcements-modal" class="bg-opacity-50 fixed inset-0 z-[9999] flex hidden items-center justify-center bg-gray-800">
+    <div id="announcements-modal" class="bg-opacity-50 fixed inset-0 z-[9999] hidden flex items-center justify-center bg-gray-800">
         <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-accent3 text-2xl font-bold">Announcements</h2>
                 <button id="close-announcements-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -139,12 +146,12 @@
     </div>
 
     <!-- Promotions Modal -->
-    <div id="promotions-modal" class="bg-opacity-50 fixed inset-0 z-[9999] flex hidden items-center justify-center bg-gray-800">
+    <div id="promotions-modal" class="bg-opacity-50 fixed inset-0 z-[9999] hidden flex items-center justify-center bg-gray-800">
         <div class="bg-primary max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-lg p-6 shadow-lg">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-accent3 text-2xl font-bold">Promotions</h2>
                 <button id="close-promotions-modal" class="text-accent3 hover:text-accent2 focus:outline-none">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -155,13 +162,13 @@
         </div>
     </div>
 
-    <main class="container mx-auto flex-grow p-4">
+    <main class="container mx-auto flex-grow bg-primaary p-2 ">
         @RenderBody()
     </main>
 
     @if (!hideNavbar)
     {
-        <footer class="bg-accent4 text-center text-white">
+        <footer class="bg-accent4 text-white">
             <div class="container mx-auto p-8">
                 <div class="grid grid-cols-4 gap-4">
                     <div>
@@ -170,68 +177,80 @@
                     </div>
                     <div>
                         <h3 class="mb-2 font-semibold">Quick Links</h3>
-                        <ul class="text-white">
-                            <li>Home</li>
-                            <li>Books</li>
-                            <li>Authors</li>
-                            <li>Genres</li>
+                        <ul class="text-white space-y-2">
+                            <li><a href="/" class="hover:text-accent2">Home</a></li>
+                            <li><a href="/book/browse" class="hover:text-accent2">Browse</a></li>
+                            <li><a href="/book/BrowseByCategory" class="hover:text-accent2">Category</a></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-2 font-semibold">User Links</h3>
-                        <ul>
-                            <li>Profile</li>
-                            <li>Orders</li>
-                            <li>Wishlist</li>
-                            <li>Cart</li>
+                        <ul class="space-y-2">
+                            <li><a href="/User/UserProfile" class="hover:text-accent2">Profile</a></li>
+                            <li><a href="/User/UserWishlist" class="hover:text-accent2">Wishlist</a></li>
+                            <li><a href="/User/UserCart" class="hover:text-accent2">Cart</a></li>
+                            <li><a href="/User/UserOrder" class="hover:text-accent2">Orders</a></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-2 font-semibold">Follow Us</h3>
-                        <ul>
-                            <li>Facebook</li>
-                            <li>Twitter</li>
-                            <li>Instagram</li>
+                        <ul class="space-y-2">
+                            <li><a href="https://facebook.com" target="_blank" class="hover:text-accent2">Facebook</a></li>
+                            <li><a href="https://twitter.com" target="_blank" class="hover:text-accent2">Twitter</a></li>
+                            <li><a href="https://instagram.com" target="_blank" class="hover:text-accent2">Instagram</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <p class="bg-secondary py-2">© @DateTime.Now.Year Whisperwood</p>
+            <p class="bg-secondary py-2 text-center">© @DateTime.Now.Year Whisperwood</p>
         </footer>
     }
 
     @RenderSection("Scripts", required: false)
     <script>
+         // setting global user variables
+        window.isAuthenticated = @isAuthenticated.ToString().ToLower();
+        window.isAdmin = @isAdmin.ToString().ToLower();
+        window.isStaff = @isStaff.ToString().ToLower();
+        window.jwtToken = @Html.Raw(Json.Serialize(jwtToken));
+        window.userId = @Html.Raw(Json.Serialize(userId));
+
+        // initializing sweetalert2 toast
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            showCloseButton: true,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            }
+        });
+
+        // initializing user roles
         const userRoles = {
             isStaff: @isStaff.ToString().ToLower(),
             isAdmin: @isAdmin.ToString().ToLower()
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            const user = {
-                isStaff: userRoles.isStaff,
-                isAdmin: userRoles.isAdmin
-            };
-
-            // Toggle admin menu
+            // setting up menu toggles
             const adminButton = document.getElementById('admin-button');
             const adminMenu = document.getElementById('admin-menu');
-            if (adminButton && adminMenu) {
-                adminButton.addEventListener('click', () => {
-                    adminMenu.classList.toggle('hidden');
-                });
-            }
-
-            // Toggle user menu
             const userButton = document.getElementById('user-button');
             const userMenu = document.getElementById('user-menu');
-            if (userButton && userMenu) {
-                userButton.addEventListener('click', () => {
-                    userMenu.classList.toggle('hidden');
-                });
+
+            if (adminButton && adminMenu) {
+                adminButton.addEventListener('click', () => adminMenu.classList.toggle('hidden'));
             }
 
-            // Close menus when clicking outside
+            if (userButton && userMenu) {
+                userButton.addEventListener('click', () => userMenu.classList.toggle('hidden'));
+            }
+
+            // handling outside clicks to close menus
             document.addEventListener('click', (event) => {
                 if (!adminButton?.contains(event.target) && !adminMenu?.contains(event.target)) {
                     adminMenu?.classList.add('hidden');
@@ -241,33 +260,29 @@
                 }
             });
 
+            // initializing announcements and promotions
             if (window.isAuthenticated) {
                 announcement.init(window.isAuthenticated);
                 promotion.init(window.isAuthenticated);
             }
 
+            // setting up signalr connection
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/orderHub")
                 .build();
 
-            connection.on("ReceiveOrderUpdate", function (message) {
-                console.log(message); // Log to console
+            connection.on("ReceiveOrderUpdate", (message) => {
                 const updatesDiv = document.getElementById("order-updates");
                 if (updatesDiv) {
                     const messageElement = document.createElement("div");
                     messageElement.className = "bg-accent3 text-white p-2 rounded shadow";
                     messageElement.textContent = message;
                     updatesDiv.appendChild(messageElement);
-                    // Optional: Remove message after 5 seconds
-                    setTimeout(() => {
-                        updatesDiv.removeChild(messageElement);
-                    }, 5000);
+                    setTimeout(() => updatesDiv.removeChild(messageElement), 5000);
                 }
             });
 
-            connection.start().catch(function (err) {
-                console.error(err.toString());
-            });
+            connection.start().catch((err) => console.error(err));
         });
     </script>
 </body>

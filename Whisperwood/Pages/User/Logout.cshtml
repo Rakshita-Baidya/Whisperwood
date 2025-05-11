@@ -4,7 +4,7 @@
     Layout = "_Layout";
     ViewData["Title"] = "Logout";
 
-    // Clear the JwtToken cookie by setting its expiration to a past date
+    // clearing jwt cookie
     Response.Cookies.Append("JwtToken", "", new CookieOptions
         {
             Expires = DateTime.Now.AddDays(-1),
@@ -16,7 +16,14 @@
 
 @section Scripts {
     <script>
-        alert("You have been successfully logged out.");
-        window.location.href = "/";
+        document.addEventListener('DOMContentLoaded', () => {
+            // showing logout success message
+            Toast.fire({
+                icon: 'success',
+                title: 'Successfully logged out!'
+            }).then(() => {
+                window.location.href = '/';
+            });
+        });
     </script>
 }

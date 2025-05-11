@@ -5,67 +5,101 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="mx-auto max-w-md text-center">
-    <h1 class="text-accent3 mb-4 text-4xl font-bold">Register</h1>
-    <div id="error-message" class="mb-4 hidden text-red-600"></div>
-    <form id="register-form">
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="name">Name</label>
-            <input type="text" id="name" name="name" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="phone">Phone</label>
-            <input type="text" id="phone" name="phone" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" placeholder="1234567890" />
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="username">Username</label>
-            <input type="text" id="username" name="username" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" />
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="email">Email</label>
-            <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="password">Password</label>
-            <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required title="Password must be at least 6 characters, including a number, letter, and special character" />
-            <p class="text-accent2 mt-1 text-sm">Password must be 6+ characters, with a number, letter, and special character.</p>
-        </div>
-        <div class="mb-4">
-            <label class="text-accent2 block text-lg font-medium" for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" name="confirm-password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-        </div>
-        <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Register</button>
-        <p class="text-accent2 mt-4">
-            Already have an account? <a href="/User/Login" class="text-accent1 hover:text-accent3">Login</a>
-        </p>
-    </form>
+<div class="min-h-screen flex items-center justify-center">
+    <div class="mx-auto w-2/3 text-center  bg-primary p-6 border border-accent3 rounded shadow-md">
+        <h1 class="text-accent4 mb-4 text-4xl font-bold">Register</h1>
+        <form id="register-form" class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="name">Name</label>
+                <input type="text" id="name" name="name" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="phone">Phone</label>
+                <input type="text" id="phone" name="phone" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" placeholder="1234567890" />
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="username">Username</label>
+                <input type="text" id="username" name="username" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" />
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="email">Email</label>
+                <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="password">Password</label>
+                <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required title="Password must be at least 6 characters, including a number, letter, and special character" />
+                <p class="text-accent2 mt-1 text-sm">Password must be 6+ characters, with a number, letter, and special character.</p>
+            </div>
+            <div>
+                <label class="text-accent4 block text-lg font-medium" for="confirm-password">Confirm Password</label>
+                <input type="password" id="confirm-password" name="confirm-password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+            </div>
+            <div class="col-span-full">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent4 w-full focus:outline-none focus:ring-2 focus:ring-accent3">Register</button>
+                <p class="text-accent2 mt-4">
+                    Already have an account? <a href="/User/Login" class="text-accent1 hover:text-accent4">Login</a>
+                </p>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <script>
+        // handling form submission
         document.getElementById('register-form').addEventListener('submit', async (event) => {
             event.preventDefault();
 
+            // collecting form data
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const errorMessageDiv = document.getElementById('error-message');
 
+            // validating inputs
             if (!name || !email || !password || !confirmPassword) {
-                errorMessageDiv.textContent = 'Please fill in all required fields.';
-                errorMessageDiv.classList.remove('hidden');
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please fill in all required fields.'
+                });
+                return;
+            }
+
+        if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please enter a valid email address.'
+                });
+                return;
+            }
+
+            if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@@$!%*?&])[A-Za-z\d@@$!%*?&]{6,}$/.test(password)) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Password must be 6+ characters, with a number, letter, and special character.'
+                });
                 return;
             }
 
             if (password !== confirmPassword) {
-                errorMessageDiv.textContent = 'Passwords do not match.';
-                errorMessageDiv.classList.remove('hidden');
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Passwords do not match.'
+                });
                 return;
             }
 
+            if (phone && !/^\d{10}$/.test(phone)) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Phone number must be a 10-digit number.'
+                });
+                return;
+            }
+
+            // preparing payload
             const payload = {
                 Name: name,
                 Username: username || null,
@@ -75,9 +109,9 @@
                 ConfirmPassword: confirmPassword,
                 ImageURL: null
             };
-            console.log('Register Payload:', payload);
 
             try {
+                // sending registration request
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
@@ -87,31 +121,27 @@
                     credentials: 'include'
                 });
 
-                const data = await response.json();
-                console.log('Register Response:', data);
-
                 if (response.ok) {
-                    alert("You have successfully registered!");
-                    window.location.href = '/User/Login';
+                    // showing success toast
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Successfully registered!'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
                 } else {
-                    let errorMessages = [];
-                    if (data.message) {
-                        errorMessages.push(data.message);
-                    } else if (data.errors) {
-                        if (data.errors.$) {
-                            errorMessages.push(...data.errors.$);
-                        }
-                        if (data.errors.dto) {
-                            errorMessages.push(...data.errors.dto);
-                        }
-                    }
-                    errorMessageDiv.textContent = errorMessages.length > 0 ? errorMessages.join(', ') : 'An error occurred during registration.';
-                    errorMessageDiv.classList.remove('hidden');
+                    // handling non-ok responses
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Registration failed. Please check your inputs.'
+                    });
                 }
             } catch (error) {
-                console.error('Register Error:', error);
-                errorMessageDiv.textContent = 'An error occurred during registration.';
-                errorMessageDiv.classList.remove('hidden');
+                // handling network errors
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to connect to the server. Please try again.'
+                });
             }
         });
     </script>
