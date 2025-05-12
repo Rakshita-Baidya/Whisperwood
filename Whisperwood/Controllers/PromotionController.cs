@@ -31,7 +31,6 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetPromotionById(Guid id)
         {
             var userId = GetLoggedInUserId();

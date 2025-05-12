@@ -43,8 +43,6 @@ namespace Whisperwood.Services
 
         public async Task<IActionResult> AddOrderAsync(Guid userId, OrderDto dto)
         {
-            Console.WriteLine($"OrderService: Processing order for user {userId}");
-
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
                 return new NotFoundObjectResult(new { message = "User not found." });
@@ -148,7 +146,6 @@ namespace Whisperwood.Services
             string message = $"New order placed with books: {string.Join(", ", orderedBooks)}";
             await hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", message);
 
-            Console.WriteLine(message);
             // Generate bill
             var pdfBytes = await billService.GenerateBillPdfAsync(order.Id);
 
