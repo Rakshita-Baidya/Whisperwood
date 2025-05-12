@@ -76,6 +76,20 @@ namespace Whisperwood.Services
             return new OkObjectResult(reviews);
         }
 
+        public async Task<IActionResult> GetReviewByIdAsync(Guid id)
+        {
+            var review = await dbContext.Reviews
+                .Include(r => r.Users)
+                .Include(r => r.Books)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            if (review == null)
+                return new NotFoundObjectResult(new
+                {
+                    message = "Review not found."
+                });
+            return new OkObjectResult(review);
+        }
+
         public async Task<IActionResult> GetReviewsByBookAsync(Guid bookId)
         {
             var book = await dbContext.Books.FindAsync(bookId);
@@ -126,23 +140,6 @@ namespace Whisperwood.Services
                 });
                 review.BookId = dto.BookId.Value;
             }
-
-            var hasFulfilledOrder = await dbContext.OrderItem
-                .Where(oi => oi.BookId == dto.BookId && oi.Order.UserId == userId && oi.Order.Status == Orders.OrderStatus.Fulfilled)
-                .AnyAsync();
-            if (!hasFulfilledOrder)
-                return new UnauthorizedObjectResult(new
-                {
-                    message = "You can only review books you have purchased and received."
-                });
-
-            var existingReview = await dbContext.Reviews
-                .AnyAsync(r => r.UserId == userId && r.BookId == dto.BookId);
-            if (existingReview)
-                return new ConflictObjectResult(new
-                {
-                    message = "You have already submitted a review for this book."
-                });
 
             var oldBookId = review.BookId;
 

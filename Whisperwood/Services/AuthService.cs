@@ -35,7 +35,7 @@ namespace Whisperwood.Services
                 Name = dto.Name!,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                ImageURL = dto.ImageURL,
+                ImageURL = "https://i.imgur.com/L8yG19z.jpeg",
             };
 
             var result = await userManager.CreateAsync(user, dto.Password!);

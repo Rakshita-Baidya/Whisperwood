@@ -6,7 +6,7 @@
 }
 
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-accent4 mb-6 text-center text-3xl font-bold">My Orders</h1>
+    <h1 class="text-accent4 mb-4 text-4xl font-bold">My Orders</h1>
     <div id="order-list" class="hidden">
         <table class="border-accent1 text-accent2 w-full border">
             <thead>
@@ -15,11 +15,12 @@
                     <th class="p-2 text-left">Date</th>
                     <th class="p-2 text-left">Status</th>
                     <th class="p-2 text-left">Total</th>
-                    <th class="p-2 text-left">Actions</th>
+                    <th class="p-2 text-center">Actions</th>
                 </tr>
             </thead>
             <tbody id="order-table-body"></tbody>
         </table>
+        <div id="pagination-controls" class="mt-4 flex justify-center space-x-2"></div>
     </div>
     <p id="no-orders" class="text-accent2 hidden text-center text-lg">No orders found.</p>
 </div>
@@ -30,8 +31,14 @@
         const elements = {
             list: document.getElementById('order-list'),
             tableBody: document.getElementById('order-table-body'),
-            noOrders: document.getElementById('no-orders')
+            noOrders: document.getElementById('no-orders'),
+            pagination: document.getElementById('pagination-controls')
         };
+
+        // pagination settings
+        const ordersPerPage = 10;
+        let currentPage = 1;
+        let allOrders = [];
 
         // fetches user id
         const fetchUserId = async () => {
@@ -141,45 +148,32 @@
             return status === 0 ? 'Pending' : status === 1 ? 'Cancelled' : status === 2 ? 'Fulfilled' : 'Unknown';
         };
 
-        // loads orders
-        const loadOrders = async () => {
-            if (!window.checkAuth('view orders')) return;
-            
-            
-            Toast.fire({
-                icon: 'info',
-                title: 'Loading orders...',
-                timer: 1000
-            });
+        // renders orders for the current page
+        const renderOrders = (page) => {
+            currentPage = page;
+            const start = (page - 1) * ordersPerPage;
+            const end = start + ordersPerPage;
+            const paginatedOrders = allOrders.slice(start, end);
 
-            const userId = await fetchUserId();
-            if (!userId) return;
-
-            const orders = await fetchOrders(userId);
-            if (!orders?.length) {
-                elements.noOrders.classList.remove('hidden');
-                return;
-            }
-            // Sort by status, then by date
-            orders.sort((a, b) => {
-                if (a.status !== b.status) return a.status - b.status;
-                return new Date(b.orderedAt) - new Date(a.orderedAt);
-            });
-
-            elements.list.classList.remove('hidden');
-            elements.tableBody.innerHTML = orders.map(order => `
+            elements.tableBody.innerHTML = paginatedOrders.map(order => `
                 <tr class="border-accent1 border-b bg-white">
                     <td class="p-2">${order.id}</td>
-
                     <td class="p-2">${new Date(order.orderedAt).toLocaleDateString()}</td>
                     <td class="p-2">${getStatusText(order.status)}</td>
                     <td class="p-2">Rs. ${order.totalAmount.toFixed(2)}</td>
-                    <td class="space-x-2">
+                    <td class="flex justify-center space-x-2 pt-1">
                         <a href="/User/OrderDetail?orderId=${order.id}" class="bg-accent3 inline-block rounded px-3 py-1 text-center text-white hover:bg-accent4">View Details</a>
-                        ${order.status === 0 ? `<button class="cancel-order rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600" data-order-id="${order.id}"> Cancel </button>` : ''}
+                        ${order.status === 0 ? `<button class="cancel-order rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600" data-order-id="${order.id}">Cancel</button>` : ''}
                     </td>
                 </tr>
             `).join('');
+
+            const totalPages = Math.ceil(allOrders.length / ordersPerPage);
+            if (totalPages > 1) {
+                window.createPaginationControls('pagination-controls', totalPages, currentPage, renderOrders);
+            } else {
+                elements.pagination.innerHTML = '';
+            }
 
             document.querySelectorAll('.cancel-order').forEach(button => {
                 button.addEventListener('click', async () => {
@@ -193,6 +187,35 @@
                     }
                 });
             });
+        };
+
+        // loads orders
+        const loadOrders = async () => {
+            if (!window.checkAuth('view orders')) return;
+
+            Toast.fire({
+                icon: 'info',
+                title: 'Loading orders...',
+                timer: 1000
+            });
+
+            const userId = await fetchUserId();
+            if (!userId) return;
+
+            allOrders = await fetchOrders(userId);
+            if (!allOrders?.length) {
+                elements.noOrders.classList.remove('hidden');
+                return;
+            }
+
+            // Sort by status, then by date
+            allOrders.sort((a, b) => {
+                if (a.status !== b.status) return a.status - b.status;
+                return new Date(b.orderedAt) - new Date(a.orderedAt);
+            });
+
+            elements.list.classList.remove('hidden');
+            renderOrders(1);
         };
 
         // initializes page

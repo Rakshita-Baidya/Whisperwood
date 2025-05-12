@@ -4,76 +4,214 @@
     Layout = "_Layout";
     ViewData["Title"] = "My Reviews";
 }
-<div class="px-6 py-8">
-    <h1 class="text-3xl font-bold text-center text-accent4 mb-6">My Reviews</h1>
 
-    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
-    <div id="review-list" class="space-y-4 max-w-5xl mx-auto"></div>
-    <p id="no-reviews" class="hidden text-center text-accent2 text-lg">You haven’t posted any reviews yet.</p>
+<div class="container mx-auto px-6 py-8">
+    <h1 class="text-accent4 mb-4 text-4xl font-bold">My Reviews</h1>
+    <div id="review-list" class="hidden">
+        <table class="border-accent1 text-accent2 w-full border">
+            <thead>
+                <tr class="bg-accent4 text-white">
+                    <th class="p-2 text-left">Book Title</th>
+                    <th class="p-2 text-left">ISBN</th>
+                    <th class="p-2 text-left">Price</th>
+                    <th class="p-2 text-left">Language</th>
+                    <th class="p-2 text-left">Rating</th>
+                    <th class="p-2 text-left">Comment</th>
+                    <th class="p-2 text-left">Posted Date</th>
+                    <th class="p-2 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="review-table-body"></tbody>
+        </table>
+        <div id="pagination-controls" class="mt-4 flex justify-center space-x-2"></div>
+    </div>
+    <p id="no-reviews" class="text-accent2 hidden text-center text-lg">You haven’t posted any reviews yet.</p>
 </div>
 
 @section Scripts {
     <script>
-        const list = document.getElementById("review-list");
-        const error = document.getElementById("error-message");
-        const empty = document.getElementById("no-reviews");
+        // caches dom elements
+        const elements = {
+            list: document.getElementById('review-list'),
+            tableBody: document.getElementById('review-table-body'),
+            noReviews: document.getElementById('no-reviews'),
+            pagination: document.getElementById('pagination-controls')
+        };
 
-        async function loadReviews() {
+        // pagination settings
+        const reviewsPerPage = 5;
+        let currentPage = 1;
+        let allReviews = [];
+
+        // fetches user id
+        const fetchUserId = async () => {
+            if (!window.checkAuth('view reviews')) return null;
             try {
-                const res = await fetch("https://localhost:7018/api/Review/getbyuserid", {
-                    headers: {
-                        "Authorization": `Bearer ${window.jwtToken}`
-                    }
+                const response = await fetch('https://localhost:7018/api/Auth/user', {
+                    headers: { 'Authorization': `Bearer ${window.jwtToken}` }
                 });
-                if (!res.ok) throw new Error("Failed to fetch reviews.");
-                const reviews = await res.json();
-
-                if (reviews.length === 0) {
-                    empty.classList.remove("hidden");
-                    return;
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to view reviews'
+                    }).then(() => window.location.href = '/User/Login');
+                    return null;
                 }
-
-                reviews.forEach(r => {
-                    const div = document.createElement("div");
-                    div.className = "border border-accent1 bg-primary p-4 rounded shadow";
-                    div.innerHTML = `
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-lg font-semibold text-accent3">★ ${r.rating}</p>
-                                <p class="text-accent2 italic mb-2">"${r.message}"</p>
-                                <p class="text-xs text-gray-500">Posted: ${new Date(r.createdAt).toLocaleDateString()}</p>
-                            </div>
-                            <div class="flex flex-col items-end gap-1">
-                                <a href="/Review/EditReview/${r.id}" class="text-blue-500 hover:underline">Edit</a>
-                                <button onclick="deleteReview('${r.id}')" class="text-red-500 hover:underline">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                    list.appendChild(div);
+                if (!response.ok) throw new Error('Failed to fetch user');
+                const data = await response.json();
+                return data.id;
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to fetch user'
                 });
-            } catch (err) {
-                error.textContent = err.message;
-                error.classList.remove("hidden");
+                return null;
             }
-        }
+        };
 
-        async function deleteReview(id) {
-            if (!confirm("Are you sure you want to delete this review?")) return;
-
+        // fetches reviews
+        const fetchReviews = async () => {
+            if (!window.checkAuth('view reviews')) return [];
             try {
-                const res = await fetch(`https://localhost:7018/api/Review/delete/${id}`, {
-                    method: "DELETE",
+                const response = await fetch('https://localhost:7018/api/Review/getbyuserid', {
+                    headers: { 'Authorization': `Bearer ${window.jwtToken}` }
+                });
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to view reviews'
+                    }).then(() => window.location.href = '/User/Login');
+                    return [];
+                }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch reviews');
+                }
+                return await response.json();
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to fetch reviews'
+                });
+                return [];
+            }
+        };
+
+        // deletes review
+        const deleteReview = async (reviewId, button) => {
+            const result = await Swal.fire({
+                title: 'Delete Review',
+                text: 'Are you sure you want to delete this review?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: 'red',
+                cancelButtonColor: 'grey',
+                confirmButtonText: 'Delete Review',
+                cancelButtonText: 'Keep'
+            });
+            if (!result.isConfirmed) return false;
+
+            button.disabled = true;
+            button.textContent = 'Deleting...';
+            try {
+                const response = await fetch(`https://localhost:7018/api/Review/delete/${reviewId}`, {
+                    method: 'DELETE',
                     headers: {
-                        "Authorization": `Bearer ${window.jwtToken}`
+                        'Authorization': `Bearer ${window.jwtToken}`
                     }
                 });
-                if (!res.ok) throw new Error("Failed to delete.");
-                location.reload();
-            } catch (err) {
-                alert(err.message);
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to delete review'
+                    }).then(() => window.location.href = '/User/Login');
+                    return false;
+                }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete review');
+                }
+                return true;
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to delete review'
+                });
+                return false;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Delete';
             }
-        }
+        };
 
-        document.addEventListener("DOMContentLoaded", loadReviews);
+        // renders reviews for the current page
+        const renderReviews = (page) => {
+            currentPage = page;
+            const start = (page - 1) * reviewsPerPage;
+            const end = start + reviewsPerPage;
+            const paginatedReviews = allReviews.slice(start, end);
+
+            elements.tableBody.innerHTML = paginatedReviews.map(review => `
+                <tr class="border-accent1 border-b bg-white">
+                    <td class="p-2">${review.books?.title || 'Unknown'}</td>
+                    <td class="p-2">${review.books?.isbn || 'N/A'}</td>
+                    <td class="p-2">Rs. ${review.books?.price?.toFixed(2) || '0.00'}</td>
+                    <td class="p-2">${review.books?.language || 'N/A'}</td>
+                    <td class="p-2">★ ${review.rating}</td>
+                    <td class="max-w-xs truncate p-2">${review.message || 'No comment'}</td>
+                    <td class="p-2">${new Date(review.createdAt).toLocaleDateString()}</td>
+                    <td class="flex justify-center space-x-2 p-2">
+                        <a href="/Review/EditReview/${review.id}" class="bg-accent3 rounded px-3 py-1 text-center text-white hover:bg-accent4">Edit</a>
+                        <button class="delete-review rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600" data-review-id="${review.id}">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            const totalPages = Math.ceil(allReviews.length / reviewsPerPage);
+            
+            window.createPaginationControls('pagination-controls', totalPages, currentPage, renderReviews);
+
+            document.querySelectorAll('.delete-review').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const reviewId = button.dataset.reviewId;
+                    const success = await deleteReview(reviewId, button);
+                    if (success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Review deleted successfully'
+                        }).then(() => location.reload());
+                    }
+                });
+            });
+        };
+
+        // loads reviews
+        const loadReviews = async () => {
+            if (!window.checkAuth('view reviews')) return;
+
+            Toast.fire({
+                icon: 'info',
+                title: 'Loading reviews...',
+                timer: 1000
+            });
+
+            const userId = await fetchUserId();
+            if (!userId) return;
+
+            allReviews = await fetchReviews();
+            if (!allReviews?.length) {
+                elements.noReviews.classList.remove('hidden');
+                return;
+            }
+
+            // Sort by createdAt (newest first)
+            allReviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            elements.list.classList.remove('hidden');
+            renderReviews(1);
+        };
+
+        // initializes page
+        document.addEventListener('DOMContentLoaded', loadReviews);
     </script>
 }

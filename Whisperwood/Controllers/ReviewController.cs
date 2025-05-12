@@ -30,7 +30,13 @@ namespace Whisperwood.Controllers
             return await reviewService.GetAllReviewsAsync();
         }
 
-        [HttpGet("book/{bookId}")]
+        [HttpGet("getbyid/{id}")]
+        public async Task<IActionResult> GetReviewById(Guid id)
+        {
+            return await reviewService.GetReviewByIdAsync(id);
+        }
+
+        [HttpGet("getbybook/{bookId}")]
         public async Task<IActionResult> GetReviewsByBook(Guid bookId)
         {
             return await reviewService.GetReviewsByBookAsync(bookId);

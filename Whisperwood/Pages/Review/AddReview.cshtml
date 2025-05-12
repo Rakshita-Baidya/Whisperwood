@@ -4,88 +4,169 @@
     Layout = "_Layout";
     ViewData["Title"] = "Add Review";
 }
-<div class="px-6 py-8 text-accent4">
-    <h1 class="text-3xl font-bold text-center mb-2">Add Review</h1>
-    <p id="book-info" class="text-center text-accent2 text-lg mb-6">Loading book details...</p>
 
-    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
-    <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
-
-    <form id="add-review-form" class="mx-auto max-w-2xl border border-accent1 bg-primary p-6 rounded shadow-sm">
-        <input type="hidden" id="bookId" name="bookId" value="@Model.BookId" />
-
-        <div class="mb-4">
-            <label for="rating" class="block font-medium mb-1">Rating (1–5)</label>
-            <input type="number" id="rating" name="rating" min="1" max="5"
-                   class="w-full p-2 border border-accent1 rounded" required />
+<div class="container mx-auto px-6 py-8">
+    <h1 class="text-accent4 mb-6 text-center text-3xl font-bold">Add Review</h1>
+    <div id="review-form-container" class="bg-primary mx-auto max-w-lg rounded-lg p-6 shadow-lg">
+        <div id="book-details" class="mb-2 flex items-center text-xl">
+            <h2 id="book-title" class="text-accent4 mr-2 font-bold"></h2>
+            <p id="book-author" class="text-accent4 italic"></p>
         </div>
-
-        <div class="mb-6">
-            <label for="message" class="block font-medium mb-1">Message</label>
-            <textarea id="message" name="message" rows="4"
-                      class="w-full p-2 border border-accent1 rounded resize-none"
-                      placeholder="Write your honest thoughts..." required></textarea>
-        </div>
-
-        <div class="flex justify-center gap-4">
-            <button type="submit" class="bg-accent3 text-white px-6 py-2 rounded hover:bg-accent2 transition">Submit</button>
-            <a href="javascript:history.back()" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">Cancel</a>
-        </div>
-    </form>
+        <form id="review-form" class="space-y-4">
+            <div>
+                <label for="rating" class="text-accent4 mb-1 block text-lg font-medium">Rating</label>
+                <select id="rating" name="rating" class="border-accent1 text-accent4 w-full rounded-md border p-2 focus:border-accent3 focus:outline-none" required>
+                    <option value="" disabled selected>Select a rating</option>
+                    <option value="1">★ 1</option>
+                    <option value="2">★ 2</option>
+                    <option value="3">★ 3</option>
+                    <option value="4">★ 4</option>
+                    <option value="5">★ 5</option>
+                </select>
+            </div>
+            <div>
+                <label for="message" class="text-accent4 mb-1 block text-lg font-medium">Comment (Optional)</label>
+                <textarea id="message" name="message" rows="5" class="border-accent1 text-accent4 w-full rounded-md border p-2 focus:border-accent3 focus:outline-none" placeholder="Share your thoughts about the book..."></textarea>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Submit Review</button>
+                <div onclick="history.back()" class="cursor-pointer rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</div>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        const bookId = "@Model.BookId";
-        const form = document.getElementById("add-review-form");
-        const bookInfo = document.getElementById("book-info");
-        const errorEl = document.getElementById("error-message");
-        const successEl = document.getElementById("success-message");
+        // caches dom elements
+        const elements = {
+            form: document.getElementById('review-form'),
+            formContainer: document.getElementById('review-form-container'),
+            rating: document.getElementById('rating'),
+            message: document.getElementById('message'),
+            bookTitle: document.getElementById('book-title'),
+            bookAuthor: document.getElementById('book-author')
+        };
 
-        async function fetchBookDetails() {
+        // gets bookId from query parameter
+        const getBookId = () => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('BookId');
+        };
+
+        // fetches book details
+        const fetchBookDetails = async (bookId) => {
             try {
-                const res = await fetch(`https://localhost:7018/api/Book/getbyid/${bookId}`);
-                if (!res.ok) throw new Error("Book not found.");
-                const book = await res.json();
-                const authorNames = book.authorBooks.map(a => a.author.name).join(", ");
-                bookInfo.textContent = `"${book.title}" by ${authorNames}`;
-            } catch (err) {
-                bookInfo.textContent = "Could not load book details.";
-            }
-        }
-
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            errorEl.classList.add("hidden");
-            successEl.classList.add("hidden");
-
-            const rating = parseInt(document.getElementById("rating").value);
-            const message = document.getElementById("message").value;
-
-            try {
-                const res = await fetch("https://localhost:7018/api/Review/add", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${window.jwtToken}` // Set globally
-                    },
-                    body: JSON.stringify({ bookId, rating, message })
+                const response = await fetch(`https://localhost:7018/api/Book/getbyid/${bookId}`);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to load book details');
+                }
+                return await response.json();
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to load book details'
+                }).then(() => {
+                    window.location.href = '/Book/Browse';
                 });
+                return null;
+            }
+        };
 
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.message || "Review submission failed.");
+        // submits review
+        const submitReview = async (bookId, rating, message) => {
+            try {
+                const response = await fetch('https://localhost:7018/api/Review/add', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bookId: bookId,
+                        rating: parseInt(rating),
+                        message: message || ''
+                    })
+                });
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to add a review'
+                    }).then(() => window.location.href = '/User/Login');
+                    return false;
+                }
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to add review');
+                }
+                return true;
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to add review'
+                });
+                return false;
+            }
+        };
+
+        // initializes form
+        const initForm = async () => {
+            if (!window.checkAuth('add a review')) return;
+
+            const bookId = getBookId();
+            if (!bookId) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Invalid book ID'
+                }).then(() => window.location.href = '/Book/Browse');
+                return;
+            }
+
+            // Fetch and display book details
+            const book = await fetchBookDetails(bookId);
+            if (!book) return;
+
+            elements.bookTitle.textContent = book.title || 'Untitled';
+            elements.bookAuthor.textContent = book.authorBooks?.length > 0
+                ? `- ${book.authorBooks.map(ab => ab.author.name).join(', ')}`
+                : 'by Unknown Author';
+
+            elements.form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const rating = elements.rating.value;
+                const message = elements.message.value.trim();
+
+                if (!rating) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please select a rating'
+                    });
+                    return;
                 }
 
-                successEl.textContent = " Review submitted successfully!";
-                successEl.classList.remove("hidden");
-                form.reset();
-            } catch (err) {
-                errorEl.textContent = err.message;
-                errorEl.classList.remove("hidden");
-            }
-        });
+                const submitButton = elements.form.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Submitting...';
 
-        document.addEventListener("DOMContentLoaded", fetchBookDetails);
+                try {
+                    const success = await submitReview(bookId, rating, message);
+                    if (success) {
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Review added successfully'
+                        }).then(() => {
+                            window.location.href = `/Book/Details/${bookId}`;
+                        });
+                    }
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Submit Review';
+                }
+            });
+        };
+
+        // initializes page
+        document.addEventListener('DOMContentLoaded', initForm);
     </script>
 }

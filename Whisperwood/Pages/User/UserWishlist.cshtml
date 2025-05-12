@@ -5,19 +5,13 @@
     ViewData["Title"] = "My Wishlist";
 }
 
-@* displays user wishlist *@
 <div class="px-4 py-8">
-    @* header with title *@
-    <div class="mb-4 flex justify-between">
-        <h1 class="text-accent4 text-4xl font-bold">My Wishlist</h1>
-    </div>
+        <h1 class="text-accent4 mb-4 text-4xl font-bold">My Wishlist</h1>
 
-    @* wishlist grid *@
     <div id="wishlist-container" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <div id="loading" class="text-accent4 col-span-full text-center text-lg">Loading wishlist...</div>
     </div>
 
-    @* empty wishlist message *@
     <div id="no-wishlist" class="text-accent4 mt-4 hidden text-center text-lg">Your wishlist is empty.</div>
 </div>
 
