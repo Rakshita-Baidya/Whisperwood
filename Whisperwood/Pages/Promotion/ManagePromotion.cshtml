@@ -8,7 +8,7 @@
 @* displays promotion management page *@
 <div class="px-4 py-8">
     @* header with title and action buttons *@
-    <div class="mb-4 flex justify-between items-center">
+    <div class="mb-4 flex items-center justify-between">
         <h1 class="text-accent4 text-4xl font-bold">Manage Promotions</h1>
         <div class="flex space-x-4 text-white">
             <a href="/Promotion/AddPromotion" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Promotion</a>
@@ -55,7 +55,7 @@
                 <label for="maxEndDate" class="mb-1 block font-medium">Max End Date</label>
                 <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-full rounded border p-[6px]">
             </div>
-            <div class="flex items-end col-start-4 justify-end gap-2">
+            <div class="col-start-4 flex items-end justify-end gap-2">
                 <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
                 <button type="button" id="clear-filters" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear</button>
             </div>
@@ -65,9 +65,9 @@
     @* promotion table *@
     <div id="promotion-list" class="space-y-4">
         <div class="overflow-x-auto">
-            <table id="promotions-table" class="min-w-full border-accent3 border">
+            <table id="promotions-table" class="border-accent3 min-w-full border">
                 <thead>
-                    <tr class="bg-accent3 text-white">
+                    <tr class="bg-accent4 text-white">
                         <th class="px-4 py-2 text-left">Name</th>
                         <th class="px-4 py-2 text-left">Description</th>
                         <th class="px-4 py-2 text-left">Code</th>
@@ -126,17 +126,17 @@
                 const row = document.createElement('tr');
                 row.className = 'border-t border-accent3';
                 row.innerHTML = `
-                    <td class="px-4 py-2 text-accent4 font-semibold truncate max-w-xs">${promotion.name}</td>
-                    <td class="px-4 py-2 text-accent4 truncate max-w-xs">${promotion.description || ''}</td>
-                    <td class="px-4 py-2 text-accent4">${promotion.code}</td>
-                    <td class="px-4 py-2 text-accent4">${promotion.discountPercent}</td>
-                    <td class="px-4 py-2 text-accent4">${new Date(promotion.startDate).toLocaleDateString()}</td>
-                    <td class="px-4 py-2 text-accent4">${new Date(promotion.endDate).toLocaleDateString()}</td>
-                    <td class="px-4 py-2 text-accent4">${promotion.isActive ? 'Active' : 'Inactive'}</td>
+                    <td class="text-accent4 max-w-xs truncate px-4 py-2 font-semibold">${promotion.name}</td>
+                    <td class="text-accent4 max-w-xs truncate px-4 py-2">${promotion.description || ''}</td>
+                    <td class="text-accent4 px-4 py-2">${promotion.code}</td>
+                    <td class="text-accent4 px-4 py-2">${promotion.discountPercent}</td>
+                    <td class="text-accent4 px-4 py-2">${new Date(promotion.startDate).toLocaleDateString()}</td>
+                    <td class="text-accent4 px-4 py-2">${new Date(promotion.endDate).toLocaleDateString()}</td>
+                    <td class="text-accent4 px-4 py-2">${promotion.isActive ? 'Active' : 'Inactive'}</td>
                     <td class="px-4 py-2 text-center">
-                        <div class="flex space-x-2 justify-center">
+                        <div class="flex justify-center space-x-2">
                             <a href="/Promotion/UpdatePromotion/${promotion.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
-                            <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4 delete-promotion" data-id="${promotion.id}" data-name="${promotion.name}">Delete</button>
+                            <button class="bg-accent3 delete-promotion rounded px-3 py-1 text-white hover:bg-accent4" data-id="${promotion.id}" data-name="${promotion.name}">Delete</button>
                         </div>
                     </td>
                 `;
