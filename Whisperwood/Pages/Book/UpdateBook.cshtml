@@ -171,12 +171,6 @@
                 return false;
             }
 
-            const publishedDate = formData.get('publishedDate');
-            if (!publishedDate || new Date(publishedDate) > new Date()) {
-                Toast.fire({ icon: 'error', title: 'Published date must not be in the future' });
-                return false;
-            }
-
             const coverImageId = formData.get('coverImageId');
             if (!coverImageId) {
                 Toast.fire({ icon: 'error', title: 'Cover image is required' });

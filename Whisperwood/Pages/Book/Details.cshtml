@@ -414,10 +414,10 @@
 
                 recentReviews.forEach((review) => {
                     const reviewCard = document.createElement('div');
-                    reviewCard.className = 'bg-primary border-[2px] border-accent1 p-4 rounded shadow-md';
+                    reviewCard.className = 'bg-primary border border-accent2 p-4 rounded shadow-md';
                     reviewCard.innerHTML = `
                         <div class="mb-1 flex items-center">
-                            <img src="${review.users?.imageURL || 'https://via.placeholder.com/32'}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name || 'Anonymous'}">
+                            <img src="${review.users?.imageURL}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name || 'Anonymous'}">
                             <p class="text-accent2 text-xl font-semibold">${review.users?.name || 'Anonymous'}</p>
                         </div>
                         <p class="text-accent3 mb-2">Rating: ★ ${review.rating}</p>

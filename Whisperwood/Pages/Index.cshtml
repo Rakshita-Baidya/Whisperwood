@@ -1,289 +1,493 @@
 ﻿@page
 @model Whisperwood.Pages.IndexModel
 @{
-	Layout = "_Layout";
-	ViewData["Title"] = "Home";
+    Layout = "_Layout";
+    ViewData["Title"] = "Home";
 }
 
-<div class="bg-gray-100">
-	<h1 class="mb-4 text-center text-3xl font-bold text-blue-600">Welcome to Whisperwood</h1>
-	<!-- Trending Now Section -->
-	<section class="mb-10">
-		<h2 class="mb-4 text-xl font-bold uppercase">Trending Now</h2>
-		<div class="flex items-center justify-between">
-			<button class="text-2xl text-gray-400 hover:text-gray-600"><i class="fas fa-chevron-left"></i></button>
+<div class="px-4 py-8">
+    <div class="my-12 grid grid-cols-3 rounded-xl bg-[#eaddc6] px-10 py-12 shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+        <div class="col-span-2 flex flex-col items-center justify-center">
+            <h1 class="text-accent4 font-serif text-4xl font-bold tracking-wide drop-shadow-md">Welcome to Whisperwood</h1>
+            <p class="mt-4 max-w-lg text-center text-base leading-relaxed text-[#4b3e2c] drop-shadow-sm">
+                Discover Whisperwood, your haven for literary adventures. Nestled in a world of stories, we offer a curated collection of books—from timeless classics to trending bestsellers. Explore mysteries, fantasies, and more, with exclusive promotions and personalized recommendations to spark your next great read.
+            </p>
+        </div>
+        <section class="flex flex-col items-center justify-center rounded bg-[#c6b28d] p-6 shadow-lg">
+            <h2 class="mb-3 text-xl font-bold tracking-widest text-[#3a2f1b] uppercase drop-shadow-md">Trending Now</h2>
+            <div id="trending-container" class="flex justify-center">
+                <div id="trending-loading" class="text-lg text-[#4b3e2c]">Loading trending book...</div>
+            </div>
+            <div id="no-trending-books" class="mt-4 hidden text-lg text-[#4b3e2c]">No books found.</div>
+        </section>
+    </div>
 
-			<div class="h-64 w-1/4 rounded bg-gray-300 shadow">
-				<!-- Placeholder for trending book image -->
-			</div>
+    @* award winner *@
+    <section class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-accent4 text-xl font-bold">Award Winners</h2>
+            <a href="/Book/BrowseByCategory" class="text-secondary text-sm hover:text-lg">See More</a>
+        </div>
+        <div id="award-winners-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
 
-			<div class="w-2/4 text-center">
-				<h3 class="mb-3 text-2xl font-bold">Whisperwood</h3>
-				<p class="mb-6 text-sm text-gray-700">
-					Where Secrets Take Root and<br>
-					Mysteries Bloom Beneath The<br>
-					Canopy Of Ancient Trees, A<br>
-					Young Forest Guide Discovers<br>
-					Hidden Truths Between The<br>
-					Boughs, Can She Solve Secrets With<br>
-					Time?
-				</p>
-			</div>
+            <div id="award-loading" class="text-accent2 col-span-full text-center text-lg">Loading award winners...</div>
+        </div>
+        <div id="no-award-winners" class="text-accent2 mt-4 hidden text-center text-lg">No award-winning books found.</div>
+    </section>
 
-			<button class="text-2xl text-gray-400 hover:text-gray-600"><i class="fas fa-chevron-right"></i></button>
-		</div>
-	</section>
+    @* deals *@
+    <section class="bg-gradient-to-r from-accent1 to-accent4 my-10 rounded px-6 py-6 shadow-md">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Hot Deals</h2>
+            <a href="/Book/BrowseByCategory" class="text-sm text-white hover:text-lg">Browse All</a>
+        </div>
+        <div id="promo-books-container" class="flex gap-6 overflow-x-auto scroll-smooth pb-2">
+            <div id="promo-loading" class="text-lg text-white">Loading promotions...</div>
+        </div>
+    </section>
 
-	<!-- Award Winners Section -->
-	<section class="mb-10">
-		<div class="mb-4 flex items-center justify-between">
-			<h2 class="text-xl font-bold">Award Winners</h2>
-			<button class="text-sm text-gray-600">See More</button>
-		</div>
-		<div class="grid grid-cols-5 gap-4">
-			<!-- Book cards -->
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<!-- Repeat for 4 more book cards -->
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-		</div>
-	</section>
+    @* best sellers *@
+    <section class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-accent2 text-xl font-bold">Best Sellers</h2>
+            <a href="/Book/BrowseByCategory" class="text-secondary text-sm hover:text-lg">See More</a>
+        </div>
+        <div id="best-sellers-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
+            <div id="best-sellers-loading" class="text-accent2 col-span-full text-center text-lg">Loading Best Sellers...</div>
+        </div>
+    </section>
 
-	<!-- Ongoing Promotions Section -->
-	<section class="mb-10">
-		<div class="rounded bg-gray-200 p-4">
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-xl font-bold">Ongoing Promotions</h2>
-			</div>
-			<p class="mb-4 text-sm text-gray-600">Lorem ipsum dolor sit amet consectetur adipiscing elit. Ut enim consectetuer adispiscing elit. Maecenas dignissim convallis augue. Morbi magna ipsum elementum.</p>
-			<div class="relative">
-				<button class="absolute top-1/2 left-0 -translate-y-1/2 transform text-2xl text-gray-400 hover:text-gray-600">
-					<i class="fas fa-chevron-left"></i>
-				</button>
+    @* genres *@
+    <section class="mb-10">
+        <h2 class="text-accent2 mb-4 text-xl font-bold">Most Popular Genres</h2>
+        <div id="popular-genres-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
+            <div id="popular-genres-loading" class="text-accent2 col-span-full text-center text-lg">Loading Popular Genres...</div>
+        </div>
+    </section>
 
-				<div class="mx-6 grid grid-cols-5 gap-4">
-					<!-- Promotion books -->
-					<div class="book-card">
-						<div class="mb-2 h-40 rounded bg-gray-300"></div>
-						<h3 class="text-sm font-semibold">Title</h3>
-					</div>
-					<div class="book-card">
-						<div class="mb-2 h-40 rounded bg-gray-300"></div>
-						<h3 class="text-sm font-semibold">Title</h3>
-					</div>
-					<div class="book-card">
-						<div class="mb-2 h-40 rounded bg-gray-300"></div>
-						<h3 class="text-sm font-semibold">Title</h3>
-					</div>
-					<div class="book-card">
-						<div class="mb-2 h-40 rounded bg-gray-300"></div>
-						<h3 class="text-sm font-semibold">Title</h3>
-					</div>
-					<div class="book-card">
-						<div class="mb-2 h-40 rounded bg-gray-300"></div>
-						<h3 class="text-sm font-semibold">Title</h3>
-					</div>
-				</div>
+    @* review section *@
+    <section class="my-10 rounded bg-[#c6b28d] px-6 py-6 shadow-md">
+        <h2 class="mb-4 text-2xl font-extrabold tracking-wide text-white uppercase">Recent Top Reviews</h2>
+        <div id="recent-reviews-grid" class="mx-6 mb-4 grid grid-cols-4 gap-4">
+        </div>
+    </section>
 
-				<button class="absolute top-1/2 right-0 -translate-y-1/2 transform text-2xl text-gray-400 hover:text-gray-600">
-					<i class="fas fa-chevron-right"></i>
-				</button>
-			</div>
-		</div>
-	</section>
-
-	<!-- Best Sellers Section -->
-	<section class="mb-10">
-		<div class="mb-4 flex items-center justify-between">
-			<h2 class="text-xl font-bold">Best Sellers</h2>
-			<button class="text-sm text-gray-600">See More</button>
-		</div>
-		<div class="grid grid-cols-4 gap-4">
-			<!-- Book cards -->
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-			<div class="book-card">
-				<div class="mb-2 h-40 rounded bg-gray-300"></div>
-				<h3 class="text-sm font-semibold">Title</h3>
-				<div class="mb-1 flex items-center">
-					<div class="flex">
-						<span class="text-xs text-gray-600">★★★★★</span>
-					</div>
-				</div>
-				<div class="flex justify-between text-xs text-gray-500">
-					<span>Genre</span>
-					<span>$XX.XX</span>
-				</div>
-			</div>
-		</div>
-	</section>
-
-	<!-- Most Popular Genres Section -->
-	<section class="mb-10">
-		<h2 class="mb-4 text-xl font-bold">Most Popular Genres</h2>
-		<div class="grid grid-cols-5 gap-4">
-			<!-- Genre cards -->
-			<div class="flex h-20 items-center justify-center rounded bg-gray-300 p-4">
-				<h3 class="font-semibold">Title</h3>
-			</div>
-			<div class="flex h-20 items-center justify-center rounded bg-gray-300 p-4">
-				<h3 class="font-semibold">Title</h3>
-			</div>
-			<div class="flex h-20 items-center justify-center rounded bg-gray-300 p-4">
-				<h3 class="font-semibold">Title</h3>
-			</div>
-			<div class="flex h-20 items-center justify-center rounded bg-gray-300 p-4">
-				<h3 class="font-semibold">Title</h3>
-			</div>
-			<div class="flex h-20 items-center justify-center rounded bg-gray-300 p-4">
-				<h3 class="font-semibold">Title</h3>
-			</div>
-		</div>
-
-	</section>
-
-	<!-- Recent Top Reviews Section -->
-	<section class="mb-10">
-		<h2 class="mb-4 text-xl font-bold">Recent Top Reviews</h2>
-		<div class="grid grid-cols-4 gap-4">
-			<!-- Review cards -->
-			<div class="rounded bg-white p-4 shadow">
-				<div class="mb-2 flex">
-					<div class="h-20 w-16 rounded bg-gray-300"></div>
-					<div class="ml-2">
-						<h3 class="text-sm font-semibold">Title</h3>
-						<p class="text-xs text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-					</div>
-				</div>
-			</div>
-			<div class="rounded bg-white p-4 shadow">
-				<div class="mb-2 flex">
-					<div class="h-20 w-16 rounded bg-gray-300"></div>
-					<div class="ml-2">
-						<h3 class="text-sm font-semibold">Title</h3>
-						<p class="text-xs text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-					</div>
-				</div>
-			</div>
-			<div class="rounded bg-white p-4 shadow">
-				<div class="mb-2 flex">
-					<div class="h-20 w-16 rounded bg-gray-300"></div>
-					<div class="ml-2">
-						<h3 class="text-sm font-semibold">Title</h3>
-						<p class="text-xs text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-					</div>
-				</div>
-			</div>
-			<div class="rounded bg-white p-4 shadow">
-				<div class="mb-2 flex">
-					<div class="h-20 w-16 rounded bg-gray-300"></div>
-					<div class="ml-2">
-						<h3 class="text-sm font-semibold">Title</h3>
-						<p class="text-xs text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</section>
 </div>
 
+@section Scripts {
+    <script>
+         // Cache DOM elements
+         const elements = {
+             trendingContainer: document.getElementById('trending-container'),
+             trendingLoading: document.getElementById('trending-loading'),
+             noTrendingBooks: document.getElementById('no-trending-books'),
+             awardWinnersContainer: document.getElementById('award-winners-container'),
+             awardLoading: document.getElementById('award-loading'),
+             noAwardWinners: document.getElementById('no-award-winners')
+         };
 
+         // Fetch all books
+         async function fetchBooks() {
+             try {
+                 const response = await fetch('https://localhost:7018/api/Book/getall');
+                 if (!response.ok) {
+                     throw new Error('Failed to load books. Please try again later.');
+                 }
+                 const books = await response.json();
+                 return books;
+             } catch (error) {
+                 console.error('Error fetching books:', error);
+                 Toast.fire({
+                     icon: 'error',
+                     title: error.message || 'Failed to load books'
+                 });
+                 return [];
+             }
+         }
+
+         // Render trending book
+         async function renderTrendingBook() {
+             elements.trendingLoading.classList.remove('hidden');
+             const books = await fetchBooks();
+             if (!books.length) {
+                 elements.trendingLoading.classList.add('hidden');
+                 elements.noTrendingBooks.classList.remove('hidden');
+                 return;
+             }
+             // Select book with highest salesCount
+             let topBook = books[0];
+             for (let i = 1; i < books.length; i++) {
+                 if ((books[i].salesCount || 0) > (topBook.salesCount || 0)) {
+                     topBook = books[i];
+                 }
+             }
+             const authorNames = topBook.authorBooks?.length > 0
+                 ? topBook.authorBooks.map(ab => ab.author.name).join(', ')
+                 : 'Unknown Author';
+             const isOnSale = window.calculateBookPrice(topBook) < topBook.price;
+             const finalPrice = window.calculateBookPrice(topBook);
+
+             const bookElement = document.createElement('a');
+             bookElement.href = `/Book/Details/${topBook.id}`;
+             bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl';
+             bookElement.innerHTML = `
+                 ${topBook.coverImage?.coverImageURL
+                     ? `<img src="${topBook.coverImage.coverImageURL}" alt="${topBook.title}" class="mb-4 h-36 w-52 rounded-md object-cover" />`
+                     : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
+                 }
+                 <h2 class="text-accent3 truncate text-xl font-semibold">${topBook.title}</h2>
+                 <p class="text-accent1 font-medium">${authorNames}</p>
+                 <div class="mb-3 flex justify-between">
+                     <p class="text-accent3">★ ${topBook.averageRating?.toFixed(1) || 0.0}</p>
+                     <div class="text-right">
+                         ${isOnSale
+                             ? `<p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${topBook.price.toFixed(2)}</span></p>
+                                <p class="text-accent4 text-sm">${topBook.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>`
+                             : `<p class="text-accent4 font-medium">Rs. ${topBook.price.toFixed(2)}</p>`
+                         }
+                     </div>
+                 </div>
+                 <div class="flex gap-2">
+                     <button id="wishlist-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
+                             <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
+                         </svg>
+                     </button>
+                     <button id="cart-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
+                             <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
+                         </svg>
+                     </button>
+                 </div>
+             `;
+
+             elements.trendingContainer.innerHTML = '';
+             elements.trendingContainer.appendChild(bookElement);
+             elements.trendingLoading.classList.add('hidden');
+
+             if (isAuthenticated) {
+                 initializeWishlistButton(`wishlist-${topBook.id}`, topBook.id, topBook);
+                 initializeCartButton(`cart-${topBook.id}`, topBook.id, topBook);
+             } else {
+                 bookElement.querySelector(`#wishlist-${topBook.id}`).addEventListener('click', (e) => {
+                     e.preventDefault();
+                     Toast.fire({
+                         icon: 'error',
+                         title: 'Please log in to manage wishlist'
+                     }).then(() => {
+                         window.location.href = '/User/Login';
+                     });
+                 });
+                 bookElement.querySelector(`#cart-${topBook.id}`).addEventListener('click', (e) => {
+                     e.preventDefault();
+                     Toast.fire({
+                         icon: 'error',
+                         title: 'Please log in to manage cart'
+                     }).then(() => {
+                         window.location.href = '/User/Login';
+                     });
+                 });
+             }
+        }
+
+        // Fetch award winners
+        async function fetchAwardWinners() {
+            const books = await  fetchBooks();
+            const awardBooks = books.filter(book =>
+                book.categoryBooks?.some(cat => cat.category.name.trim().toLowerCase() === 'award winner')
+            );
+            return awardBooks.slice(0, 5);
+        }
+
+         // Render award winners
+         async function renderAwardWinners() {
+             elements.awardLoading.classList.remove('hidden');
+             const books = await fetchAwardWinners();
+             if (!books.length) {
+                 elements.awardLoading.classList.add('hidden');
+                 elements.noAwardWinners.classList.remove('hidden');
+                 return;
+             }
+             // Render award-winning books
+             books.forEach(book => {
+                 const authorNames = book.authorBooks?.length > 0
+                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
+                     : 'Unknown Author';
+                 const isOnSale = window.calculateBookPrice(book) < book.price;
+                 const finalPrice = window.calculateBookPrice(book);
+
+                 const bookElement = document.createElement('a');
+                 bookElement.href = `/Book/Details/${book.id}`;
+                 bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl';
+                 bookElement.innerHTML = `
+                    ${book.coverImage?.coverImageURL
+                      ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-36 w-52 rounded-md object-cover" />`
+                        : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
+                    }
+                   <h2 class="text-accent3 truncate text-xl font-semibold">${book.title}</h2>
+                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <div class="mb-3 flex justify-between">
+                       <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
+                        <div class="text-right">
+                            ${isOnSale
+                               ? `<p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
+                                   <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>`
+                               : `<p class="text-accent4 font-medium">Rs. ${book.price.toFixed(2)}</p>`
+                            }
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                       <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
+                                <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
+                            </svg>
+                        </button>
+                       <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
+                                <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
+                            </svg>
+                        </button>
+                    </div>
+                 `;
+
+                 elements.awardWinnersContainer.appendChild(bookElement);
+             });
+
+             elements.awardLoading.classList.add('hidden');
+         }
+
+        async function fetchPromoBooks() {
+            const books = await fetchBooks();
+            const promoBooks = books.filter(book => book.isOnSale === true);
+            return promoBooks;
+        }
+
+                async function renderPromoBooks() {
+            const promoContainer = document.getElementById('promo-books-container');
+            const loadingElement = document.getElementById('promo-loading');
+            loadingElement.classList.remove('hidden');  // Show loading text while fetching data
+
+            const promoBooks = await fetchPromoBooks();
+
+            if (promoBooks.length === 0) {
+                loadingElement.classList.add('hidden');
+                promoContainer.innerHTML = `<div class="text-accent2 text-center text-lg">No ongoing promotions found.</div>`;
+                return;
+            }
+
+            // Clear the container before rendering
+            promoContainer.innerHTML = '';
+
+            // Render the books on sale
+            promoBooks.forEach(book => {
+                const authorNames = book.authorBooks?.length > 0
+                    ? book.authorBooks.map(ab => ab.author.name).join(', ')
+                    : 'Unknown Author';
+                const finalPrice = window.calculateBookPrice(book);
+
+                const bookElement = document.createElement('a');
+                bookElement.href = `/Book/Details/${book.id}`;
+                bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl';
+                bookElement.innerHTML = `
+                    ${book.coverImage?.coverImageURL
+                        ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-36 w-52 rounded-md object-cover" />`
+                        : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
+                    }
+                    <h2 class="text-accent3 truncate text-xl font-semibold">${book.title}</h2>
+                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <div class="mb-3 flex justify-between">
+                        <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
+                        <div class="text-right">
+                            <p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)}</p>
+                            <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
+                                <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
+                            </svg>
+                        </button>
+                        <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
+                                <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                promoContainer.appendChild(bookElement);
+            });
+
+            loadingElement.classList.add('hidden');
+        }
+
+        async function fetchBestSellerBooks() {
+            const books = await fetchBooks();
+            const bestSellers = books.sort((a, b) => b.salesCount - a.salesCount).slice(0, 5);
+            return bestSellers;
+        }
+
+        async function renderBestSellers() {
+            const bestSellersContainer = document.getElementById('best-sellers-container');
+            const loadingElement = document.getElementById('best-sellers-loading');
+            loadingElement.classList.remove('hidden');
+
+            const bestSellers = await fetchBestSellerBooks();
+
+            if (bestSellers.length === 0) {
+                loadingElement.classList.add('hidden');
+                bestSellersContainer.innerHTML = `<div class="text-accent2 text-center text-lg">No Best Sellers Found.</div>`;
+                return;
+            }
+
+            // Clear the container before rendering
+            bestSellersContainer.innerHTML = '';
+
+            // Render the best seller books
+            bestSellers.forEach(book => {
+                const authorNames = book.authorBooks?.length > 0
+                    ? book.authorBooks.map(ab => ab.author.name).join(', ')
+                    : 'Unknown Author';
+                const finalPrice = window.calculateBookPrice(book);
+
+                const bookElement = document.createElement('a');
+                bookElement.href = `/Book/Details/${book.id}`;
+                bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl';
+                bookElement.innerHTML = `
+                    ${book.coverImage?.coverImageURL
+                        ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-36 w-52 rounded-md object-cover" />`
+                        : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
+                    }
+                    <h2 class="text-accent3 truncate text-xl font-semibold">${book.title}</h2>
+                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <div class="mb-3 flex justify-between">
+                        <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
+                        <div class="text-right">
+                            <p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)}</p>
+                            <p class="text-accent4 text-sm">${book.discountPercentage}% Off</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
+                                <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
+                            </svg>
+                        </button>
+                        <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
+                                <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                bestSellersContainer.appendChild(bookElement);
+            });
+
+            loadingElement.classList.add('hidden');
+        }
+
+        //genres
+        async function fetchBestSellerGenres() {
+            const books = await fetchBooks();
+            const bestSellers = books.sort((a, b) => b.salesCount - a.salesCount).slice(0, 5);
+            
+            const genres = new Set();
+            bestSellers.forEach(book => {
+                book.genreBooks.forEach(genreObj => {
+                    genres.add(genreObj.genre.name);
+                });
+            });
+            return Array.from(genres);
+        }
+
+        async function renderPopularGenres() {
+            const genresContainer = document.getElementById('popular-genres-container');
+            const loadingElement = document.getElementById('popular-genres-loading');
+            loadingElement.classList.remove('hidden'); 
+
+            const genres = await fetchBestSellerGenres();
+
+            if (genres.length === 0) {
+                loadingElement.classList.add('hidden');
+                genresContainer.innerHTML = `<div class="text-accent2 text-center text-lg">No Popular Genres Found.</div>`;
+                return;
+            }
+
+            // Clear the container before rendering
+            genresContainer.innerHTML = '';
+
+            // Render the genre links
+            genres.forEach(genre => {
+                const genreElement = document.createElement('a');
+                genreElement.href = `/Book/Browse`;
+                genreElement.className = 'bg-accent1 flex items-center justify-center rounded p-4 text-center text-white hover:bg-accent2 transition-colors';
+                genreElement.innerHTML = `
+                    <h3 class="font-semibold">${genre}</h3>
+                `;
+                genresContainer.appendChild(genreElement);
+            });
+
+            loadingElement.classList.add('hidden');
+        }
+
+        async function fetchTopReviews() {
+            try {
+                const response = await fetch('https://localhost:7018/api/Review/getall');
+                if (!response.ok) throw new Error('Could not load reviews');
+
+                const reviews = await response.json();
+
+                const topReviews = reviews
+                    .filter(review => review.rating >= 4) 
+                    .sort((a, b) => {
+                        const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt);
+                        const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt);
+                        return dateB - dateA; 
+                    })
+                    .slice(0, 4);
+
+                const grid = document.getElementById('recent-reviews-grid');
+                grid.innerHTML = ''; 
+
+                if (topReviews.length === 0) {
+                    grid.innerHTML = '<p class="text-accent2 text-center">No recent top reviews available.</p>';
+                    return;
+                }
+
+                // Populate the grid with top reviews
+                topReviews.forEach((review) => {
+                    const reviewCard = document.createElement('div');
+                    reviewCard.className = 'bg-primary rounded p-4 shadow-md border border-accent2' ;
+                    reviewCard.innerHTML = `
+                         <div class="mb-1 flex items-center">
+                            <img src="${review.users?.imageURL}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name || 'Anonymous'}">
+                            <p class="text-accent2 text-xl font-semibold">${review.users?.name || 'Anonymous'}</p>
+                        </div>
+                        <p class="text-accent3 mb-2">Rating: ★ ${review.rating}</p>
+                        <p class="text-accent1 mb-2 line-clamp-5 italic">"${review.message || 'No comment'}"</p>
+                        <p class="text-accent2 text-sm">${new Date(review.createdAt).toLocaleString()}</p>
+                    `;
+                    grid.appendChild(reviewCard);
+                });
+            } catch (error) {
+                console.error('Error fetching top reviews:', error);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Failed to load top reviews'
+                });
+            }
+        }
+
+         // Initialize page
+         document.addEventListener('DOMContentLoaded', async () => {
+             await renderTrendingBook();
+             await renderAwardWinners();
+             await renderPromoBooks();
+             await renderBestSellers();
+             await renderPopularGenres();
+             await fetchTopReviews();
+         });
+    </script>
+}
