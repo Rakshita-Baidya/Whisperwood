@@ -66,7 +66,7 @@ const createQuantityDialog = (book, onConfirm) => {
     const isOnSale = effectivePrice < book.price;
     const dialog = document.createElement('dialog');
     dialog.id = 'quantity-dialog';
-    dialog.className = 'bg-primary border-accent1 rounded-lg border-[2px] p-6 max-w-sm mx-auto';
+    dialog.className = 'bg-primary border-accent1 rounded border-[2px] p-6 max-w-sm mx-auto';
     dialog.innerHTML = `
         <h3 class="text-accent3 text-lg font-semibold mb-4">Add "${book.title}" to Cart</h3>
         <p class="text-accent2 mb-2">Price: ${isOnSale ? `<span class="text-accent4">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${book.price.toFixed(2)}</span>` : `Rs. ${book.price.toFixed(2)}`}</p>

@@ -14,7 +14,7 @@
     <div id="order-details" class="grid hidden grid-cols-1 gap-6 lg:grid-cols-3">
         @* order summary *@
         <div class="lg:col-span-1">
-            <div class="bg-primary border-accent1 rounded-lg border p-6 shadow-sm">
+            <div class="bg-primary border-accent1 rounded border p-6 shadow-sm">
                 <h2 class="text-accent4 mb-4 text-xl font-semibold">Order Summary</h2>
                 <div class="text-accent2 space-y-2">
                     <p><span class="font-medium">Order ID:</span> <span id="order-id"></span></p>
@@ -202,7 +202,7 @@
             }
 
             if (order.status === 0) {
-                elements.cancelButton.innerHTML = `<button class="cancel-order bg-accent4 rounded-lg px-4 py-2 text-white hover:bg-red-600" data-order-id="${order.id}">Cancel Order</button>`;
+                elements.cancelButton.innerHTML = `<button class="cancel-order bg-accent4 rounded px-4 py-2 text-white hover:bg-red-600" data-order-id="${order.id}">Cancel Order</button>`;
                 document.querySelector('.cancel-order')?.addEventListener('click', async () => {
                     const success = await cancelOrder(orderId);
                     if (success) {

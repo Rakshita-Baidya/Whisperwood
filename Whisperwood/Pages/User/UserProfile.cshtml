@@ -6,20 +6,20 @@
 }
 
 <div class="px-4 py-8">
-    <h1 class="text-accent3 text-center text-4xl font-bold mb-8">User Profile</h1>
+    <h1 class="text-accent3 mb-8 text-center text-4xl font-bold">User Profile</h1>
 
     <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
 
-    <div class="bg-primary border-accent4 mx-auto rounded-lg border p-6 shadow-md max-w-4xl">
+    <div class="bg-primary border-accent4 mx-auto max-w-4xl rounded border p-6 shadow-md">
         <div id="loading" class="text-accent2 text-center text-lg">Loading profile...</div>
 
-        <div id="profile-section" class="hidden flex flex-col lg:flex-row justify-between gap-8">
-            <div class="flex flex-col items-center min-w-[200px]">
+        <div id="profile-section" class="flex hidden flex-col justify-between gap-8 lg:flex-row">
+            <div class="flex min-w-[200px] flex-col items-center">
                 <img id="profile-image" src="" alt="Profile Image"
-                     class="h-52 w-52 rounded-full object-cover mb-4 hidden border-2 border-accent3" />
-                <h2 id="profile-name" class="text-accent4 text-2xl font-semibold text-center"></h2>
+                     class="border-2 border-accent3 mb-4 hidden h-52 w-52 rounded-full object-cover" />
+                <h2 id="profile-name" class="text-accent4 text-center text-2xl font-semibold"></h2>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
+            <div class="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                     <label class="text-accent4 font-semibold">Membership ID</label>
                     <p id="profile-membership" class="text-accent1"></p>

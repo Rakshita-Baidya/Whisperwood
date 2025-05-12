@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
+    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded border p-6 shadow-md">
         <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <div>
                 <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
@@ -95,7 +95,7 @@
 
     <div id="book-list" class="hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-accent2 border border-accent1 rounded-lg">
+            <table class="text-accent2 border-accent1 w-full rounded border">
                 <thead>
                     <tr class="bg-accent3 text-white">
                         <th class="p-2 text-left">Image</th>
@@ -119,7 +119,7 @@
 @section Scripts {
     <script>
         // configuration constants
-        const pageSize = 10;
+        const pageSize = 5;
         let currentPage = 1;
         let allBooks = [];
         let originalBooks = [];
@@ -264,15 +264,15 @@
                                 : `<div class="text-accent3 flex h-20 w-16 items-center justify-center">No Image</div>`
                             }
                         </td>
-                        <td class="p-2 truncate">${book.title}</td>
-                        <td class="p-2 truncate">${authorNames}</td>
+                        <td class="truncate p-2">${book.title}</td>
+                        <td class="truncate p-2">${authorNames}</td>
                         <td class="p-2">Rs. ${book.price.toFixed(2)}</td>
                         <td class="p-2">${book.stock}</td>
                         <td class="p-2">
-                            <div class="flex space-x-2 justify-center">
+                            <div class="flex justify-center space-x-2">
                                 <a href="/Book/Details/${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">View</a>
                                 <a href="/Book/UpdateBook/${book.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
-                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4 delete-btn" data-id="${book.id}" data-title="${book.title}">Delete</button>
+                                <button class="bg-accent3 delete-btn rounded px-3 py-1 text-white hover:bg-accent4" data-id="${book.id}" data-title="${book.title}">Delete</button>
                             </div>
                         </td>
                     `;

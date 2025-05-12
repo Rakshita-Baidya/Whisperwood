@@ -13,7 +13,7 @@
             <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Filter Announcement</button>
         </div>
     </div>
-    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded-lg border p-6 shadow-md">
+    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded border p-6 shadow-md">
         <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div>
                 <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
@@ -62,7 +62,7 @@
 
     <div id="announcement-list" class="hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-accent2 border border-accent1">
+            <table class="text-accent2 border-accent1 w-full border">
                 <thead>
                     <tr class="bg-accent4 text-white">
                         <th class="p-2 text-left">Title</th>
@@ -86,7 +86,7 @@
 @section Scripts {
     <script>
         // configuration constants
-        const PAGE_SIZE = 10;
+        const pageSize = 8;
         let currentPage = 1;
         let allAnnouncements = [];
         let originalAnnouncements = [];
@@ -255,8 +255,8 @@
                 return;
             }
 
-            const startIndex = (page - 1) * PAGE_SIZE;
-            const endIndex = Math.min(startIndex + PAGE_SIZE, allAnnouncements.length);
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allAnnouncements.length);
             const paginatedAnnouncements = allAnnouncements.slice(startIndex, endIndex);
 
             if (paginatedAnnouncements.length > 0) {
@@ -267,22 +267,22 @@
                     const row = document.createElement('tr');
                     row.className = 'border-b border-accent1';
                     row.innerHTML = `
-                        <td class="p-2 truncate">${announcement.title}</td>
-                        <td class="p-2 truncate">${announcement.message}</td>
+                        <td class="truncate p-2">${announcement.title}</td>
+                        <td class="truncate p-2">${announcement.message}</td>
                         <td class="p-2">${announcement.recipientGroups.join(', ')}</td>
                         <td class="p-2">${formatDate(announcement.startDate)}</td>
                         <td class="p-2">${formatDate(announcement.endDate)}</td>
                         <td class="p-2">
-                            <div class="flex space-x-2 justify-center">
+                            <div class="flex justify-center space-x-2">
                                 <a href="/Announcement/UpdateAnnouncement/${announcement.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
-                                <button class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4 delete-btn" data-id="${announcement.id}" data-title="${announcement.title}">Delete</button>
+                                <button class="bg-accent3 delete-btn rounded px-3 py-1 text-white hover:bg-accent4" data-id="${announcement.id}" data-title="${announcement.title}">Delete</button>
                             </div>
                         </td>
                     `;
                     announcementsTableBody.appendChild(row);
                 });
 
-                const totalPages = Math.ceil(allAnnouncements.length / PAGE_SIZE);
+                const totalPages = Math.ceil(allAnnouncements.length / pageSize);
                 createPaginationControls('pagination-container', totalPages, page, (newPage) => {
                     currentPage = newPage;
                     renderAnnouncements(newPage);

@@ -59,7 +59,7 @@ renderAnnouncements(announcements) {
 
     announcements.forEach(announcement => {
         const announcementItem = document.createElement('div');
-        announcementItem.className = 'bg-gray-100 p-4 rounded-lg border border-accent1';
+        announcementItem.className = 'bg-gray-100 p-4 rounded border border-accent1';
         announcementItem.innerHTML = `
                 <h3 class="text-accent3 font-semibold text-lg">${announcement.title}</h3>
                 <p class="text-accent2">${announcement.message || 'No message'}</p>

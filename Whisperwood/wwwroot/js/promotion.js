@@ -64,7 +64,7 @@
 
         promotions.forEach(promotion => {
             const promotionItem = document.createElement('div');
-            promotionItem.className = 'bg-primary p-4 rounded-lg border border-accent1';
+            promotionItem.className = 'bg-primary p-4 rounded border border-accent1';
             promotionItem.innerHTML = `
                 <h3 class="text-accent3 font-semibold text-lg">${promotion.name}</h3>
                 <p class="text-accent2">${promotion.description || 'No description'}</p>
