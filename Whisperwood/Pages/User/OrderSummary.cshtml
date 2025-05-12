@@ -126,7 +126,8 @@
             if (!window.checkAuth('place order')) return;
             Toast.fire({
                 icon: 'info',
-                title: 'Placing order...'
+                title: 'Placing order...',
+                timer: 5000
             });
             const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
             try {

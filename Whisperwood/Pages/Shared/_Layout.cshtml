@@ -142,7 +142,7 @@
 
     @if (isAdmin || isStaff)
     {
-        <div id="order-updates" class="fixed top-20 right-4 z-[9999] space-y-2"></div>
+        <div id="order-updates" class="fixed top-[8%] z-[9999] w-full text-xl"></div>
     }
 
     <!-- Announcements Modal -->
@@ -301,15 +301,23 @@
                 .withUrl("/orderHub")
                 .build();
 
-            connection.on("ReceiveOrderUpdate", (message) => {
+            connection.on("ReceiveOrderUpdate", function (message) {
                 const updatesDiv = document.getElementById("order-updates");
-                if (updatesDiv) {
-                    const messageElement = document.createElement("div");
-                    messageElement.className = "bg-accent3 text-white p-4 text-xl rounded shadow";
-                    messageElement.textContent = message;
-                    updatesDiv.appendChild(messageElement);
-                    setTimeout(() => updatesDiv.removeChild(messageElement), 5000);
-                }
+                setTimeout(() => {
+                    if (updatesDiv) {
+                        const messageElement = document.createElement("div");
+                        messageElement.className = "bg-secondary text-white text-semibold p-4 text-center shadow-xl";
+                        messageElement.textContent = message;
+                        updatesDiv.appendChild(messageElement);
+                        setTimeout(() => {
+                            updatesDiv.removeChild(messageElement);
+                        }, 3000);
+                    }
+                }, 2000);
+            });
+
+            connection.start().catch(function (err) {
+                console.error(err.toString());
             });
 
         });
