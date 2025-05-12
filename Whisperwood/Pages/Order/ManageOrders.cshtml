@@ -330,8 +330,10 @@
                                     <option value="1" ${currentStatus === 1 ? 'selected' : ''}>Cancelled</option>
                                     <option value="2" ${currentStatus === 2 ? 'selected' : ''}>Fulfilled</option>
                                 </select>
-                                <label class="text-accent2 mt-4 mb-1 block">Claim Code</label>
-                                <input id="edit-claim-code" type="text" value="${currentClaimCode}" class="border-accent1 w-full rounded border p-2" maxlength="6">
+                                <div id="claim-code-container" class="${currentStatus === 2 ? '' : 'hidden'} mt-4">
+                                    <label class="text-accent2 mb-1 block">Claim Code</label>
+                                    <input id="edit-claim-code" type="text" value="${currentStatus === 2 ? currentClaimCode : ''}" class="border-accent1 w-full rounded border p-2" maxlength="6">
+                                </div>
                             </div>
                         `,
                         showCancelButton: true,
@@ -342,9 +344,17 @@
                         customClass: {
                             popup: 'bg-primary rounded shadow-lg max-w-md w-full p-6'
                         },
+                        didOpen: () => {
+                            const statusSelect = document.getElementById('edit-status');
+                            const claimCodeContainer = document.getElementById('claim-code-container');
+                            statusSelect.addEventListener('change', () => {
+                                const status = parseInt(statusSelect.value);
+                                claimCodeContainer.classList.toggle('hidden', status !== 2);
+                            });
+                        },
                         preConfirm: () => {
                             const status = parseInt(document.getElementById('edit-status').value);
-                            const claimCode = document.getElementById('edit-claim-code').value.trim();
+                            const claimCode = document.getElementById('edit-claim-code')?.value.trim() || null;
                             if (status === 2 && !claimCode) {
                                 Swal.showValidationMessage('Claim code is required for Fulfilled status');
                                 return false;

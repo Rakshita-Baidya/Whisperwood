@@ -124,7 +124,10 @@
         // confirms order
         const confirmOrder = async () => {
             if (!window.checkAuth('place order')) return;
-
+            Toast.fire({
+                icon: 'info',
+                title: 'Placing order...'
+            });
             const orderData = JSON.parse(localStorage.getItem('orderData') || '{}');
             try {
                 const response = await fetch('https://localhost:7018/api/Order/add', {

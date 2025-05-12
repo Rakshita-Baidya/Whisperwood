@@ -5,19 +5,22 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="min-h-screen flex items-center justify-center">
-    <div class="mx-auto w-1/4 text-center bg-primary p-6 border border-accent2 rounded shadow-md">
+<div class="flex min-h-screen items-center justify-center">
+    <div class="bg-primary border-accent2 mx-auto w-1/4 rounded border p-6 text-center shadow-md">
         <h1 class="text-accent4 mb-4 text-4xl font-bold">Login</h1>
         <form id="login-form" method="post" class="space-y-4">
             <div>
                 <label class="text-accent4 block text-lg font-medium" for="email">Email</label>
                 <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
             </div>
-            <div>
+            <div class="relative">
                 <label class="text-accent4 block text-lg font-medium" for="password">Password</label>
-                <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
+                <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required title="Password must be at least 6 characters, including a number, letter, and special character" />
+                <button type="button" class="absolute top-10 right-2 text-gray-500 transition hover:text-accent3" onclick="togglePassword('password', this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" /></svg>
+                </button>
             </div>
-            <button type="submit" class="bg-accent3 rounded px-4 py-2 text-lg font-medium text-white w-full hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Login</button>
+            <button type="submit" class="bg-accent3 w-full rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent2 focus:outline-none focus:ring-2 focus:ring-accent3">Login</button>
             <p class="text-accent4">
                 Don't have an account? <a href="/User/Register" class="text-accent1 hover:text-accent3">Register</a>
             </p>
@@ -27,6 +30,15 @@
 
 @section Scripts {
     <script>
+        function togglePassword(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            btn.innerHTML = isPassword
+                ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8"/><circle cx="12" cy="12" r="3"/></svg>`
+                : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22"/></svg>`;
+        }
         // handling form submission
         document.getElementById('login-form').addEventListener('submit', async (event) => {
             event.preventDefault();
