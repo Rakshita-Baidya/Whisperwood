@@ -8,7 +8,7 @@
 <div class="px-4 py-8">
     <h1 class="text-accent3 mb-6 text-center text-4xl font-bold">Update Promotion</h1>
 
-    <div class="mx-auto max-w-2xl rounded-lg bg-primary border border-accent3 p-6 shadow-md">
+    <div class="bg-primary border-accent3 mx-auto max-w-2xl rounded-lg border p-6 shadow-md">
         <form id="promotion-form" class="text-accent4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
                 <label for="name" class="mb-1 block font-medium">Name</label>
@@ -31,9 +31,9 @@
                 <label for="endDate" class="mb-1 block font-medium">End Date</label>
                 <input type="date" id="endDate" name="endDate" class="border-accent1 w-full rounded border p-[6px]" required>
             </div>
-            <div class="md:col-span-2 flex justify-end gap-4">
+            <div class="flex justify-end gap-4 md:col-span-2">
                 <button type="submit" class="bg-accent3 rounded px-6 py-2 text-white hover:bg-accent4">Update Promotion</button>
-                <button type="button" id="clear-form" class="bg-gray-500 rounded px-6 py-2 text-white hover:bg-gray-600">Clear</button>
+                <a href="/Promotion/ManagePromotion" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</a>
             </div>
         </form>
     </div>
@@ -167,11 +167,6 @@
             }
         };
 
-        // redirects to manage promotions
-        const cancelForm = () => {
-            window.location.href = '/Promotion/ManagePromotion';
-        };
-
         // initializes event listeners
         document.addEventListener('DOMContentLoaded', async () => {
             const elements = {
@@ -181,7 +176,6 @@
                 discountPercent: document.getElementById('discountPercent'),
                 startDate: document.getElementById('startDate'),
                 endDate: document.getElementById('endDate'),
-                cancelButton: document.getElementById('cancel-form')
             };
 
             if (!window.checkAuth('update promotions')) return;
@@ -202,8 +196,6 @@
                 e.preventDefault();
                 submitForm(elements.form, promotionId);
             });
-
-            elements.cancelButton.addEventListener('click', cancelForm);
         });
     </script>
 }

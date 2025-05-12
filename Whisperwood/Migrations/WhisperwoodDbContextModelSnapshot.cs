@@ -53,7 +53,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Announcements");
+                    b.ToTable("Announcements", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.AuthorBooks", b =>
@@ -68,7 +68,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("AuthorBooks");
+                    b.ToTable("AuthorBooks", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Authors", b =>
@@ -99,7 +99,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Authors");
+                    b.ToTable("Authors", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Bill", b =>
@@ -142,7 +142,7 @@ namespace Whisperwood.Migrations
                     b.HasIndex("OrderId")
                         .IsUnique();
 
-                    b.ToTable("Bill");
+                    b.ToTable("Bill", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Books", b =>
@@ -219,7 +219,7 @@ namespace Whisperwood.Migrations
                     b.HasIndex("ISBN")
                         .IsUnique();
 
-                    b.ToTable("Books");
+                    b.ToTable("Books", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Cart", b =>
@@ -236,7 +236,7 @@ namespace Whisperwood.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Cart", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.CartItem", b =>
@@ -261,7 +261,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("CartItem");
+                    b.ToTable("CartItem", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Categories", b =>
@@ -279,7 +279,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.CategoryBooks", b =>
@@ -294,7 +294,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CategoryBooks");
+                    b.ToTable("CategoryBooks", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.CoverImages", b =>
@@ -309,7 +309,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CoverImages");
+                    b.ToTable("CoverImages", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.DiscountCode", b =>
@@ -334,7 +334,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiscountCodes");
+                    b.ToTable("DiscountCodes", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.GenreBooks", b =>
@@ -349,7 +349,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("GenreBooks");
+                    b.ToTable("GenreBooks", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Genres", b =>
@@ -366,7 +366,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genres");
+                    b.ToTable("Genres", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.OrderItem", b =>
@@ -392,7 +392,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("OrderItem");
+                    b.ToTable("OrderItem", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Orders", b =>
@@ -437,7 +437,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Promotions", b =>
@@ -477,7 +477,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Promotions");
+                    b.ToTable("Promotions", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.PublisherBooks", b =>
@@ -492,7 +492,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("PublisherId");
 
-                    b.ToTable("PublisherBooks");
+                    b.ToTable("PublisherBooks", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Publishers", b =>
@@ -516,7 +516,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Publishers");
+                    b.ToTable("Publishers", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Reviews", b =>
@@ -550,7 +550,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Users", b =>
@@ -625,7 +625,7 @@ namespace Whisperwood.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Wishlist", b =>
@@ -642,7 +642,7 @@ namespace Whisperwood.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Wishlist");
+                    b.ToTable("Wishlist", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.WishlistItem", b =>
@@ -657,7 +657,7 @@ namespace Whisperwood.Migrations
 
                     b.HasIndex("WishlistId");
 
-                    b.ToTable("WishlistItem");
+                    b.ToTable("WishlistItem", (string)null);
                 });
 
             modelBuilder.Entity("Whisperwood.Models.Announcements", b =>

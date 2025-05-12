@@ -11,46 +11,65 @@ const cartRemoveIcon = `
     </svg>
 `;
 
+// calculates book price with active discount
 const calculateBookPrice = (book) => {
     if (book.isOnSale && book.discountPercentage > 0) {
         const today = new Date();
-        const startDate = book.discountStartDate ? new Date(book.discountStartDate) : null;
-        const endDate = book.discountEndDate ? new Date(book.discountEndDate) : null;
-        const isSaleActive = startDate && endDate && !isNaN(startDate) && !isNaN(endDate) &&
-            startDate <= today && endDate >= today;
-        if (isSaleActive) {
+        const startDate = new Date(book.discountStartDate ?? '');
+        const endDate = new Date(book.discountEndDate ?? '');
+        if (startDate <= today && endDate >= today && !isNaN(startDate) && !isNaN(endDate)) {
             return book.price * (1 - book.discountPercentage / 100);
         }
     }
     return book.price;
 };
 
+// fetches cart items from api
 const fetchCartItems = async () => {
+    if (!window.checkAuth('manage cart')) return [];
+
     try {
         const response = await fetch('https://localhost:7018/api/CartItem/getall', {
             headers: { 'Authorization': `Bearer ${window.jwtToken}` }
         });
-        if (!response.ok) throw new Error('Failed to fetch cart.');
+
+        if (response.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to manage cart'
+            }).then(() => {
+                window.location.href = '/User/Login';
+            });
+            return [];
+        }
+
+        if (!response.ok) throw new Error('Failed to fetch cart');
+
         return await response.json();
     } catch (error) {
-        console.error('Error fetching cart items:', error);
+        Toast.fire({
+            icon: 'error',
+            title: error.message || 'Failed to fetch cart'
+        });
         return [];
     }
 };
 
+// updates cart button icon for book list pages
 const updateCartButtonIcon = (button, isInCart) => {
     button.innerHTML = isInCart ? cartRemoveIcon : cartAddIcon;
 };
 
+// creates quantity dialog for adding to cart on book list pages
 const createQuantityDialog = (book, onConfirm) => {
-    const effectivePrice = window.calculateBookPrice(book);
+    const effectivePrice = calculateBookPrice(book);
     const isOnSale = effectivePrice < book.price;
     const dialog = document.createElement('dialog');
     dialog.id = 'quantity-dialog';
     dialog.className = 'bg-primary border-accent1 rounded-lg border-[2px] p-6 max-w-sm mx-auto';
     dialog.innerHTML = `
         <h3 class="text-accent3 text-lg font-semibold mb-4">Add "${book.title}" to Cart</h3>
-        <p class="text-accent2 mb-2">Price: ${isOnSale ? `<span class="text-red-500">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${book.price.toFixed(2)}</span>` : `Rs. ${book.price.toFixed(2)}`}</p>
+        <p class="text-accent2 mb-2">Price: ${isOnSale ? `<span class="text-accent4">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${book.price.toFixed(2)}</span>` : `Rs. ${book.price.toFixed(2)}`}</p>
         <p class="text-accent2 mb-2">Stock: ${book.availabilityStatus && book.stock > 0 ? `In Stock (${book.stock})` : 'Out of Stock'}</p>
         <label for="quantity-input" class="text-accent2 block mb-2">Quantity (1-${book.stock}):</label>
         <input type="number" id="quantity-input" min="1" max="${book.stock}" value="1" class="border-accent2 w-full rounded border p-2 text-gray-800 mb-4" ${book.stock <= 0 ? 'disabled' : ''} />
@@ -62,50 +81,84 @@ const createQuantityDialog = (book, onConfirm) => {
     document.body.appendChild(dialog);
     dialog.showModal();
 
-    dialog.querySelector('#cancel-quantity').addEventListener('click', () => dialog.close());
+    const elements = {
+        cancel: dialog.querySelector('#cancel-quantity'),
+        confirm: dialog.querySelector('#confirm-quantity')
+    };
+
+    elements.cancel.addEventListener('click', () => dialog.close());
     if (book.stock > 0) {
-        dialog.querySelector('#confirm-quantity').addEventListener('click', onConfirm);
+        elements.confirm.addEventListener('click', onConfirm);
     }
 
     return dialog;
 };
 
+// handles add or remove cart actions for book list pages
 const handleCartAction = async (button, bookId, book, isInCart) => {
+    if (!window.checkAuth('manage cart')) return;
+
     if (isInCart) {
-        if (confirm('Are you sure you want to remove this book from your cart?')) {
-            try {
-                const response = await fetch(`https://localhost:7018/api/CartItem/delete/${bookId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${window.jwtToken}`
-                    }
+        const result = await Swal.fire({
+            title: 'Remove from Cart',
+            text: `Are you sure you want to remove "${book.title}" from your cart?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#E74C3C',
+            cancelButtonColor: '#2C3E50',
+            confirmButtonText: 'Remove',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const response = await fetch(`https://localhost:7018/api/CartItem/delete/${bookId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${window.jwtToken}` }
+            });
+
+            if (response.status === 401) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please log in to manage cart'
+                }).then(() => {
+                    window.location.href = '/User/Login';
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Book removed from cart successfully!');
-                    await updateCartButton(button, bookId, book);
-                    if (typeof renderBooks === 'function') {
-                        renderBooks(currentPage);
-                    }
-                } else {
-                    alert(data.message || 'Failed to remove book from cart.');
-                }
-            } catch (error) {
-                console.error('Error removing book from cart:', error);
-                alert('An error occurred while removing the book from the cart.');
+                return;
             }
+
+            if (!response.ok) throw new Error('Failed to remove book from cart');
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Book removed from cart'
+            }).then(() => {
+                updateCartButton(button, bookId, book); // Update icon
+                window.location.reload();
+            });
+        } catch (error) {
+            Toast.fire({
+                icon: 'error',
+                title: error.message || 'Failed to remove book from cart'
+            });
         }
     } else {
         if (!book.availabilityStatus || book.stock <= 0) {
-            alert('This book is out of stock.');
+            Toast.fire({
+                icon: 'error',
+                title: 'This book is out of stock'
+            });
             return;
         }
+
         const dialog = createQuantityDialog(book, async () => {
             const quantity = parseInt(document.getElementById('quantity-input').value);
             if (isNaN(quantity) || quantity < 1 || quantity > book.stock) {
-                alert(`Please enter a valid quantity between 1 and ${book.stock}.`);
+                Toast.fire({
+                    icon: 'error',
+                    title: `Please enter a valid quantity between 1 and ${book.stock}`
+                });
                 return;
             }
 
@@ -119,47 +172,60 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
                     body: JSON.stringify({ bookId, quantity })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(`Book added to cart for Rs. ${(quantity * window.calculateBookPrice(book)).toFixed(2)}!`);
-                    dialog.close();
-                    await updateCartButton(button, bookId, book);
-                    if (typeof renderBooks === 'function') {
-                        renderBooks(currentPage);
-                    }
-                } else {
-                    alert(data.message || 'Failed to add book to cart.');
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to manage cart'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return;
                 }
+
+                if (!response.ok) throw new Error('Failed to add book to cart');
+
+                Toast.fire({
+                    icon: 'success',
+                    title: `Book added to cart for Rs. ${(quantity * calculateBookPrice(book)).toFixed(2)}`
+                }).then(() => {
+                    dialog.close();
+                    updateCartButton(button, bookId, book); // Update icon
+                    window.location.reload();
+                });
             } catch (error) {
-                console.error('Error adding book to cart:', error);
-                alert('An error occurred while adding the book to the cart.');
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to add book to cart'
+                });
             }
         });
     }
 };
 
+// updates cart button state for book list pages
 const updateCartButton = async (button, bookId, book) => {
-    if (!window.isAuthenticated) {
-        button.innerHTML = cartAddIcon;
+    if (!window.checkAuth('manage cart')) {
+        updateCartButtonIcon(button, false);
         button.disabled = book.stock <= 0 || !book.availabilityStatus;
         return null;
     }
 
     const cartItems = await fetchCartItems();
-    const cartItem = cartItems.find(item => item.bookId === bookId);
-    const isInCart = !!cartItem;
+    const isInCart = cartItems.some(item => item.bookId === bookId);
     updateCartButtonIcon(button, isInCart);
     button.disabled = book.stock <= 0 || !book.availabilityStatus;
-    button.setAttribute('data-price', window.calculateBookPrice(book).toFixed(2));
+    button.setAttribute('data-price', calculateBookPrice(book).toFixed(2));
     button.setAttribute('data-stock', book.stock);
     button.setAttribute('data-availability', book.availabilityStatus ? 'In Stock' : 'Out of Stock');
-    return cartItem;
+    return isInCart ? cartItems.find(item => item.bookId === bookId) : null;
 };
 
+// updates cart item quantity
 const updateCartItem = async (bookId, quantity, successCallback, errorCallback) => {
+    if (!window.checkAuth('manage cart')) return;
+
     if (isNaN(quantity) || quantity < 1) {
-        errorCallback('Quantity must be at least 1.');
+        errorCallback('Quantity must be at least 1');
         return;
     }
 
@@ -168,80 +234,141 @@ const updateCartItem = async (bookId, quantity, successCallback, errorCallback) 
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.jwtToken || ''}`
+                'Authorization': `Bearer ${window.jwtToken}`
             },
             body: JSON.stringify({ bookId, quantity })
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
+        if (response.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to manage cart'
+            }).then(() => {
                 window.location.href = '/User/Login';
-                return;
-            }
-            const data = await response.json();
-            throw new Error(data.message || 'Failed to update cart item.');
+            });
+            return;
         }
 
-        successCallback('Cart item updated successfully!', true);
+        if (!response.ok) throw new Error('Failed to update cart item');
+
+        successCallback('Cart item updated successfully');
     } catch (error) {
-        console.error('Error updating cart item:', error);
-        errorCallback(error.message);
+        errorCallback(error.message || 'Failed to update cart item');
     }
 };
 
+// deletes cart item
 const deleteCartItem = async (bookId, successCallback, errorCallback) => {
-    if (!confirm('Are you sure you want to remove this book from your cart?')) return;
+    if (!window.checkAuth('manage cart')) return;
+
+    const result = await Swal.fire({
+        title: 'Are you sure you want to remove this book from your cart?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: 'red',
+        cancelButtonColor: 'grey',
+        confirmButtonText: 'Delete'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
         const response = await fetch(`https://localhost:7018/api/CartItem/delete/${bookId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${window.jwtToken || ''}`
-            }
+            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
         });
 
-        if (!response.ok) {
-            if (response.status === 401) {
+        if (response.status === 401) {
+            Toast.fire({
+                icon: 'error',
+                title: 'Please log in to manage cart'
+            }).then(() => {
                 window.location.href = '/User/Login';
-                return;
-            }
-            const data = await response.json();
-            throw new Error(data.message || 'Failed to remove book from cart.');
-        }
-
-        successCallback('Book removed from cart successfully!', true);
-    } catch (error) {
-        console.error('Error removing cart item:', error);
-        errorCallback(error.message);
-    }
-};
-
-const initializeCartButton = async (buttonId, bookId, book) => {
-    const button = document.getElementById(buttonId);
-    if (!button) {
-        console.error(`Button not found: ${buttonId}`);
-        return;
-    }
-
-    await updateCartButton(button, bookId, book);
-
-    button.addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!window.isAuthenticated) {
-            window.location.href = '/User/Login';
+            });
             return;
         }
 
-        const cartItem = await updateCartButton(button, bookId, book);
-        const isInCart = !!cartItem;
+        if (!response.ok) throw new Error('Failed to remove book from cart');
 
-        console.log(`Cart button clicked for bookId: ${bookId}, isInCart: ${isInCart}`);
-        handleCartAction(button, bookId, book, isInCart);
+        successCallback('Book removed from cart successfully');
+    } catch (error) {
+        errorCallback(error.message || 'Failed to remove book from cart');
+    }
+};
+
+// initializes cart button for a book
+const initializeCartButton = async (buttonId, bookId, book) => {
+    const button = document.getElementById(buttonId);
+
+    // handle book list page add/remove buttons
+    if (!buttonId.startsWith('update-') && !buttonId.startsWith('delete-')) {
+        await updateCartButton(button, bookId, book);
+        button.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (!window.checkAuth('manage cart')) return;
+            const cartItem = await updateCartButton(button, bookId, book);
+            const isInCart = !!cartItem;
+            await handleCartAction(button, bookId, book, isInCart);
+        });
+        return;
+    }
+
+    // handle cart page update/delete buttons
+    button.disabled = book.stock <= 0 || !book.availabilityStatus;
+    button.setAttribute('data-price', calculateBookPrice(book).toFixed(2));
+    button.setAttribute('data-stock', book.stock);
+    button.setAttribute('data-availability', book.availabilityStatus ? 'In Stock' : 'Out of Stock');
+
+    button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!window.checkAuth('manage cart')) return;
+
+        if (buttonId.startsWith('update-')) {
+            const quantityInput = document.getElementById(`quantity-${bookId}`);
+            const quantity = parseInt(quantityInput.value);
+            await updateCartItem(
+                bookId,
+                quantity,
+                (message) => {
+                    Toast.fire({
+                        icon: 'success',
+                        title: message
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                },
+                (error) => {
+                    Toast.fire({
+                        icon: 'error',
+                        title: error
+                    });
+                }
+            );
+        } else if (buttonId.startsWith('delete-')) {
+            await deleteCartItem(
+                bookId,
+                (message) => {
+                    Toast.fire({
+                        icon: 'success',
+                        title: message
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                },
+                (error) => {
+                    Toast.fire({
+                        icon: 'error',
+                        title: error
+                    });
+                }
+            );
+        }
     });
 };
 
-// Expose functions to global scope
+// exposes functions globally
 window.calculateBookPrice = calculateBookPrice;
+window.fetchCartItems = fetchCartItems;
 window.initializeCartButton = initializeCartButton;
 window.updateCartItem = updateCartItem;
 window.deleteCartItem = deleteCartItem;

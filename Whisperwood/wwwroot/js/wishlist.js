@@ -45,7 +45,7 @@ const fetchWishlist = async () => {
 };
 
 // updates wishlist button icon
-const updateButtonIcon = (button, isInWishlist) => {
+const updateWishlistButtonIcon = (button, isInWishlist) => {
     button.innerHTML = isInWishlist ? wishlistIcons.remove : wishlistIcons.add;
 };
 
@@ -62,19 +62,19 @@ const initializeWishlistButton = async (buttonId, bookId) => {
 
     // refreshes button icon based on wishlist status
     const refreshIcon = async () => {
-        if (!checkAuth()) {
-            updateButtonIcon(button, false);
+        if (!window.checkAuth('manage wishlist')) {
+            updateWishlistButtonIcon(button, false);
             return;
         }
 
         const wishlist = await fetchWishlist();
         const isInWishlist = wishlist.some(item => item.bookId === bookId);
-        updateButtonIcon(button, isInWishlist);
+        updateWishlistButtonIcon(button, isInWishlist);
     };
 
     // toggles book in wishlist
     const toggleWishlist = async () => {
-        if (!checkAuth()) return;
+        if (!window.checkAuth('manage wishlist')) return;
 
         try {
             const wishlist = await fetchWishlist();
@@ -109,6 +109,8 @@ const initializeWishlistButton = async (buttonId, bookId) => {
             Toast.fire({
                 icon: 'success',
                 title: isInWishlist ? 'Removed from wishlist' : 'Added to wishlist'
+            }).then(() => {
+                window.location.reload();
             });
             await refreshIcon();
         } catch (error) {

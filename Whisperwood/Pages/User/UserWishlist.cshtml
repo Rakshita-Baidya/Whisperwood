@@ -81,7 +81,7 @@
                     bookElement.innerHTML = `
                         ${book.coverImage?.coverImageURL
                             ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title}" class="mb-4 h-64 w-full rounded-md object-cover" />`
-                            : `<div class="text-accent4 mb-4 h-64 w-full rounded-md flex items-center justify-center bg-secondary">No Image</div>`
+                            : `<div class="text-accent4 bg-secondary mb-4 flex h-64 w-full items-center justify-center rounded-md">No Image</div>`
                         }
                         <h2 class="text-accent4 truncate text-xl font-semibold">${book.title}</h2>
                         <p class="text-accent4 font-medium">${authorNames}</p>
@@ -89,8 +89,8 @@
                             <p class="text-accent4">★ ${book.averageRating.toFixed(1)}</p>
                             <div class="text-right">
                                 ${isOnSale
-                                    ? `<p class="text-accent4 font-medium">Rs. ${window.calculateBookPrice(book).toFixed(2)} <span class="line-through text-accent1 text-sm">Rs. ${book.price.toFixed(2)}</span></p>
-                                       <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 text-white text-xs px-1 rounded">On Sale</span></p>`
+                                    ? `<p class="text-accent4 font-medium">Rs. ${window.calculateBookPrice(book).toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
+                                       <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 text-xs text-white">On Sale</span></p>`
                                     : `<p class="text-accent4 font-medium">Rs. ${book.price.toFixed(2)}</p>`
                                 }
                             </div>

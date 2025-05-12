@@ -5,26 +5,26 @@
     ViewData["Title"] = "Cart";
 }
 
+@* displays user cart *@
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold text-center text-accent4 mb-6">My Cart</h1>
+    <h1 class="text-accent4 mb-6 text-center text-3xl font-bold">My Cart</h1>
 
-    <div id="error-message" class="hidden mb-4 text-center text-red-600"></div>
-    <div id="success-message" class="hidden mb-4 text-center text-green-600"></div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        @* cart items list *@
         <div class="col-span-2">
             <div id="cart-item-list" class="space-y-2"></div>
-            <p id="no-cart-items" class="hidden text-center text-accent2 text-lg">You haven’t added any books to your cart yet.</p>
+            <p id="no-cart-items" class="text-accent2 hidden text-center text-lg">You haven’t added any books to your cart yet.</p>
         </div>
 
+        @* cart summary *@
         <div class="col-span-1">
-            <div class="bg-primary border border-accent1 p-6 rounded shadow">
-                <h2 class="text-xl font-semibold text-accent4 mb-2 pb-2 border-b-2 border-accent4">Cart Summary</h2>
-                <div class="space-y-2 text-accent2">
+            <div class="bg-primary border-accent1 rounded border p-6 shadow">
+                <h2 class="text-accent4 border-accent4 mb-2 border-b-2 pb-2 text-xl font-semibold">Cart Summary</h2>
+                <div class="text-accent2 space-y-2">
                     <p><span class="font-medium">Book Subtotal (after book discounts):</span> Rs. <span id="cart-subtotal">0.00</span></p>
                     <p id="book-discount-row" class="hidden"><span class="font-medium">Book Discounts (included in subtotal):</span> Rs. <span id="book-discount">0.00</span></p>
                     <div class="flex items-center gap-2">
-                        <input type="text" id="promo-code" placeholder="Enter promo code (optional)" class="border-accent1 rounded border p-1 w-full">
+                        <input type="text" id="promo-code" placeholder="Enter promo code (optional)" class="border-accent1 w-full rounded border p-1">
                         <button id="apply-promo" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2">Apply</button>
                     </div>
                     <div id="discount-details" class="space-y-1">
@@ -33,9 +33,9 @@
                         <p id="loyal-discount-row" class="hidden"><span class="font-medium">Loyal Customer Discount (10%):</span> Rs. <span id="loyal-discount">0.00</span></p>
                     </div>
                     <p id="total-discount-row" class="hidden"><span class="font-medium">Total Additional Discount:</span> Rs. <span id="cart-discount">0.00</span></p>
-                    <p class="text-lg text-accent4 font-semibold"><span class="font-bold">Total:</span> Rs. <span id="cart-total">0.00</span></p>
+                    <p class="text-accent4 text-lg font-semibold"><span class="font-bold">Total:</span> Rs. <span id="cart-total">0.00</span></p>
                 </div>
-                <button id="proceed-to-order" class="mt-4 w-full bg-accent3 rounded px-3 py-2 text-white hover:bg-accent2">Proceed to Order</button>
+                <button id="proceed-to-order" class="bg-accent3 mt-4 w-full rounded px-3 py-2 text-white hover:bg-accent2">Proceed to Order</button>
             </div>
         </div>
     </div>
@@ -43,26 +43,28 @@
 
 @section Scripts {
     <script>
-        const list = document.getElementById("cart-item-list");
-        const error = document.getElementById("error-message");
-        const success = document.getElementById("success-message");
-        const empty = document.getElementById("no-cart-items");
-        const subtotalElement = document.getElementById("cart-subtotal");
-        const bookDiscountElement = document.getElementById("book-discount");
-        const bookDiscountRow = document.getElementById("book-discount-row");
-        const promoDiscountElement = document.getElementById("promo-discount");
-        const bulkDiscountElement = document.getElementById("bulk-discount");
-        const loyalDiscountElement = document.getElementById("loyal-discount");
-        const totalDiscountElement = document.getElementById("cart-discount");
-        const promoDiscountRow = document.getElementById("promo-discount-row");
-        const bulkDiscountRow = document.getElementById("bulk-discount-row");
-        const loyalDiscountRow = document.getElementById("loyal-discount-row");
-        const totalDiscountRow = document.getElementById("total-discount-row");
-        const totalElement = document.getElementById("cart-total");
-        const promoInput = document.getElementById("promo-code");
-        const applyPromoButton = document.getElementById("apply-promo");
-        const proceedButton = document.getElementById("proceed-to-order");
+        // caches dom elements
+        const elements = {
+            list: document.getElementById('cart-item-list'),
+            empty: document.getElementById('no-cart-items'),
+            subtotal: document.getElementById('cart-subtotal'),
+            bookDiscount: document.getElementById('book-discount'),
+            bookDiscountRow: document.getElementById('book-discount-row'),
+            promoDiscount: document.getElementById('promo-discount'),
+            bulkDiscount: document.getElementById('bulk-discount'),
+            loyalDiscount: document.getElementById('loyal-discount'),
+            totalDiscount: document.getElementById('cart-discount'),
+            promoDiscountRow: document.getElementById('promo-discount-row'),
+            bulkDiscountRow: document.getElementById('bulk-discount-row'),
+            loyalDiscountRow: document.getElementById('loyal-discount-row'),
+            totalDiscountRow: document.getElementById('total-discount-row'),
+            total: document.getElementById('cart-total'),
+            promoInput: document.getElementById('promo-code'),
+            applyPromo: document.getElementById('apply-promo'),
+            proceed: document.getElementById('proceed-to-order')
+        };
 
+        // initializes state
         let cartItems = [];
         let books = [];
         let subtotal = 0;
@@ -71,49 +73,75 @@
         let orderPromotion = null;
         let userOrdersCount = 0;
 
-        async function fetchUserOrdersCount() {
+        // fetches user orders count
+        const fetchUserOrdersCount = async () => {
+            if (!window.checkAuth('view cart')) return 0;
+
             try {
-                const userId = window.jwtToken ? JSON.parse(atob(window.jwtToken.split('.')[1])).sub : null;
-                const response = await fetch(`https://localhost:7018/api/Auth/user`, {
-                    headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                const response = await fetch('https://localhost:7018/api/Auth/user', {
+                    headers: { 'Authorization': `Bearer ${window.jwtToken}` }
                 });
-                if (!response.ok) throw new Error("Failed to fetch user.");
+
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to view cart'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return 0;
+                }
+
+                if (!response.ok) throw new Error('Failed to fetch user');
+
                 const data = await response.json();
                 return data.ordersCount || 0;
-            } catch (err) {
-                console.error("Error fetching user order count:", err);
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to fetch user'
+                });
                 return 0;
             }
-        }
+        };
 
-        async function validatePromoCode(promoCode) {
+        // validates promo code
+        const validatePromoCode = async (promoCode) => {
             if (!promoCode) return null;
+            if (!window.checkAuth('manage cart')) return null;
+
             try {
                 const response = await fetch(`https://localhost:7018/api/Promotion/validate/${promoCode}`, {
-                    headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                    headers: { 'Authorization': `Bearer ${window.jwtToken}` }
                 });
+
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to manage cart'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return null;
+                }
+
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || "Invalid promo code.");
+                    throw new Error(errorData.message || 'Invalid promo code');
                 }
+
                 return await response.json();
-            } catch (err) {
-                showError(err.message);
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Invalid promo code'
+                });
                 return null;
             }
-        }
+        };
 
-        function calculateDiscount(subTotal, totalItems, userOrdersCount, orderPromotion) {
-            console.log('calculateDiscount: Inputs', {
-                subTotal,
-                totalItems,
-                userOrdersCount,
-                orderPromotion: orderPromotion ? {
-                    discountPercent: orderPromotion.discountPercent,
-                    code: orderPromotion.code
-                } : null
-            });
-
+        // calculates discounts
+        const calculateDiscount = (subTotal, totalItems, userOrdersCount, orderPromotion) => {
             let currentSubTotal = subTotal;
             let promoDiscount = 0;
             let bulkDiscount = 0;
@@ -134,17 +162,48 @@
             }
 
             const totalDiscount = promoDiscount + bulkDiscount + loyalDiscount;
-            console.log({promo: promoDiscount, bulk: bulkDiscount, loyal: loyalDiscount, total: totalDiscount });
             return { promo: promoDiscount, bulk: bulkDiscount, loyal: loyalDiscount, total: totalDiscount };
-        }
+        };
 
-        async function loadCartItems() {
+        // updates cart summary
+        const updateSummary = () => {
+            elements.subtotal.textContent = subtotal.toFixed(2);
+            elements.bookDiscount.textContent = bookDiscount.toFixed(2);
+            elements.promoDiscount.textContent = discounts.promo.toFixed(2);
+            elements.bulkDiscount.textContent = discounts.bulk.toFixed(2);
+            elements.loyalDiscount.textContent = discounts.loyal.toFixed(2);
+            elements.totalDiscount.textContent = discounts.total.toFixed(2);
+            elements.total.textContent = (subtotal - discounts.total).toFixed(2);
+
+            elements.bookDiscountRow.classList.toggle('hidden', bookDiscount === 0);
+            elements.promoDiscountRow.classList.toggle('hidden', discounts.promo === 0);
+            elements.bulkDiscountRow.classList.toggle('hidden', discounts.bulk === 0);
+            elements.loyalDiscountRow.classList.toggle('hidden', discounts.loyal === 0);
+            elements.totalDiscountRow.classList.toggle('hidden', discounts.total === 0);
+        };
+
+        // renders cart items
+        const renderCartItems = async () => {
+            if (!Object.values(elements).every(el => el)) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Cart elements not found'
+                });
+                return;
+            }
+
+            elements.list.innerHTML = '';
+            elements.empty.classList.add('hidden');
+            elements.proceed.disabled = true;
+
+            if (!window.checkAuth('view cart')) return;
+
             try {
                 userOrdersCount = await fetchUserOrdersCount();
-                cartItems = await fetchCartItems();
-                if (!cartItems || cartItems.length === 0) {
-                    empty.classList.remove("hidden");
-                    proceedButton.disabled = true;
+                cartItems = await window.fetchCartItems();
+
+                if (!cartItems?.length) {
+                    elements.empty.classList.remove('hidden');
                     subtotal = 0;
                     bookDiscount = 0;
                     discounts = { promo: 0, bulk: 0, loyal: 0, total: 0 };
@@ -156,17 +215,23 @@
                 for (const ci of cartItems) {
                     try {
                         const response = await fetch(`https://localhost:7018/api/Book/getbyid/${ci.bookId}`, {
-                            headers: { "Authorization": `Bearer ${window.jwtToken || ''}` }
+                            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
                         });
                         books.push(response.ok ? await response.json() : null);
                     } catch (error) {
-                        console.error(`Error fetching book with ID ${ci.bookId}:`, error);
+                        Toast.fire({
+                            icon: 'error',
+                            title: `Failed to fetch book with ID ${ci.bookId}`
+                        });
                         books.push(null);
                     }
                 }
 
-                if (books.every(book => book === null)) {
-                    showError("Failed to load book details.");
+                if (books.every(book => !book)) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Failed to load book details'
+                    });
                     return;
                 }
 
@@ -182,10 +247,11 @@
                 });
 
                 const totalItems = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
-                const promoCode = promoInput.value.trim();
+                const promoCode = elements.promoInput.value.trim();
                 orderPromotion = await validatePromoCode(promoCode);
                 discounts = calculateDiscount(subtotal, totalItems, userOrdersCount, orderPromotion);
                 updateSummary();
+                elements.proceed.disabled = false;
 
                 const itemsByDate = {};
                 cartItems.forEach((ci, index) => {
@@ -194,12 +260,20 @@
                     itemsByDate[date].push({ cartItem: ci, book: books[index] });
                 });
 
-                list.innerHTML = '';
                 for (const [date, items] of Object.entries(itemsByDate)) {
-                    const dateHeader = document.createElement("h2");
-                    dateHeader.className = "text-xl font-semibold text-accent4 mt-4";
-                    dateHeader.textContent = date;
-                    list.appendChild(dateHeader);
+                    const dateHeader = document.createElement('div');
+                    dateHeader.className = 'flex items-center gap-4 ml-2';
+
+                    const dateText = document.createElement('h2');
+                    dateText.className = 'text-xl font-semibold text-accent4 whitespace-nowrap';
+                    dateText.textContent = date;
+
+                    const divider = document.createElement('div');
+                    divider.className = 'flex-1 border-t-2 border-accent4';
+
+                    dateHeader.appendChild(dateText);
+                    dateHeader.appendChild(divider);
+                    elements.list.appendChild(dateHeader);
 
                     items.forEach(item => {
                         const { cartItem: ci, book } = item;
@@ -208,80 +282,60 @@
                         const authorNames = book.authorBooks?.map(ab => ab.author.name).join(', ') || 'Unknown Author';
                         const effectivePrice = window.calculateBookPrice(book);
                         const isOnSale = effectivePrice < book.price;
-                        const div = document.createElement("div");
-                        div.className = "border border-accent1 bg-primary p-4 rounded shadow flex items-center justify-between ml-4";
+                        const div = document.createElement('div');
+                        div.className = 'border border-accent1 bg-primary p-4 rounded shadow flex items-center justify-between ml-4';
                         div.innerHTML = `
                             <div class="flex-1">
-                                <p class="text-lg font-semibold text-accent3">${book.title}</p>
+                                <p class="text-accent3 text-lg font-semibold">${book.title}</p>
                                 <p class="text-accent1">${authorNames}</p>
-                                <p class="text-accent1">Price: ${isOnSale ? `<span class="text-red-500">Rs. ${effectivePrice.toFixed(2)}</span> <span class="line-through text-accent1">Rs. ${book.price.toFixed(2)}</span>` : `Rs. ${book.price.toFixed(2)}`}</p>
+                                <p class="text-accent1">Price: ${isOnSale ? `<span class="text-accent4">Rs. ${effectivePrice.toFixed(2)}</span> <span class="text-accent1 line-through">Rs. ${book.price.toFixed(2)}</span>` : `Rs. ${book.price.toFixed(2)}`}</p>
                                 <p class="text-accent1">Subtotal: Rs. ${ci.subTotal.toFixed(2)}</p>
                                 <p class="text-accent1">Stock: ${book.availabilityStatus && book.stock > 0 ? `In Stock (${book.stock})` : 'Out of Stock'}</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" id="quantity-${ci.bookId}" value="${ci.quantity}" min="1" max="${book.stock}" class="border-accent1 w-16 rounded border p-1 text-center" ${book.stock <= 0 ? 'disabled' : ''}>
-                                <button onclick="window.updateCartItem('${ci.bookId}', document.getElementById('quantity-${ci.bookId}').value, showSuccess, showError)" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent2" ${book.stock <= 0 ? 'disabled' : ''}>Update</button>
-                                <button onclick="window.deleteCartItem('${ci.bookId}', showSuccess, showError)" class="bg-red-500 rounded px-3 py-1 text-white hover:bg-red-600">Delete</button>
+                                <button id="update-${ci.bookId}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" ${book.stock <= 0 ? 'disabled' : ''}>Update</button>
+                                <button id="delete-${ci.bookId}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-red-600">Delete</button>
                             </div>
                         `;
-                        list.appendChild(div);
+                        elements.list.appendChild(div);
+
+                        window.initializeCartButton(`update-${ci.bookId}`, ci.bookId, book);
+                        window.initializeCartButton(`delete-${ci.bookId}`, ci.bookId, book);
                     });
                 }
-            } catch (err) {
-                console.error('Error loading cart items:', err);
-                showError(err.message);
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to load cart items'
+                });
             }
-        }
+        };
 
-        function updateSummary() {
-            subtotalElement.textContent = subtotal.toFixed(2);
-            bookDiscountElement.textContent = bookDiscount.toFixed(2);
-            promoDiscountElement.textContent = discounts.promo.toFixed(2);
-            bulkDiscountElement.textContent = discounts.bulk.toFixed(2);
-            loyalDiscountElement.textContent = discounts.loyal.toFixed(2);
-            totalDiscountElement.textContent = discounts.total.toFixed(2);
-            totalElement.textContent = (subtotal - discounts.total).toFixed(2);
-
-            bookDiscountRow.classList.toggle("hidden", bookDiscount === 0);
-            promoDiscountRow.classList.toggle("hidden", discounts.promo === 0);
-            bulkDiscountRow.classList.toggle("hidden", discounts.bulk === 0);
-            loyalDiscountRow.classList.toggle("hidden", discounts.loyal === 0);
-            totalDiscountRow.classList.toggle("hidden", discounts.total === 0);
-        }
-
-        function showSuccess(message, reload = false) {
-            success.textContent = message;
-            success.classList.remove("hidden");
-            error.classList.add("hidden");
-            if (reload) {
-                setTimeout(() => location.reload(), 500);
-            }
-        }
-
-        function showError(message) {
-            error.textContent = message;
-            error.classList.remove("hidden");
-            success.classList.add("hidden");
-        }
-
-        applyPromoButton.addEventListener("click", async () => {
-            const promoCode = promoInput.value.trim();
+        // applies promo code
+        const applyPromoCode = async () => {
+            const promoCode = elements.promoInput.value.trim();
             orderPromotion = await validatePromoCode(promoCode);
             const totalItems = cartItems.reduce((sum, ci) => sum + ci.quantity, 0);
+            discounts = calculateDiscount(subtotal, totalItems, userOrdersCount, orderPromotion);
             if (promoCode && !orderPromotion) {
-                discounts = { promo: 0, bulk: 0, loyal: 0, total: 0 };
-            } else {
-                discounts = calculateDiscount(subtotal, totalItems, userOrdersCount, orderPromotion);
-                if (orderPromotion) {
-                    showSuccess(`Promo code "${promoCode}" applied!`);
-                } else {
-                    showSuccess("Promo code removed.");
-                }
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Promo code removed'
+                });
+            } else if (orderPromotion) {
+                Toast.fire({
+                    icon: 'success',
+                    title: `Promo code "${promoCode}" applied`
+                });
             }
             updateSummary();
-        });
+        };
 
-        proceedButton.addEventListener("click", () => {
+        // proceeds to order summary
+        const proceedToOrder = () => {
+            if (!window.checkAuth('manage cart')) return;
+
             const orderData = {
                 cartItems: cartItems.map((ci, index) => ({
                     bookId: ci.bookId,
@@ -289,22 +343,21 @@
                     subTotal: ci.subTotal,
                     book: books[index]
                 })),
-                subtotal: subtotal,
-                bookDiscount: bookDiscount,
-                discounts: discounts,
+                subtotal,
+                bookDiscount,
+                discounts,
                 total: subtotal - discounts.total,
-                promoCode: promoInput.value.trim()
+                promoCode: elements.promoInput.value.trim()
             };
             localStorage.setItem('orderData', JSON.stringify(orderData));
             window.location.href = '/User/OrderSummary';
-        });
+        };
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (!window.jwtToken) {
-                window.location.href = '/User/Login';
-                return;
-            }
-            loadCartItems();
+        // initializes cart page
+        document.addEventListener('DOMContentLoaded', () => {
+            elements.applyPromo.addEventListener('click', applyPromoCode);
+            elements.proceed.addEventListener('click', proceedToOrder);
+            renderCartItems();
         });
     </script>
 }

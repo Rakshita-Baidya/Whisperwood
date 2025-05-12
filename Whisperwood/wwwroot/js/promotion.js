@@ -1,14 +1,13 @@
 ﻿const promotion = {
     // fetches promotions from api
     fetchPromotions: async () => {
-        if (!promotion.checkAuth()) return [];
+        if (!window.checkAuth('view promotions')) return [];
 
         try {
             const response = await fetch('https://localhost:7018/api/Promotion/getall', {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${window.jwtToken}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${window.jwtToken}`
                 }
             });
 
@@ -79,6 +78,7 @@
     // initializes promotion modal
     init: (user) => {
         if (!window.checkAuth('view promotions')) return;
+
         const elements = {
             icon: document.getElementById('promotions-icon'),
             modal: document.getElementById('promotions-modal'),

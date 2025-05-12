@@ -142,7 +142,6 @@ namespace Whisperwood.Services
             dbContext.Orders.Add(order);
             dbContext.Bill.Add(bill);
             dbContext.CartItem.RemoveRange(cart.CartItems);
-            user.OrdersCount += 1;
             await dbContext.SaveChangesAsync();
 
             // Broadcast order announcement via notifier
@@ -297,7 +296,6 @@ namespace Whisperwood.Services
                         item.Book.SalesCount -= item.Quantity;
                         if (item.Book.Stock > 0) item.Book.AvailabilityStatus = true;
                     }
-                    user.OrdersCount -= 1;
                 }
 
                 order.Status = dto.Status.Value;
