@@ -104,8 +104,8 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
             text: `Are you sure you want to remove "${book.title}" from your cart?`,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#E74C3C',
-            cancelButtonColor: '#2C3E50',
+            confirmButtonColor: 'red',
+            cancelButtonColor: 'grey',
             confirmButtonText: 'Remove',
             cancelButtonText: 'Cancel'
         });
@@ -171,6 +171,7 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
                 return;
             }
 
+
             try {
                 const response = await fetch('https://localhost:7018/api/CartItem/add', {
                     method: 'POST',
@@ -223,7 +224,7 @@ const updateCartButton = async (button, bookId, book) => {
     const cartItems = await fetchCartItems();
     const isInCart = cartItems.some(item => item.bookId === bookId);
     updateCartButtonIcon(button, isInCart);
-    button.disabled = book.stock <= 0 || !book.availabilityStatus;
+    button.classList.add('cursor-pointer');
     button.classList.remove('opacity-50', 'cursor-not-allowed');
     button.setAttribute('data-price', calculateBookPrice(book).toFixed(2));
     button.setAttribute('data-stock', book.stock);
@@ -325,7 +326,8 @@ const initializeCartButton = async (buttonId, bookId, book) => {
     }
 
     // handle cart page update/delete buttons
-    button.disabled = book.stock <= 0 || !book.availabilityStatus;
+    button.classList.add('cursor-pointer');
+    button.classList.remove('opacity-50', 'cursor-not-allowed');
     button.setAttribute('data-price', calculateBookPrice(book).toFixed(2));
     button.setAttribute('data-stock', book.stock);
     button.setAttribute('data-availability', book.availabilityStatus ? 'In Stock' : 'Out of Stock');
