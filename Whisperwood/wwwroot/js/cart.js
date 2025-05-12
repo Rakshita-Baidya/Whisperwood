@@ -26,7 +26,7 @@ const calculateBookPrice = (book) => {
 
 // fetches cart items from api
 const fetchCartItems = async () => {
-    if (!window.checkAuth('manage cart')) return [];
+    if (!window.jwtToken) return [];
 
     try {
         const response = await fetch('https://localhost:7018/api/CartItem/getall', {
@@ -134,7 +134,7 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
                 icon: 'success',
                 title: 'Book removed from cart'
             }).then(() => {
-                updateCartButton(button, bookId, book); // Update icon
+                updateCartButton(button, bookId, book);
                 window.location.reload();
             });
         } catch (error) {
@@ -144,6 +144,15 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
             });
         }
     } else {
+        const pubDate = new Date(book.publicationDate);
+        const now = new Date();
+        if (!isNaN(pubDate) && pubDate > now) {
+            Toast.fire({
+                icon: 'error',
+                title: 'This book is not yet available for purchase'
+            });
+            return;
+        }
         if (!book.availabilityStatus || book.stock <= 0) {
             Toast.fire({
                 icon: 'error',
@@ -189,7 +198,7 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
                     title: `Book added to cart for Rs. ${(quantity * calculateBookPrice(book)).toFixed(2)}`
                 }).then(() => {
                     dialog.close();
-                    updateCartButton(button, bookId, book); // Update icon
+                    updateCartButton(button, bookId, book);
                     window.location.reload();
                 });
             } catch (error) {
@@ -204,9 +213,10 @@ const handleCartAction = async (button, bookId, book, isInCart) => {
 
 // updates cart button state for book list pages
 const updateCartButton = async (button, bookId, book) => {
-    if (!window.checkAuth('manage cart')) {
+    if (!window.jwtToken) {
         updateCartButtonIcon(button, false);
-        button.disabled = book.stock <= 0 || !book.availabilityStatus;
+        button.disabled = true;
+        button.classList.add('opacity-50', 'cursor-not-allowed');
         return null;
     }
 
@@ -214,6 +224,7 @@ const updateCartButton = async (button, bookId, book) => {
     const isInCart = cartItems.some(item => item.bookId === bookId);
     updateCartButtonIcon(button, isInCart);
     button.disabled = book.stock <= 0 || !book.availabilityStatus;
+    button.classList.remove('opacity-50', 'cursor-not-allowed');
     button.setAttribute('data-price', calculateBookPrice(book).toFixed(2));
     button.setAttribute('data-stock', book.stock);
     button.setAttribute('data-availability', book.availabilityStatus ? 'In Stock' : 'Out of Stock');

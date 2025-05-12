@@ -76,8 +76,8 @@ function filterBooks(books, params) {
             }
             return true;
         })
-        .filter(book => params.minPrice === null || book.price >= params.minPrice)
-        .filter(book => params.maxPrice === null || book.price <= params.maxPrice)
+        .filter(book => params.minPrice === null || window.calculateBookPrice(book) >= params.minPrice)
+        .filter(book => params.maxPrice === null || window.calculateBookPrice(book) <= params.maxPrice)
         .filter(book => params.minRating === null || (book.averageRating || 0) >= params.minRating)
         .filter(book => params.language === null || book.language?.toLowerCase() === params.language)
         .filter(book => params.isAvailable === null || book.stock > 0 === params.isAvailable)
@@ -94,8 +94,8 @@ function filterBooks(books, params) {
                     valueB = new Date(b.publicationDate);
                     break;
                 case 2: // price
-                    valueA = a.price;
-                    valueB = b.price;
+                    valueA = window.calculateBookPrice(a);
+                    valueB = window.calculateBookPrice(b);
                     break;
                 case 3: // popularity
                     valueA = a.averageRating || 0;
@@ -109,94 +109,37 @@ function filterBooks(books, params) {
 
 // fetches dropdown options for book filters
 async function fetchBookDropdownOptions() {
-    // check authentication
-    if (!window.jwtToken) {
-        Toast.fire({
-            icon: 'error',
-            title: 'Please log in to view dropdown options'
-        }).then(() => {
-            window.location.href = '/User/Login';
-        });
-        return;
-    }
-
     const authorsSelect = document.getElementById('authors');
     const genresSelect = document.getElementById('genres');
     const categoriesSelect = document.getElementById('categories');
     const publishersSelect = document.getElementById('publishers');
 
-    if (!authorsSelect || !genresSelect || !publishersSelect) {
-        console.warn('dropdown elements not found');
-        Toast.fire({
-            icon: 'error',
-            title: 'Failed to initialize filter options'
-        });
-        return;
-    }
-
     try {
         // fetch authors
-        const authorsResponse = await fetch('https://localhost:7018/api/Author/getall', {
-            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
-        });
-        if (authorsResponse.status === 401) {
-            Toast.fire({
-                icon: 'error',
-                title: 'Please log in to view dropdown options'
-            }).then(() => {
-                window.location.href = '/User/Login';
-            });
-            return;
-        }
+        const authorsResponse = await fetch('https://localhost:7018/api/Author/getall');
         if (!authorsResponse.ok) throw new Error('Failed to fetch authors');
         const authors = await authorsResponse.json();
         authorsSelect.innerHTML = authors.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
 
         // fetch genres
-        const genresResponse = await fetch('https://localhost:7018/api/Genre/getall', {
-            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
-        });
-        if (genresResponse.status === 401) {
-            Toast.fire({
-                icon: 'error',
-                title: 'Please log in to view dropdown options'
-            }).then(() => {
-                window.location.href = '/User/Login';
-            });
-            return;
-        }
+        const genresResponse = await fetch('https://localhost:7018/api/Genre/getall');
         if (!genresResponse.ok) throw new Error('Failed to fetch genres');
         const genres = await genresResponse.json();
         genresSelect.innerHTML = genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
 
         // fetch categories
         if (categoriesSelect) {
-            const categoriesResponse = await fetch('https://localhost:7018/api/Category/getall', {
-                headers: { 'Authorization': `Bearer ${window.jwtToken}` }
-            });
-            if (categoriesResponse.status === 401) throw new Error('Unauthorized');
+            const categoriesResponse = await fetch('https://localhost:7018/api/Category/getall');
             if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
             const categories = await categoriesResponse.json();
             categoriesSelect.innerHTML = categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
 
         // fetch publishers
-        const publishersResponse = await fetch('https://localhost:7018/api/Publisher/getall', {
-            headers: { 'Authorization': `Bearer ${window.jwtToken}` }
-        });
-        if (publishersResponse.status === 401) {
-            Toast.fire({
-                icon: 'error',
-                title: 'Please log in to view dropdown options'
-            }).then(() => {
-                window.location.href = '/User/Login';
-            });
-            return;
-        }
+        const publishersResponse = await fetch('https://localhost:7018/api/Publisher/getall');
         if (!publishersResponse.ok) throw new Error('Failed to fetch publishers');
         const publishers = await publishersResponse.json();
         publishersSelect.innerHTML = publishers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-
     } catch (error) {
         Toast.fire({
             icon: 'error',

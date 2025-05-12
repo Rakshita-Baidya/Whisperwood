@@ -15,7 +15,7 @@
 
 // fetches wishlist from api
 const fetchWishlist = async () => {
-    if (!window.checkAuth('manage wishlist')) return [];
+    if (!window.jwtToken) return [];
 
     try {
         const response = await fetch('https://localhost:7018/api/WishlistItem/getall', {
@@ -50,7 +50,7 @@ const updateWishlistButtonIcon = (button, isInWishlist) => {
 };
 
 // initializes wishlist button for a book
-const initializeWishlistButton = async (buttonId, bookId) => {
+const initializeWishlistButton = async (buttonId, bookId, book) => {
     const button = document.getElementById(buttonId);
     if (!button) {
         Toast.fire({
@@ -62,14 +62,18 @@ const initializeWishlistButton = async (buttonId, bookId) => {
 
     // refreshes button icon based on wishlist status
     const refreshIcon = async () => {
-        if (!window.checkAuth('manage wishlist')) {
+        if (!window.jwtToken) {
             updateWishlistButtonIcon(button, false);
+            button.disabled = true;
+            button.classList.add('opacity-50', 'cursor-not-allowed');
             return;
         }
 
         const wishlist = await fetchWishlist();
         const isInWishlist = wishlist.some(item => item.bookId === bookId);
         updateWishlistButtonIcon(button, isInWishlist);
+        button.disabled = false;
+        button.classList.remove('opacity-50', 'cursor-not-allowed');
     };
 
     // toggles book in wishlist
