@@ -219,9 +219,9 @@
                         <p class="text-accent3">★ ${book.averageRating.toFixed(1)}</p>
                         <div class="text-right">
                             ${isOnSale
-                                ? `<p class="font-medium text-red-500">Rs. ${finalPrice.toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
-                                   <p class="text-sm text-red-500">${book.discountPercentage}% Off <span class="rounded bg-red-500 px-1 text-xs text-white">On Sale</span></p>`
-                                : `<p class="text-accent1 font-medium">Rs. ${book.price.toFixed(2)}</p>`
+                                ? `<p class="text-accent4 font-medium">Rs. ${window.calculateBookPrice(book).toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
+                                    <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>`
+                                : `<p class="text-accent4 font-medium">Rs. ${book.price.toFixed(2)}</p>`
                             }
                         </div>
                     </div>

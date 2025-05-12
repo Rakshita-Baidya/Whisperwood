@@ -90,7 +90,7 @@
                             <div class="text-right">
                                 ${isOnSale
                                     ? `<p class="text-accent4 font-medium">Rs. ${window.calculateBookPrice(book).toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
-                                       <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 text-xs text-white">On Sale</span></p>`
+                                       <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>`
                                     : `<p class="text-accent4 font-medium">Rs. ${book.price.toFixed(2)}</p>`
                                 }
                             </div>

@@ -8,9 +8,6 @@
 <div class="px-4 py-8">
     <h1 class="text-accent4 mb-6 text-center text-4xl font-bold">Update Book</h1>
 
-    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
-    <div id="success-message" class="mb-4 hidden text-center text-green-600"></div>
-
     <form id="update-book-form" class="bg-primary border-accent3 mx-auto rounded border p-6 shadow-md">
         <div class="text-accent4 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
@@ -65,14 +62,7 @@
             </div>
             <div class="col-start-1">
                 <label for="discountPercentage" class="mb-1 block font-medium">Discount (%)</label>
-                <input type="number" id="discountPercentage" name="discountPercentage" class="border-accent1 w-full rounded border p-2" placeholder="e.g., 10" min="0" max="100" step="0.01">
-            </div>
-            <div>
-                <label for="isOnSale" class="mb-1 block font-medium">On Sale</label>
-                <select id="isOnSale" name="isOnSale" class="border-accent1 w-full rounded border p-[10px]">
-                    <option value="false">No</option>
-                    <option value="true">Yes</option>
-                </select>
+                <input type="number" id="discountPercentage" name="discountPercentage" class="border-a ccent1 w-full rounded border p-2" placeholder="e.g., 10" min="0" max="100" step="0.01">
             </div>
             <div>
                 <label for="discountStartDate" class="mb-1 block font-medium">Discount Start Date</label>
@@ -235,7 +225,6 @@
                 document.getElementById('price').value = book.price || '';
                 document.getElementById('stock').value = book.stock || 0;
                 document.getElementById('discountPercentage').value = book.discountPercentage || 0;
-                document.getElementById('isOnSale').value = book.isOnSale.toString();
                 document.getElementById('discountStartDate').value = book.discountStartDate ? new Date(book.discountStartDate).toISOString().split('T')[0] : '';
                 document.getElementById('discountEndDate').value = book.discountEndDate ? new Date(book.discountEndDate).toISOString().split('T')[0] : '';
                 document.getElementById('language').value = book.language || '';
@@ -363,7 +352,6 @@
                 isbn: formData.get('isbn').trim(),
                 price: parseFloat(formData.get('price')),
                 discountPercentage: parseFloat(formData.get('discountPercentage')) || 0,
-                isOnSale: formData.get('isOnSale') === 'true',
                 discountStartDate: formData.get('discountStartDate') || null,
                 discountEndDate: formData.get('discountEndDate') || null,
                 synopsis: formData.get('synopsis').trim(),
