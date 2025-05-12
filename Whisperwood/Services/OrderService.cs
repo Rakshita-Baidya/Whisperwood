@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Whisperwood.DatabaseContext;
@@ -211,7 +212,7 @@ namespace Whisperwood.Services
                 });
 
             var orders = await dbContext.Orders
-                .Where(o => o.UserId == userId)
+                .Include(u => u.User)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .ToListAsync();
@@ -239,50 +240,93 @@ namespace Whisperwood.Services
             });
         }
 
+        [Authorize]
         public async Task<IActionResult> UpdateOrderAsync(Guid userId, Guid id, OrderUpdateDto dto)
         {
+            // Load user to check admin/staff status
             var user = await dbContext.Users.FindAsync(userId);
             if (user == null)
-                return new NotFoundObjectResult(new
+            {
+                return new UnauthorizedObjectResult(new
                 {
                     message = "User not found."
                 });
+            }
 
+            // Load order with related data
             var order = await dbContext.Orders
+                .Include(u => u.User)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
-                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
-
-            var bill = await dbContext.Bill.FirstOrDefaultAsync(b => b.OrderId == order.Id);
+                .FirstOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
+            {
                 return new NotFoundObjectResult(new
                 {
                     message = "Order not found!"
                 });
+            }
+
+            var isAdminOrStaff = user.IsAdmin.GetValueOrDefault(false) || user.IsStaff.GetValueOrDefault(false);
+            if (!isAdminOrStaff && order.UserId != userId)
+            {
+                return new UnauthorizedObjectResult(new
+                {
+                    message = "Only admins, staff, or the order owner can update this order."
+                });
+            }
+
+            // Restrict regular users to only canceling orders
+            if (!isAdminOrStaff && dto.Status.HasValue && dto.Status.Value != Orders.OrderStatus.Cancelled)
+            {
+                return new BadRequestObjectResult(new
+                {
+                    message = "Regular users can only cancel their own orders."
+                });
+            }
+
+            // Validate status
+            if (dto.Status.HasValue && !Enum.IsDefined(typeof(Orders.OrderStatus), dto.Status.Value))
+            {
+                return new BadRequestObjectResult(new
+                {
+                    message = "Invalid order status."
+                });
+            }
+
+            // Load bill for fulfilled orders
+            var bill = await dbContext.Bill.FirstOrDefaultAsync(b => b.OrderId == order.Id);
 
             if (dto.Status.HasValue)
             {
                 if (order.Status == Orders.OrderStatus.Cancelled || order.Status == Orders.OrderStatus.Fulfilled)
+                {
                     return new BadRequestObjectResult(new
                     {
                         message = "Cannot update a cancelled or fulfilled order."
                     });
+                }
 
                 if (dto.Status.Value == Orders.OrderStatus.Fulfilled)
                 {
                     if (string.IsNullOrEmpty(dto.ClaimCode))
+                    {
                         return new BadRequestObjectResult(new
                         {
                             message = "Claim code is required to fulfill the order."
                         });
+                    }
 
                     if (bill == null || bill.ClaimCode != dto.ClaimCode)
+                    {
                         return new BadRequestObjectResult(new
                         {
                             message = "Invalid claim code."
                         });
-                    user.OrdersCount += 1;
+                    }
+
+                    order.User.OrdersCount += 1;
                 }
 
                 if (dto.Status.Value == Orders.OrderStatus.Cancelled)
@@ -291,7 +335,10 @@ namespace Whisperwood.Services
                     {
                         item.Book.Stock += item.Quantity;
                         item.Book.SalesCount -= item.Quantity;
-                        if (item.Book.Stock > 0) item.Book.AvailabilityStatus = true;
+                        if (item.Book.Stock > 0)
+                        {
+                            item.Book.AvailabilityStatus = true;
+                        }
                     }
                 }
 
@@ -299,6 +346,7 @@ namespace Whisperwood.Services
             }
 
             await dbContext.SaveChangesAsync();
+
             return new OkObjectResult(new
             {
                 OrderId = order.Id,
@@ -312,7 +360,7 @@ namespace Whisperwood.Services
                 OrderItems = order.OrderItems.Select(oi => new OrderItemDto
                 {
                     BookId = oi.Book.Id,
-                    Quantity = oi.Quantity,
+                    Quantity = oi.Quantity
                 }).ToList()
             });
         }
