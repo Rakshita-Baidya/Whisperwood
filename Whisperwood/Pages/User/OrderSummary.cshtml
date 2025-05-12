@@ -5,11 +5,9 @@
     ViewData["Title"] = "Order Summary";
 }
 
-@* displays order summary *@
 <div class="container mx-auto px-6 py-8">
     <h1 class="text-accent4 mb-6 text-center text-3xl font-bold">Order Summary</h1>
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        @* order items table *@
         <div class="lg:col-span-2">
             <div class="overflow-x-auto">
                 <table id="order-item-table" class="border-accent1 w-full border-collapse border">
@@ -26,7 +24,6 @@
             </div>
             <p id="no-order-items" class="text-accent2 mt-4 hidden text-center text-lg">No items in your order.</p>
         </div>
-        @* order summary details *@
         <div class="lg:col-span-1">
             <div class="bg-primary border-accent1 rounded border p-6 shadow">
                 <h2 class="text-accent4 mb-4 text-xl font-semibold">Order Summary</h2>

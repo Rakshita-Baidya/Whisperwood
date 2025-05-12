@@ -12,8 +12,6 @@
         <button id="toggle-filter" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Filter Books</button>
     </div>
 
-    <div id="error-message" class="text-accent2 mb-4 hidden text-center"></div>
-
     <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded border p-6 shadow-md">
         <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
             <div>
@@ -109,7 +107,6 @@
             booksContainer: document.getElementById('books-container'),
             noBooks: document.getElementById('no-books'),
             loading: document.getElementById('loading'),
-            errorMessage: document.getElementById('error-message'),
             filterSection: document.getElementById('filter-section'),
             filterForm: document.getElementById('filter-form'),
             toggleFilter: document.getElementById('toggle-filter'),
@@ -146,8 +143,6 @@
             } catch (error) {
                 console.error('Error fetching books:', error);
                 elements.loading.classList.add('hidden');
-                elements.errorMessage.textContent = error.message;
-                elements.errorMessage.classList.remove('hidden');
                 Toast.fire({
                     icon: 'error',
                     title: error.message || 'Failed to load books'

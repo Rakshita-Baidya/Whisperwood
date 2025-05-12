@@ -8,8 +8,6 @@
 <div class="px-4 py-8">
     <h1 class="text-accent3 mb-8 text-center text-4xl font-bold">User Profile</h1>
 
-    <div id="error-message" class="mb-4 hidden text-center text-red-600"></div>
-
     <div class="bg-primary border-accent4 mx-auto max-w-4xl rounded border p-6 shadow-md">
         <div id="loading" class="text-accent2 text-center text-lg">Loading profile...</div>
 
@@ -60,7 +58,6 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const profileSection = document.getElementById('profile-section');
             const loadingElement = document.getElementById('loading');
-            const errorMessage = document.getElementById('error-message');
 
             if (!window.isAuthenticated || !window.jwtToken) {
                 window.location.href = '/User/Login';
@@ -80,9 +77,11 @@
                     const user = await response.json();
                     displayUserProfile(user);
                 } catch (error) {
-                    console.error('Error fetching profile:', error);
-                    errorMessage.textContent = error.message;
-                    errorMessage.classList.remove('hidden');
+                    Toast.fire({
+                        icon: 'error',
+                        title: error.message || 'Failed to fetch user profile'
+                    });
+                    return [];
                 } finally {
                     loadingElement.classList.add('hidden');
                 }

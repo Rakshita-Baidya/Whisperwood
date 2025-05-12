@@ -99,20 +99,6 @@
 
 @section Scripts {
     <script>
-        // checks authentication and redirects if unauthorized
-        const checkAuth = () => {
-            if (!window.jwtToken) {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Please log in to add books'
-                }).then(() => {
-                    window.location.href = '/User/Login';
-                });
-                return false;
-            }
-            return true;
-        };
-
         // validates form inputs
         const validateForm = (formData) => {
             const title = formData.get('title')?.trim();
@@ -174,7 +160,7 @@
             const genreIds = formData.getAll('genreIds');
             const categoryIds = formData.getAll('categoryIds');
             const publisherIds = formData.getAll('publisherIds');
-            
+
             const discountStartDate = formData.get('discountStartDate');
             const discountEndDate = formData.get('discountEndDate');
             if (discountStartDate && discountEndDate && new Date(discountStartDate) > new Date(discountEndDate)) {
@@ -191,7 +177,7 @@
 
         // submits book data to api
         const submitForm = async (form) => {
-            if (!checkAuth()) return;
+            if (!window.checkAuth('add books')) return;
 
             const formData = new FormData(form);
             if (!validateForm(formData)) return;
@@ -248,11 +234,11 @@
                 }).then(() => {
                     window.location.href = '/Book/ManageBook';
                 });
-                clearForm();
             } catch (error) {
+                // handle network error
                 Toast.fire({
                     icon: 'error',
-                    title: error.message || 'Failed to add book'
+                    title: 'Failed to connect to the server. Please try again.'
                 });
             }
         };
