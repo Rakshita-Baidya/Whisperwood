@@ -6,8 +6,6 @@
 }
 
 <div class="container mx-auto px-4 py-8">
-    <div id="error-message" class="mb-6 hidden text-center text-red-600"></div>
-    <div id="success-message" class="mb-6 hidden text-center text-green-600"></div>
     <div id="loading" class="text-accent2 col-span-full text-center text-lg">Loading book details...</div>
     <div id="book-details" class="hidden">
         <div class="flex gap-8">
@@ -98,8 +96,6 @@
     <script>
         async function fetchBookDetails() {
             const elements = {
-                error: document.getElementById('error-message'),
-                success: document.getElementById('success-message'),
                 loading: document.getElementById('loading'),
                 details: document.getElementById('book-details'),
                 cover: document.getElementById('cover-image'),
@@ -240,14 +236,9 @@
                     }
                 });
 
-
-
-
                 await fetchReviews(id);
             } catch (error) {
                 elements.loading.classList.add('hidden');
-                elements.error.textContent = error.message;
-                elements.error.classList.remove('hidden');
                 Toast.fire({
                     icon: 'error',
                     title: error.message || 'Failed to load book details'
