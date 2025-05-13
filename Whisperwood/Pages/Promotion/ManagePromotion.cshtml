@@ -294,12 +294,6 @@
 
         // loads promotions
         const loadPromotions = async () => {
-            Toast.fire({
-                icon: 'info',
-                title: 'Loading promotions...',
-                timer: 1000
-            });
-
             const promotions = await fetchPromotions();
             if (!promotions?.length) {
                 elements.noPromotions.classList.remove('hidden');

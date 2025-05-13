@@ -148,12 +148,6 @@
 
         // fetches books
         const fetchBooks = async () => {
-            Toast.fire({
-                icon: 'info',
-                title: 'Loading books...',
-                timer: 1000
-            });
-
             try {
                 const response = await fetch('https://localhost:7018/api/Book/getall');
                 if (!response.ok) {

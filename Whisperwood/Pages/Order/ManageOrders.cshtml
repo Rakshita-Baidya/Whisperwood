@@ -381,12 +381,6 @@
 
         // loads orders
         const loadOrders = async () => {
-            Toast.fire({
-                icon: 'info',
-                title: 'Loading orders...',
-                timer: 1000
-            });
-
             const orders = await fetchOrders();
             if (!orders?.length) {
                 elements.noOrders.classList.remove('hidden');
