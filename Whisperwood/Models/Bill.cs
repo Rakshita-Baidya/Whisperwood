@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 namespace Whisperwood.Models
 {
@@ -9,6 +10,7 @@ namespace Whisperwood.Models
         public DateOnly PickUpDate { get; set; }
         public string? PromoCode { get; set; }
         public Guid OrderId { get; set; }
+        [JsonIgnore]
         public Orders Order { get; set; }
         [Precision(10, 2)]
         public decimal PromoDiscount { get; set; }

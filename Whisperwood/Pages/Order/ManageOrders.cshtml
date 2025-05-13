@@ -12,11 +12,10 @@
         <button id="filter-button" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Filter Orders</button>
     </div>
     <div id="filter-section" class="bg-primary border-accent1 mb-8 hidden rounded border p-6 shadow-sm">
-        <h2 class="text-accent4 mb-4 text-xl font-semibold">Filter Orders</h2>
         <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
                 <label for="search" class="text-accent2 mb-1 block font-medium">Search</label>
-                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by user name or order ID">
+                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by user name, order ID, or claim code">
             </div>
             <div>
                 <label for="status" class="text-accent2 mb-1 block font-medium">Status</label>
@@ -63,7 +62,7 @@
                 <thead>
                     <tr class="bg-accent4 text-white">
                         <th class="p-3 text-left">Order ID</th>
-                        <th class="p-3 text-left">User</th>
+                        <th class="p-3 text-left">Username</th>
                         <th class="p-3 text-left">Date</th>
                         <th class="p-3 text-left">Status</th>
                         <th class="p-3 text-left">Total</th>
@@ -97,37 +96,6 @@
         const pageSize = 8;
         let allOrders = [];
         let originalOrders = [];
-        const billCache = {};
-
-        // fetches bill
-        const fetchBill = async (orderId) => {
-            if (billCache[orderId]) return billCache[orderId];
-            try {
-                const response = await fetch(`https://localhost:7018/api/Bill/getbyorderid/${orderId}`, {
-                    headers: { 'Authorization': `Bearer ${window.jwtToken}` }
-                });
-                if (response.status === 401) {
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Please log in to fetch bill'
-                    }).then(() => {
-                        window.location.href = '/User/Login';
-                    });
-                    return { claimCode: null };
-                }
-                if (!response.ok) throw new Error(`Failed to fetch bill for order ${orderId}`);
-                const bill = await response.json();
-                billCache[orderId] = bill || { claimCode: null };
-                return billCache[orderId];
-            } catch (error) {
-                Toast.fire({
-                    icon: 'error',
-                    title: error.message || `Failed to fetch bill for order ${orderId}`
-                });
-                billCache[orderId] = { claimCode: null };
-                return billCache[orderId];
-            }
-        };
 
         // fetches orders
         const fetchOrders = async () => {
@@ -204,19 +172,19 @@
             }
         };
 
-        // gets status text and badge class
+        // gets status text
         const getStatusText = (status) => {
             switch (status) {
-                case 0: return { text: 'Pending'};
-                case 1: return { text: 'Cancelled'};
-                case 2: return { text: 'Fulfilled'};
-                default: return { text: 'Unknown'};
+                case 0: return { text: 'Pending' };
+                case 1: return { text: 'Cancelled' };
+                case 2: return { text: 'Fulfilled' };
+                default: return { text: 'Unknown' };
             }
         };
 
         // gets filter parameters
         const getFilterParams = () => ({
-            search: document.getElementById('search').value.toLowerCase(),
+            search: document.getElementById('search').value.toLowerCase().trim(),
             status: document.getElementById('status').value,
             minStartDate: document.getElementById('minStartDate').value,
             maxEndDate: document.getElementById('maxEndDate').value,
@@ -231,7 +199,8 @@
             if (params.search) {
                 filtered = filtered.filter(o =>
                     (o.user?.name?.toLowerCase() || '').includes(params.search) ||
-                    o.id.toLowerCase().includes(params.search)
+                    o.id.toLowerCase().includes(params.search) ||
+                    (o.orderBill?.claimCode?.toLowerCase() || '').includes(params.search)
                 );
             }
 
@@ -273,7 +242,7 @@
         };
 
         // renders orders
-        const renderOrders = async (page, orders) => {
+        const renderOrders = (page, orders) => {
             elements.tableBody.innerHTML = '';
             elements.noOrders.classList.add('hidden');
             elements.paginationContainer.innerHTML = '';
@@ -288,7 +257,6 @@
             const paginatedOrders = orders.slice(startIndex, endIndex);
 
             for (const order of paginatedOrders) {
-                await fetchBill(order.id); // Ensure bill is fetched
                 const statusInfo = getStatusText(order.status);
                 const row = document.createElement('tr');
                 row.className = 'border-b border-accent1 bg-white';
@@ -298,10 +266,10 @@
                     <td class="p-3">${new Date(order.orderedAt).toLocaleDateString()}</td>
                     <td class="p-3">${statusInfo.text}</td>
                     <td class="p-3">Rs. ${order.totalAmount.toFixed(2)}</td>
-                    <td class="p-3">${billCache[order.id]?.claimCode || '-'}</td>
+                    <td class="p-3">${order.orderBill?.claimCode || '-'}</td>
                     <td class="p-3">
                         ${order.status === 0 ? `
-                            <button class="edit-order bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" data-order-id="${order.id}" data-status="${order.status}" data-claim-code="${billCache[order.id]?.claimCode || ''}">Edit</button>
+                            <button class="edit-order bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4" data-order-id="${order.id}" data-status="${order.status}" data-claim-code="${order.orderBill?.claimCode || ''}">Edit</button>
                         ` : ''}
                     </td>
                 `;
@@ -387,19 +355,15 @@
                 return;
             }
 
-            for (const order of orders) {
-                await fetchBill(order.id);
-            }
-
             originalOrders = [...orders];
             orders.sort((a, b) => {
-            // status
-            if (a.status !== b.status) {
-                return a.status - b.status; // ascending
-            }
-            // date
-            return new Date(b.orderedAt) - new Date(a.orderedAt);
-        });
+                // status
+                if (a.status !== b.status) {
+                    return a.status - b.status; // ascending
+                }
+                // date
+                return new Date(b.orderedAt) - new Date(a.orderedAt);
+            });
 
             allOrders = [...orders];
             elements.list.classList.remove('hidden');

@@ -213,6 +213,7 @@ namespace Whisperwood.Services
 
             var orders = await dbContext.Orders
                 .Include(u => u.User)
+                .Include(b => b.OrderBill)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .ToListAsync();
