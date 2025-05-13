@@ -1,0 +1,369 @@
+﻿@page
+@model Whisperwood.Pages.Author.ManageAuthorModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Manage Authors";
+}
+
+<div class="px-4 py-8">
+    <div class="mb-4 flex justify-between">
+        <h1 class="text-accent4 text-center text-4xl font-bold">Manage Authors</h1>
+        <div class="flex space-x-4 text-white">
+            <a href="/Author/AddAuthor" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Add Author</a>
+            <button id="filter-button" class="bg-accent3 rounded px-4 py-2 hover:bg-accent4">Filter Authors</button>
+        </div>
+    </div>
+    <div id="filter-section" class="bg-primary border-accent3 mb-8 hidden rounded border p-6 shadow-md">
+        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div>
+                <label for="search" class="text-accent3 mb-1 block font-medium">Search</label>
+                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by name or email" />
+            </div>
+            <div>
+                <label for="sortBy" class="text-accent3 mb-1 block font-medium">Sort By</label>
+                <select id="sortBy" name="sortBy" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                    <option value="dob">Date of Birth</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortOrder" class="text-accent3 mb-1 block font-medium">Sort Order</label>
+                <select id="sortOrder" name="sortOrder" class="border-accent1 w-full rounded border p-[10px]">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <div>
+                <label for="nationality" class="text-accent3 mb-1 block font-medium">Nationality</label>
+                <input type="text" id="nationality" name="nationality" class="border-accent1 w-full rounded border p-2" placeholder="Filter by nationality" />
+            </div>
+            <div>
+                <label for="minDOB" class="text-accent3 mb-1 block font-medium">Min Date of Birth</label>
+                <input type="date" id="minDOB" name="minDOB" class="border-accent1 w-full rounded border p-1.5" />
+            </div>
+            <div class="flex items-end justify-end gap-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
+                <button type="button" id="clear-filters" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear Filters</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="author-list" class="hidden">
+        <div class="overflow-x-auto">
+            <table class="text-accent2 border-accent1 w-full border">
+                <thead>
+                    <tr class="bg-accent4 text-white">
+                        <th class="p-2 text-left">Name</th>
+                        <th class="p-2 text-left">Email</th>
+                        <th class="p-2 text-left">Nationality</th>
+                        <th class="p-2 text-left">Date of Birth</th>
+                        <th class="p-2 text-left">Contact</th>
+                        <th class="p-2 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="authors-table-body" class="bg-white"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="no-authors" class="text-accent2 mt-4 hidden text-center text-lg">No authors found.</div>
+
+    <div id="pagination-container" class="mt-6 flex justify-center gap-2"></div>
+</div>
+
+@section Scripts {
+    <script>
+        // configuration constants
+        const pageSize = 8;
+        let currentPage = 1;
+        let allAuthors = [];
+        let originalAuthors = [];
+
+        // formats date string to locale date
+        const formatDate = (dateStr) => {
+            return dateStr ? new Date(dateStr).toLocaleDateString() : '-';
+        };
+
+        // validates filter inputs
+        const validateFilters = (params) => {
+            // validate min DOB
+            if (params.minDOB) {
+                const minDOB = new Date(params.minDOB);
+                if (isNaN(minDOB)) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Min date of birth must be a valid date.'
+                    });
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        // fetches all authors from API
+        const fetchAuthors = async () => {
+            // check authentication
+            if (!window.jwtToken) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please log in to view authors.'
+                }).then(() => {
+                    window.location.href = '/User/Login';
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('https://localhost:7018/api/Author/getall', {
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to view authors.'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Failed to load authors.');
+                }
+
+                originalAuthors = await response.json();
+                allAuthors = [...originalAuthors];
+                renderAuthors(currentPage);
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to load authors.'
+                });
+            }
+        };
+
+        // deletes an author by ID
+        const deleteAuthor = async (authorId, authorName) => {
+            // confirm deletion
+            const result = await Swal.fire({
+                title: `Are you sure you want to delete the author "${authorName}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: 'red',
+                cancelButtonColor: 'grey',
+                confirmButtonText: 'Delete'
+            });
+
+            if (!result.isConfirmed) return;
+
+            // check authentication
+            if (!window.jwtToken) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Please log in to delete authors.'
+                }).then(() => {
+                    window.location.href = '/User/Login';
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://localhost:7018/api/Author/delete/${authorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${window.jwtToken}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Please log in to delete authors.'
+                    }).then(() => {
+                        window.location.href = '/User/Login';
+                    });
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete author.');
+                }
+
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Author deleted successfully!'
+                }).then(() => {
+                    fetchAuthors();
+                });
+            } catch (error) {
+                Toast.fire({
+                    icon: 'error',
+                    title: error.message || 'Failed to delete author.'
+                });
+            }
+        };
+
+        // renders authors for the current page
+        const renderAuthors = (page) => {
+            const authorsTableBody = document.getElementById('authors-table-body');
+            const noAuthorsElement = document.getElementById('no-authors');
+            const paginationContainer = document.getElementById('pagination-container');
+            const authorList = document.getElementById('author-list');
+
+            authorsTableBody.innerHTML = '';
+
+            if (allAuthors.length === 0) {
+                noAuthorsElement.classList.remove('hidden');
+                authorList.classList.add('hidden');
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, allAuthors.length);
+            const paginatedAuthors = allAuthors.slice(startIndex, endIndex);
+
+            if (paginatedAuthors.length > 0) {
+                authorList.classList.remove('hidden');
+                noAuthorsElement.classList.add('hidden');
+
+                paginatedAuthors.forEach(author => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-accent1';
+                    row.innerHTML = `
+                        <td class="truncate p-2">${author.name}</td>
+                        <td class="truncate p-2">${author.email || '-'}</td>
+                        <td class="p-2">${author.nationality || '-'}</td>
+                        <td class="p-2">${formatDate(author.dob)}</td>
+                        <td class="p-2">${author.contact || '-'}</td>
+                        <td class="p-2">
+                            <div class="flex justify-center space-x-2">
+                                <a href="/Author/UpdateAuthor/${author.id}" class="bg-accent3 rounded px-3 py-1 text-white hover:bg-accent4">Update</a>
+                                <button class="bg-accent3 delete-btn rounded px-3 py-1 text-white hover:bg-accent4" data-id="${author.id}" data-name="${author.name}">Delete</button>
+                            </div>
+                        </td>
+                    `;
+                    authorsTableBody.appendChild(row);
+                });
+
+                const totalPages = Math.ceil(allAuthors.length / pageSize);
+                createPaginationControls('pagination-container', totalPages, page, (newPage) => {
+                    currentPage = newPage;
+                    renderAuthors(newPage);
+                });
+            } else {
+                noAuthorsElement.classList.remove('hidden');
+                authorList.classList.add('hidden');
+                paginationContainer.innerHTML = '';
+            }
+        };
+
+        // gets filter parameters from form
+        const getAuthorFilterParams = () => ({
+            search: document.getElementById('search').value.trim().toLowerCase(),
+            nationality: document.getElementById('nationality').value.trim().toLowerCase(),
+            minDOB: document.getElementById('minDOB').value,
+            sortBy: document.getElementById('sortBy').value,
+            sortOrder: document.getElementById('sortOrder').value
+        });
+
+        // filters authors based on parameters
+        const filterAuthors = (authors, params) => {
+            return authors
+                .filter(a => {
+                    // filter by search (name or email)
+                    if (params.search) {
+                        return (a.name && a.name.toLowerCase().includes(params.search)) ||
+                               (a.email && a.email.toLowerCase().includes(params.search));
+                    }
+                    return true;
+                })
+                .filter(a => {
+                    // filter by nationality
+                    if (params.nationality) {
+                        return a.nationality && a.nationality.toLowerCase().includes(params.nationality);
+                    }
+                    return true;
+                })
+                .filter(a => {
+                    // filter by min DOB
+                    if (params.minDOB) {
+                        const dob = new Date(a.dob);
+                        const minDOB = new Date(params.minDOB);
+                        return dob >= minDOB;
+                    }
+                    return true;
+                })
+                .sort((a, b) => {
+                    // sort by selected field and order
+                    const fieldA = params.sortBy === 'name' ? (a.name || '').toLowerCase() :
+                                  params.sortBy === 'email' ? (a.email || '').toLowerCase() :
+                                  new Date(a.dob);
+                    const fieldB = params.sortBy === 'name'?t (b.name || '').toLowerCase() :
+                                  params.sortBy === 'email' ? (b.email || '').toLowerCase() :
+                                  new Date(b.dob);
+                    const comparison = fieldA > fieldB ? 1 : fieldA < fieldB ? -1 : 0;
+                    return params.sortOrder === 'asc' ? comparison : -comparison;
+                });
+        };
+
+        // clears filter form inputs
+        const clearAuthorFilters = () => {
+            document.getElementById('search').value = '';
+            document.getElementById('nationality').value = '';
+            document.getElementById('minDOB').value = '';
+            document.getElementById('sortBy').value = 'name';
+            document.getElementById('sortOrder').value = 'asc';
+        };
+
+        // initializes event listeners on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            // cache DOM elements
+            const filterButton = document.getElementById('filter-button');
+            const filterSection = document.getElementById('filter-section');
+            const filterForm = document.getElementById('filter-form');
+            const clearAuthorFiltersButton = document.getElementById('clear-filters');
+            const authorsTableBody = document.getElementById('authors-table-body');
+
+            // toggle filter section visibility
+            filterButton.addEventListener('click', () => {
+                filterSection.classList.toggle('hidden');
+            });
+
+            // handle filter form submission
+            filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const params = getAuthorFilterParams();
+                if (!validateFilters(params)) return;
+                allAuthors = filterAuthors(originalAuthors, params);
+                currentPage = 1;
+                renderAuthors(currentPage);
+            });
+
+            // handle clear filters
+            clearAuthorFiltersButton.addEventListener('click', () => {
+                clearAuthorFilters();
+                allAuthors = [...originalAuthors];
+                currentPage = 1;
+                renderAuthors(currentPage);
+            });
+
+            // handle delete button clicks
+            authorsTableBody.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-btn');
+                if (deleteBtn) {
+                    const { id, name } = deleteBtn.dataset;
+                    deleteAuthor(id, name);
+                }
+            });
+
+            // fetch initial authors
+            fetchAuthors();
+        });
+    </script>
+}

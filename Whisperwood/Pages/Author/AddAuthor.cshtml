@@ -1,0 +1,153 @@
+﻿@page
+@model Whisperwood.Pages.Author.AddAuthorModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Add Author";
+}
+
+<div class="px-4 py-8">
+    <h1 class="text-accent4 mb-6 text-center text-4xl font-bold">Add Author</h1>
+
+    <div class="bg-primary border-accent3 mx-auto max-w-3xl rounded border p-6 shadow-md">
+        <form id="author-form" class="gap-6 grid grid-cols-2 ">
+            <div>
+                <label for="name" class="text-accent3 mb-1 block font-medium">Name</label>
+                <input type="text" id="name" name="name" class="border-accent1 w-full rounded border p-2" placeholder="Author Name" required />
+            </div>
+            <div>
+                <label for="email" class="text-accent3 mb-1 block font-medium">Email</label>
+                <input type="email" id="email" name="email" class="border-accent1 w-full rounded border p-2" placeholder="Author Email" />
+            </div>
+            <div>
+                <label for="address" class="text-accent3 mb-1 block font-medium">Address</label>
+                <input type="text" id="address" name="address" class="border-accent1 w-full rounded border p-2" placeholder="Author Address" />
+            </div>
+            <div>
+                <label for="nationality" class="text-accent3 mb-1 block font-medium">Nationality</label>
+                <input type="text" id="nationality" name="nationality" class="border-accent1 w-full rounded border p-2" placeholder="Author Nationality" />
+            </div>
+            <div>
+                <label for="dob" class="text-accent3 mb-1 block font-medium">Date of Birth</label>
+                <input type="date" id="dob" name="dob" class="border-accent1 w-full rounded border p-2" />
+            </div>
+            <div>
+                <label for="contact" class="text-accent3 mb-1 block font-medium">Contact</label>
+                <input type="text" id="contact" name="contact" class="border-accent1 w-full rounded border p-2" placeholder="Author Contact" />
+            </div>
+            <div class="flex justify-end gap-2 col-span-full">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Create Author</button>
+                <button type="button" id="clear-form" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Clear</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // clears the form and resets UI state
+        const clearForm = () => {
+            document.getElementById('author-form').reset();
+        };
+
+        // initializes form event listeners on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('author-form');
+            const clearButton = document.getElementById('clear-form');
+
+            // handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!window.checkAuth('add authors')) return;
+
+                // collect form data
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const address = document.getElementById('address').value.trim();
+                const nationality = document.getElementById('nationality').value.trim();
+                const dob = document.getElementById('dob').value;
+                const contact = document.getElementById('contact').value.trim();
+
+                // validate name
+                if (!name) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Name is required.'
+                    });
+                    return;
+                }
+
+                // validate email format if provided
+                if (email && !/[^\s]+[^\s]+\.[^\s]+/.test(email)) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Invalid email format.'
+                    });
+                    return;
+                }
+
+                // validate DOB if provided
+                if (dob) {
+                    const dobDate = new Date(dob);
+                    const today = new Date();
+                    if (isNaN(dobDate) || dobDate > today) {
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Date of birth must be a valid past date.'
+                        });
+                        return;
+                    }
+                }
+
+                // prepare API payload
+                const authorDto = {
+                    name,
+                    email: email || null,
+                    address: address || null,
+                    nationality: nationality || null,
+                    dob: dob || null,
+                    contact: contact || null
+                };
+
+                try {
+                    // send author creation request
+                    const response = await fetch('https://localhost:7018/api/Author/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${window.jwtToken}`
+                        },
+                        body: JSON.stringify(authorDto)
+                    });
+
+                    if (response.ok) {
+                        // show success toast and redirect
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Author created successfully!'
+                        }).then(() => {
+                            window.location.href = '/Author/ManageAuthors';
+                        });
+                        clearForm();
+                    } else {
+                        // handle API error
+                        const data = await response.json();
+                        Toast.fire({
+                            icon: 'error',
+                            title: data.message || 'Failed to create author.'
+                        });
+                    }
+                } catch (error) {
+                    // handle network error
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Failed to connect to the server. Please try again.'
+                    });
+                }
+            });
+
+            // handle clear button click
+            clearButton.addEventListener('click', clearForm);
+        });
+    </script>
+}
