@@ -92,6 +92,21 @@
                         <div class="relative space-x-4">
                             @if (isAdmin || isStaff)
                             {
+                                <button id="staff-button" class="text-accent3 hover:text-accent4 focus:outline-none">
+                                    Staff
+                                    <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div id="staff-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-56 rounded border shadow-lg">
+                                    <a href="/Book/ManageBook" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Book</a>
+                                    <a href="/Promotion/ManagePromotion" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Promotion</a>
+                                    <a href="/Order/ManageOrders" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Orders</a>
+                                    <a href="/Announcement/ManageAnnouncement" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Announcement</a>
+                                </div>
+                            }
+                            @if (isAdmin)
+                            {
                                 <button id="admin-button" class="text-accent3 hover:text-accent4 focus:outline-none">
                                     Admin
                                     <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,10 +114,7 @@
                                     </svg>
                                 </button>
                                 <div id="admin-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-56 rounded border shadow-lg">
-                                    <a href="/Book/ManageBook" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Book</a>
-                                    <a href="/Promotion/ManagePromotion" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Promotion</a>
-                                    <a href="/Order/ManageOrders" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Orders</a>
-                                    <a href="/Announcement/ManageAnnouncement" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Announcement</a>
+                                    <a href="/Author/ManageAuthor" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Authors</a>
                                 </div>
                             }
                             <button id="user-button" class="text-accent3 hover:text-accent4 focus:outline-none">
@@ -235,7 +247,7 @@
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 2000,
+            timer: 1000,
             showCloseButton: true,
             timerProgressBar: true,
             didOpen: (toast) => {
@@ -269,10 +281,17 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // setting up menu toggles
+
+            const staffButton = document.getElementById('staff-button');
+            const staffMenu = document.getElementById('staff-menu');
             const adminButton = document.getElementById('admin-button');
             const adminMenu = document.getElementById('admin-menu');
             const userButton = document.getElementById('user-button');
             const userMenu = document.getElementById('user-menu');
+
+            if (staffButton && staffMenu) {
+                staffButton.addEventListener('click', () => staffMenu.classList.toggle('hidden'));
+            }
 
             if (adminButton && adminMenu) {
                 adminButton.addEventListener('click', () => adminMenu.classList.toggle('hidden'));
@@ -284,6 +303,9 @@
 
             // handling outside clicks to close menus
             document.addEventListener('click', (event) => {
+                if (!staffButton?.contains(event.target) && !staffMenu?.contains(event.target)) {
+                    staffMenu?.classList.add('hidden');
+                }
                 if (!adminButton?.contains(event.target) && !adminMenu?.contains(event.target)) {
                     adminMenu?.classList.add('hidden');
                 }

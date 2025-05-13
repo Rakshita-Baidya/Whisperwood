@@ -25,8 +25,8 @@
     @* Award Winners *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-accent4 text-xl font-bold">Award Winners</h2>
-            <a href="/Book/BrowseByCategory" class="text-secondary text-sm hover:text-lg">See More</a>
+            <h2 class="text-accent4  text-2xl font-bold uppercase">Award Winners</h2>
+            <a href="/Book/BrowseByCategory" class="text-secondary hover:text-lg">See More</a>
         </div>
         <div id="award-winners-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
             <div id="award-loading" class="text-accent2 col-span-full text-center text-lg">Loading award winners...</div>
@@ -38,7 +38,7 @@
     <section class="bg-gradient-to-r from-accent1 to-accent4 my-10 rounded px-6 py-6 shadow-md">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Hot Deals</h2>
-            <a href="/Book/BrowseByCategory" class="text-sm text-white hover:text-lg">Browse All</a>
+            <a href="/Book/BrowseByCategory" class="text-white hover:text-lg">Browse All</a>
         </div>
         <div id="promo-books-container" class="mx-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             <div id="promo-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
@@ -63,8 +63,8 @@
     @* Best Sellers *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-accent2 text-xl font-bold">Best Sellers</h2>
-            <a href="/Book/BrowseByCategory" class="text-secondary text-sm hover:text-lg">See More</a>
+            <h2 class="text-accent4 text-2xl uppercase font-bold">Best Sellers</h2>
+            <a href="/Book/BrowseByCategory" class="text-secondary hover:text-lg">See More</a>
         </div>
         <div id="best-sellers-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
             <div id="best-sellers-loading" class="text-accent2 col-span-full text-center text-lg">Loading Best Sellers...</div>
@@ -74,7 +74,7 @@
 
     @* Most Popular Genres *@
     <section class="mb-10">
-        <h2 class="text-accent2 mb-4 text-xl font-bold">Most Popular Genres</h2>
+        <h2 class="text-accent4 mb-4 text-2xl font-bold uppercase">Most Popular Genres</h2>
         <div id="popular-genres-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
             <div id="popular-genres-loading" class="text-accent2 col-span-full text-center text-lg">Loading Popular Genres...</div>
         </div>
@@ -179,7 +179,7 @@
                     : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
                 }
                 <h2 class="text-accent3 truncate text-xl font-semibold">${topBook.title || 'Untitled'}</h2>
-                <p class="text-accent1 font-medium">${authorNames}</p>
+                <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
                 <div class="mb-3 flex justify-between">
                     <p class="text-accent3">★ ${topBook.averageRating?.toFixed(1) || 0.0}</p>
                     <div class="text-right">
@@ -285,7 +285,7 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-52 items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
@@ -391,7 +391,7 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-full items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
@@ -524,6 +524,7 @@
                 const authorNames = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
                     : 'Unknown Author';
+                const isOnSale = window.calculateBookPrice(book) < book.price;
                 const finalPrice = window.calculateBookPrice(book);
 
                 const bookElement = document.createElement('a');
@@ -535,12 +536,15 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-52 items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium">${authorNames}</p>
+                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
-                            <p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)}</p>
-                            ${book.discountPercentage > 0 ? `<p class="text-accent4 text-sm">${book.discountPercentage}% Off</p>` : ''}
+                            ${isOnSale
+                                ? `<p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)} <span class="text-accent1 text-sm line-through">Rs. ${book.price.toFixed(2)}</span></p>
+                                   <p class="text-accent4 text-sm">${book.discountPercentage}% Off <span class="bg-accent4 rounded px-1 py-1 text-xs text-white">On Sale</span></p>`
+                                : `<p class="text-accent4 font-medium">Rs. ${finalPrice.toFixed(2)}</p>`
+                            }
                         </div>
                     </div>
                     <div class="flex gap-2">
@@ -660,7 +664,7 @@
                             <p class="text-accent2 text-xl font-semibold">${review.users?.name || 'Anonymous'}</p>
                         </div>
                         <p class="text-accent3 mb-2">Rating: ★ ${review.rating || 0}</p>
-                        <p class="text-accent1 mb-2 line-clamp-5 italic">"${review.message || 'No comment'}"</p>
+                        <p class="text-accent1 mb-2 line-clamp-2 italic">"${review.message || 'No comment'}"</p>
                         <p class="text-accent2 text-sm">${new Date(review.createdAt).toLocaleString()}</p>
                     `;
                     elements.recentReviewsGrid.appendChild(reviewCard);
