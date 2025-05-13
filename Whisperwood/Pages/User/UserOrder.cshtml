@@ -6,23 +6,74 @@
 }
 
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-accent4 mb-4 text-4xl font-bold">My Orders</h1>
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-accent4 text-4xl font-bold">My Orders</h1>
+        <button id="filter-button" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Filter Orders</button>
+    </div>
+    <div id="filter-section" class="bg-primary border-accent1 mb-8 hidden rounded border p-6 shadow-sm">
+        <h2 class="text-accent4 mb-4 text-xl font-semibold">Filter Orders</h2>
+        <form id="filter-form" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <label for="search" class="text-accent2 mb-1 block font-medium">Search</label>
+                <input type="text" id="search" name="search" class="border-accent1 w-full rounded border p-2" placeholder="Search by order ID or claim code">
+            </div>
+            <div>
+                <label for="status" class="text-accent2 mb-1 block font-medium">Status</label>
+                <select id="status" name="status" class="border-accent1 w-full rounded border p-2">
+                    <option value="">All</option>
+                    <option value="0">Pending</option>
+                    <option value="1">Cancelled</option>
+                    <option value="2">Fulfilled</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortBy" class="text-accent2 mb-1 block font-medium">Sort By</label>
+                <select id="sortBy" name="sortBy" class="border-accent1 w-full rounded border p-2">
+                    <option value="orderedAt">Order Date</option>
+                    <option value="totalAmount">Total Amount</option>
+                    <option value="status">Status</option>
+                </select>
+            </div>
+            <div>
+                <label for="sortOrder" class="text-accent2 mb-1 block font-medium">Sort Order</label>
+                <select id="sortOrder" name="sortOrder" class="border-accent1 w-full rounded border p-2">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+            <div>
+                <label for="minStartDate" class="text-accent2 mb-1 block font-medium">Min Order Date</label>
+                <input type="date" id="minStartDate" name="minStartDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div>
+                <label for="maxEndDate" class="text-accent2 mb-1 block font-medium">Max Order Date</label>
+                <input type="date" id="maxEndDate" name="maxEndDate" class="border-accent1 w-full rounded border p-2">
+            </div>
+            <div class="col-start-4 flex items-end justify-end gap-2">
+                <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Apply Filters</button>
+                <button type="button" id="clear-filters" class="bg-secondary rounded px-4 py-2 text-white hover:bg-gray-600">Clear Filters</button>
+            </div>
+        </form>
+    </div>
     <div id="order-list" class="hidden">
-        <table class="border-accent1 text-accent2 w-full border">
-            <thead>
-                <tr class="bg-accent4 text-white">
-                    <th class="p-2 text-left">Order ID</th>
-                    <th class="p-2 text-left">Date</th>
-                    <th class="p-2 text-left">Status</th>
-                    <th class="p-2 text-left">Total</th>
-                    <th class="p-2 text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="order-table-body"></tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="border-accent1 text-accent2 w-full border shadow-sm">
+                <thead>
+                    <tr class="bg-accent4 text-white">
+                        <th class="p-2 text-left">Order ID</th>
+                        <th class="p-2 text-left">Date</th>
+                        <th class="p-2 text-left">Status</th>
+                        <th class="p-2 text-left">Total</th>
+                        <th class="p-2 text-left">Claim Code</th>
+                        <th class="p-2 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="order-table-body"></tbody>
+            </table>
+        </div>
         <div id="pagination-controls" class="mt-4 flex justify-center space-x-2"></div>
     </div>
-    <p id="no-orders" class="text-accent2 hidden text-center text-lg">No orders found.</p>
+    <p id="no-orders" class="text-accent2 mt-4 hidden text-center text-lg">No orders found.</p>
 </div>
 
 @section Scripts {
@@ -32,6 +83,10 @@
             list: document.getElementById('order-list'),
             tableBody: document.getElementById('order-table-body'),
             noOrders: document.getElementById('no-orders'),
+            filterSection: document.getElementById('filter-section'),
+            filterForm: document.getElementById('filter-form'),
+            filterButton: document.getElementById('filter-button'),
+            clearFilters: document.getElementById('clear-filters'),
             pagination: document.getElementById('pagination-controls')
         };
 
@@ -39,6 +94,7 @@
         const ordersPerPage = 10;
         let currentPage = 1;
         let allOrders = [];
+        let originalOrders = [];
 
         // fetches user id
         const fetchUserId = async () => {
@@ -148,19 +204,75 @@
             return status === 0 ? 'Pending' : status === 1 ? 'Cancelled' : status === 2 ? 'Fulfilled' : 'Unknown';
         };
 
+        // gets filter parameters
+        const getFilterParams = () => ({
+            search: document.getElementById('search').value.toLowerCase().trim(),
+            status: document.getElementById('status').value,
+            minStartDate: document.getElementById('minStartDate').value,
+            maxEndDate: document.getElementById('maxEndDate').value,
+            sortBy: document.getElementById('sortBy').value,
+            sortOrder: document.getElementById('sortOrder').value
+        });
+
+        // filters orders
+        const filterOrders = (orders, params) => {
+            let filtered = [...orders];
+
+            if (params.search) {
+                filtered = filtered.filter(o =>
+                    o.id.toLowerCase().includes(params.search) ||
+                    (o.orderBill?.claimCode?.toLowerCase() || '').includes(params.search)
+                );
+            }
+
+            if (params.status !== '') {
+                const status = parseInt(params.status);
+                filtered = filtered.filter(o => o.status === status);
+            }
+
+            if (params.minStartDate) {
+                filtered = filtered.filter(o => new Date(o.orderedAt) >= new Date(params.minStartDate));
+            }
+
+            if (params.maxEndDate) {
+                filtered = filtered.filter(o => new Date(o.orderedAt) <= new Date(params.maxEndDate));
+            }
+
+            filtered.sort((a, b) => {
+                const fieldA = params.sortBy === 'orderedAt' ? new Date(a.orderedAt) :
+                              params.sortBy === 'totalAmount' ? a.totalAmount : a.status;
+                const fieldB = params.sortBy === 'orderedAt' ? new Date(b.orderedAt) :
+                              params.sortBy === 'totalAmount' ? b.totalAmount : b.status;
+                const comparison = fieldA > fieldB ? 1 : fieldA < fieldB ? -1 : 0;
+                return params.sortOrder === 'asc' ? comparison : -comparison;
+            });
+
+            return filtered;
+        };
+
+        // clears filters
+        const clearFilters = () => {
+            document.getElementById('search').value = '';
+            document.getElementById('status').value = '';
+            document.getElementById('minStartDate').value = '';
+            document.getElementById('maxEndDate').value = '';
+            document.getElementById('sortBy').value = 'orderedAt';
+            document.getElementById('sortOrder').value = 'asc';
+        };
+
         // renders orders for the current page
-        const renderOrders = (page) => {
+        const renderOrders = (page, orders) => {
             currentPage = page;
             const start = (page - 1) * ordersPerPage;
-            const end = start + ordersPerPage;
-            const paginatedOrders = allOrders.slice(start, end);
-
+            const end = Math.min(start + ordersPerPage, orders.length);
+            const paginatedOrders = orders.slice(start, end);
             elements.tableBody.innerHTML = paginatedOrders.map(order => `
                 <tr class="border-accent1 border-b bg-white">
                     <td class="p-2">${order.id}</td>
                     <td class="p-2">${new Date(order.orderedAt).toLocaleDateString()}</td>
                     <td class="p-2">${getStatusText(order.status)}</td>
                     <td class="p-2">Rs. ${order.totalAmount.toFixed(2)}</td>
+                    <td class="p-2">${order.orderBill?.claimCode || '-'}</td>
                     <td class="flex justify-center space-x-2 pt-1">
                         <a href="/User/OrderDetail?orderId=${order.id}" class="bg-accent3 inline-block rounded px-3 py-1 text-center text-white hover:bg-accent4">View Details</a>
                         ${order.status === 0 ? `<button class="cancel-order rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600" data-order-id="${order.id}">Cancel</button>` : ''}
@@ -168,9 +280,9 @@
                 </tr>
             `).join('');
 
-            const totalPages = Math.ceil(allOrders.length / ordersPerPage);
+            const totalPages = Math.ceil(orders.length / ordersPerPage);
             if (totalPages > 1) {
-                window.createPaginationControls('pagination-controls', totalPages, currentPage, renderOrders);
+                window.createPaginationControls('pagination-controls', totalPages, currentPage, (newPage) => renderOrders(newPage, allOrders));
             } else {
                 elements.pagination.innerHTML = '';
             }
@@ -183,7 +295,7 @@
                         Toast.fire({
                             icon: 'success',
                             title: 'Order cancelled successfully'
-                        }).then(() => location.reload());
+                        }).then(() => loadOrders());
                     }
                 });
             });
@@ -193,32 +305,47 @@
         const loadOrders = async () => {
             if (!window.checkAuth('view orders')) return;
 
-            Toast.fire({
-                icon: 'info',
-                title: 'Loading orders...',
-                timer: 1000
-            });
-
             const userId = await fetchUserId();
             if (!userId) return;
 
-            allOrders = await fetchOrders(userId);
-            if (!allOrders?.length) {
+            const orders = await fetchOrders(userId);
+            if (!orders?.length) {
                 elements.noOrders.classList.remove('hidden');
                 return;
             }
 
-            // Sort by status, then by date
-            allOrders.sort((a, b) => {
+            orders.sort((a, b) => {
                 if (a.status !== b.status) return a.status - b.status;
                 return new Date(b.orderedAt) - new Date(a.orderedAt);
             });
 
+            originalOrders = [...orders];
+            allOrders = [...orders];
             elements.list.classList.remove('hidden');
-            renderOrders(1);
+            renderOrders(1, allOrders);
         };
 
+
         // initializes page
-        document.addEventListener('DOMContentLoaded', loadOrders);
+        document.addEventListener('DOMContentLoaded', () => {
+            elements.filterButton.addEventListener('click', () => {
+                elements.filterSection.classList.toggle('hidden');
+            });
+
+            elements.filterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const params = getFilterParams();
+                allOrders = filterOrders(originalOrders, params);
+                renderOrders(1, allOrders);
+            });
+
+            elements.clearFilters.addEventListener('click', () => {
+                clearFilters();
+                allOrders = [...originalOrders];
+                renderOrders(1, allOrders);
+            });
+
+            loadOrders();
+        });
     </script>
 }

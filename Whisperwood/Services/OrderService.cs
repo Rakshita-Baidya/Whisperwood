@@ -231,6 +231,8 @@ namespace Whisperwood.Services
                 });
 
             var order = await dbContext.Orders
+                .Include(u => u.User)
+                .Include(b => b.OrderBill)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
@@ -257,6 +259,7 @@ namespace Whisperwood.Services
             // Load order with related data
             var order = await dbContext.Orders
                 .Include(u => u.User)
+                .Include(b => b.OrderBill)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .FirstOrDefaultAsync(o => o.Id == id);
@@ -389,6 +392,8 @@ namespace Whisperwood.Services
 
             var orders = await dbContext.Orders
                 .Where(o => o.UserId == targetUserId)
+                .Include(u => u.User)
+                .Include(b => b.OrderBill)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
                 .ToListAsync();
