@@ -22,7 +22,7 @@
         </section>
     </div>
 
-    @* award winner *@
+    @* Award Winners *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-accent4 text-xl font-bold">Award Winners</h2>
@@ -34,20 +34,33 @@
         <div id="no-award-winners" class="text-accent2 mt-4 hidden text-center text-lg">No award-winning books found.</div>
     </section>
 
-    @* deals *@
+    @* Hot Deals (Individual Book Discounts) *@
     <section class="bg-gradient-to-r from-accent1 to-accent4 my-10 rounded px-6 py-6 shadow-md">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Hot Deals</h2>
             <a href="/Book/BrowseByCategory" class="text-sm text-white hover:text-lg">Browse All</a>
         </div>
-        <div class="relative">
-            <div id="promo-books-container" class="mx-6 grid grid-cols-4 gap-4 overflow-x-auto scroll-smooth">
-                <div id="promo-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
-            </div>
+        <div id="promo-books-container" class="mx-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div id="promo-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
         </div>
         <div id="no-promo-books" class="text-white mt-4 hidden text-center text-lg">No ongoing promotions found.</div>
     </section>
-    @* best sellers *@
+
+    @* Active Promotions (Promo Codes) *@
+    <section class="my-10 rounded-lg bg-cover bg-center bg-[url('https://images.unsplash.com/photo-1512820790803-83ca734da794')] shadow-lg relative">
+        <div class="bg-black bg-opacity-60 rounded-lg px-6 py-6">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Active Promotions</h2>
+                <a href="/Promotions" class="text-sm text-white hover:text-lg">View All</a>
+            </div>
+            <div id="promotions-container" class="mx-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div id="promotions-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
+            </div>
+            <div id="no-promotions" class="text-white mt-4 hidden text-center text-lg">No active promotions found.</div>
+        </div>
+    </section>
+
+    @* Best Sellers *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-accent2 text-xl font-bold">Best Sellers</h2>
@@ -56,21 +69,7 @@
         <div id="best-sellers-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
             <div id="best-sellers-loading" class="text-accent2 col-span-full text-center text-lg">Loading Best Sellers...</div>
         </div>
-    </section>
-
-    @* Active Promotions (Promo Codes) *@
-    <section class="my-10 rounded-lg bg-cover bg-center bg-[url('https://images.unsplash.com/photo-1512820790803-83ca734da794')] shadow-lg relative">
-        <div class="bg-black bg-opacity-60 rounded-lg px-6 py-6">
-            <div class="mb-4 flex items-center justify-between">
-                <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Active Promotions</h2>
-            </div>
-            <div class="relative">
-                <div id="promotions-container" class="mx-6 grid grid-flow-col auto-cols-[minmax(0,20rem)] gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2">
-                    <div id="promotions-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
-                </div>
-            </div>
-            <div id="no-promotions" class="text-white mt-4 hidden text-center text-lg">No active promotions found.</div>
-        </div>
+        <div id="no-best-sellers" class="text-accent2 mt-4 hidden text-center text-lg">No best sellers found.</div>
     </section>
 
     @* Most Popular Genres *@
@@ -90,6 +89,7 @@
 </div>
 
 @section Scripts {
+    <script src="/js/promotion.js"></script>
     <script>
         // Cache DOM elements
         const elements = {
@@ -107,10 +107,14 @@
             noPromotions: document.getElementById('no-promotions'),
             bestSellersContainer: document.getElementById('best-sellers-container'),
             bestSellersLoading: document.getElementById('best-sellers-loading'),
+            noBestSellers: document.getElementById('no-best-sellers'),
             popularGenresContainer: document.getElementById('popular-genres-container'),
             popularGenresLoading: document.getElementById('popular-genres-loading'),
             recentReviewsGrid: document.getElementById('recent-reviews-grid')
         };
+
+        // Current date for filtering published books
+        const TODAY = new Date('2025-05-13');
 
         // Fetch all books
         async function fetchBooks() {
@@ -128,6 +132,20 @@
                     title: error.message || 'Failed to load books'
                 });
                 return [];
+            }
+        }
+
+        // Check if book is published
+        function isBookPublished(book) {
+            if (!book.publishedDate) {
+                console.warn(`Book ${book.id} has no publishedDate, treating as unpublished`);
+                return false;
+            }
+            try {
+                return new Date(book.publishedDate) <= TODAY;
+            } catch (error) {
+                console.warn(`Invalid publishedDate for book ${book.id}: ${book.publishedDate}`);
+                return false;
             }
         }
 
@@ -173,12 +191,12 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button id="wishlist-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                    <button id="wishlist-trending-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
                             <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
                         </svg>
                     </button>
-                    <button id="cart-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                    <button id="cart-trending-${topBook.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
                             <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
                         </svg>
@@ -190,29 +208,45 @@
             elements.trendingContainer.appendChild(bookElement);
             elements.trendingLoading.classList.add('hidden');
 
-            if (window.isAuthenticated) {
-                initializeWishlistButton(`wishlist-${topBook.id}`, topBook.id, topBook);
-                initializeCartButton(`cart-${topBook.id}`, topBook.id, topBook);
-            } else {
-                bookElement.querySelector(`#wishlist-${topBook.id}`).addEventListener('click', (e) => {
-                    e.preventDefault();
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Please log in to manage wishlist'
-                    }).then(() => {
-                        window.location.href = '/User/Login';
+            // Initialize buttons with timeout
+            setTimeout(() => {
+                if (window.isAuthenticated) {
+                    initializeWishlistButton(`wishlist-trending-${topBook.id}`, topBook.id, topBook);
+                    if (isBookPublished(topBook)) {
+                        initializeCartButton(`cart-trending-${topBook.id}`, topBook.id, topBook);
+                    } else {
+                        const cartButton = document.querySelector(`#cart-trending-${topBook.id}`);
+                        cartButton.disabled = true;
+                        cartButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        cartButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'info',
+                                title: 'This book is not yet available'
+                            });
+                        });
+                    }
+                } else {
+                    bookElement.querySelector(`#wishlist-trending-${topBook.id}`).addEventListener('click', (e) => {
+                        e.preventDefault();
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Please log in to manage wishlist'
+                        }).then(() => {
+                            window.location.href = '/User/Login';
+                        });
                     });
-                });
-                bookElement.querySelector(`#cart-${topBook.id}`).addEventListener('click', (e) => {
-                    e.preventDefault();
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Please log in to manage cart'
-                    }).then(() => {
-                        window.location.href = '/User/Login';
+                    bookElement.querySelector(`#cart-trending-${topBook.id}`).addEventListener('click', (e) => {
+                        e.preventDefault();
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Please log in to manage cart'
+                        }).then(() => {
+                            window.location.href = '/User/Login';
+                        });
                     });
-                });
-            }
+                }
+            }, 100);
         }
 
         // Fetch award winners
@@ -234,6 +268,7 @@
                 return;
             }
             elements.awardWinnersContainer.innerHTML = '';
+
             books.forEach(book => {
                 const authorNames = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
@@ -262,12 +297,12 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="wishlist-award-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
                                 <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
                             </svg>
                         </button>
-                        <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="cart-award-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
                                 <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
                             </svg>
@@ -275,40 +310,60 @@
                     </div>
                 `;
 
-                if (window.isAuthenticated) {
-                    initializeWishlistButton(`wishlist-${book.id}`, book.id, book);
-                    initializeCartButton(`cart-${book.id}`, book.id, book);
-                } else {
-                    bookElement.querySelector(`#wishlist-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage wishlist'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                    bookElement.querySelector(`#cart-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage cart'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                }
-
                 elements.awardWinnersContainer.appendChild(bookElement);
             });
+
             elements.awardLoading.classList.add('hidden');
+
+            // Initialize buttons with timeout
+            setTimeout(() => {
+                books.forEach(book => {
+                    if (window.isAuthenticated) {
+                        initializeWishlistButton(`wishlist-award-${book.id}`, book.id, book);
+                        if (isBookPublished(book)) {
+                            initializeCartButton(`cart-award-${book.id}`, book.id, book);
+                        } else {
+                            const cartButton = document.querySelector(`#cart-award-${book.id}`);
+                            cartButton.disabled = true;
+                            cartButton.classList.add('opacity-50', 'cursor-not-allowed');
+                            cartButton.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                Toast.fire({
+                                    icon: 'info',
+                                    title: 'This book is not yet available'
+                                });
+                            });
+                        }
+                    } else {
+                        const bookElement = document.querySelector(`#wishlist-award-${book.id}`).parentElement.parentElement;
+                        bookElement.querySelector(`#wishlist-award-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage wishlist'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                        bookElement.querySelector(`#cart-award-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage cart'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                    }
+                });
+            }, 100);
         }
 
         // Fetch and render Hot Deals (individual book discounts)
         async function fetchPromoBooks() {
             const books = await fetchBooks();
-            const promoBooks = books.filter(book => book.isOnSale === true);
-            return promoBooks;
+            const promoBooks = books.filter(book => book.isOnSale === true && isBookPublished(book));
+            return promoBooks.slice(0, 5);
         }
 
         async function renderPromoBooks() {
@@ -320,6 +375,7 @@
                 return;
             }
             elements.promoBooksContainer.innerHTML = '';
+
             promoBooks.forEach(book => {
                 const authorNames = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
@@ -328,11 +384,11 @@
 
                 const bookElement = document.createElement('a');
                 bookElement.href = `/Book/Details/${book.id}`;
-                bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl snap-start';
+                bookElement.className = 'block bg-primary border border-accent1 rounded-lg p-4 shadow-md transition-shadow hover:shadow-xl transform transition-transform hover:scale-105';
                 bookElement.innerHTML = `
                     ${book.coverImage?.coverImageURL
                         ? `<img src="${book.coverImage.coverImageURL}" alt="${book.title || 'Book'}" class="mb-4 h-64 w-full rounded-md object-cover" />`
-                        : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-52 items-center justify-center rounded-md">No Image</div>`
+                        : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-full items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
                     <p class="text-accent1 font-medium">${authorNames}</p>
@@ -344,12 +400,12 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="wishlist-promo-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
                                 <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
                             </svg>
                         </button>
-                        <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="cart-promo-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
                                 <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
                             </svg>
@@ -357,53 +413,62 @@
                     </div>
                 `;
 
-                if (window.isAuthenticated) {
-                    initializeWishlistButton(`wishlist-${book.id}`, book.id, book);
-                    initializeCartButton(`cart-${book.id}`, book.id, book);
-                } else {
-                    bookElement.querySelector(`#wishlist-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage wishlist'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                    bookElement.querySelector(`#cart-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage cart'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                }
                 elements.promoBooksContainer.appendChild(bookElement);
             });
+
             elements.promoLoading.classList.add('hidden');
+
+            // Initialize buttons with timeout
+            setTimeout(() => {
+                promoBooks.forEach(book => {
+                    if (window.isAuthenticated) {
+                        initializeWishlistButton(`wishlist-promo-${book.id}`, book.id, book);
+                        // Cart button already filtered by fetchPromoBooks (published books only)
+                        initializeCartButton(`cart-promo-${book.id}`, book.id, book);
+                    } else {
+                        const bookElement = document.querySelector(`#wishlist-promo-${book.id}`).parentElement.parentElement;
+                        bookElement.querySelector(`#wishlist-promo-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage wishlist'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                        bookElement.querySelector(`#cart-promo-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage cart'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                    }
+                });
+            }, 100);
         }
 
-        // promo codes
+        // Render Active Promotions (promo codes)
         async function renderPromotions() {
-             elements.promotionsLoading.classList.remove('hidden');
-             const promotions = await promotion.fetchPromotions();
-             const activePromotions = promotion.filterPromotions(promotions, null);
-             elements.promotionsContainer.innerHTML = '';
-
-             if (activePromotions.length === 0) {
-                 elements.promotionsLoading.classList.add('hidden');
-                 elements.noPromotions.classList.remove('hidden');
-                 return;
-             }
+            elements.promotionsLoading.classList.remove('hidden');
+            const promotions = await promotion.fetchPromotions();
+            const activePromotions = promotion.filterPromotions(promotions, null).slice(0, 4);
             elements.promotionsContainer.innerHTML = '';
+
+            if (activePromotions.length === 0) {
+                elements.promotionsLoading.classList.add('hidden');
+                elements.noPromotions.classList.remove('hidden');
+                return;
+            }
+
             activePromotions.forEach(promotion => {
                 const promotionItem = document.createElement('div');
-                promotionItem.className = 'bg-primary p-4 rounded-lg border border-accent1 shadow-lgt';
+                promotionItem.className = 'bg-primary p-4 rounded-lg border border-accent1 shadow-lg hover:shadow-xl transform transition-transform hover:scale-105';
                 promotionItem.innerHTML = `
                     <h3 class="text-accent3 font-semibold text-lg mb-2">${promotion.name || 'Special Offer'}</h3>
-                    <p class="text-accent2 mb-3 line-clamp-2 truncate">${promotion.description || 'No description'}</p>
+                    <p class="text-accent2 mb-3 line-clamp-2">${promotion.description || 'No description'}</p>
                     <div class="flex items-center justify-between mb-3">
                         <p class="text-accent2">Use code: <span class="font-semibold bg-accent1 px-2 py-1 rounded text-white cursor-pointer copy-promo-code" data-code="${promotion.code}">${promotion.code}</span></p>
                         <span class="bg-accent4 text-white text-xs font-bold px-2 py-1 rounded">${promotion.discountPercent}% OFF</span>
@@ -413,9 +478,10 @@
                 `;
                 elements.promotionsContainer.appendChild(promotionItem);
             });
+
             elements.promotionsLoading.classList.add('hidden');
 
-            // Add click to copy for promo codes
+            // Add click-to-copy for promo codes
             document.querySelectorAll('.copy-promo-code').forEach(button => {
                 button.addEventListener('click', () => {
                     const code = button.dataset.code;
@@ -437,7 +503,10 @@
         // Fetch and render Best Sellers
         async function fetchBestSellerBooks() {
             const books = await fetchBooks();
-            const bestSellers = books.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 5);
+            const bestSellers = books
+                .filter(book => isBookPublished(book))
+                .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
+                .slice(0, 5);
             return bestSellers;
         }
 
@@ -446,10 +515,11 @@
             const bestSellers = await fetchBestSellerBooks();
             if (!bestSellers.length) {
                 elements.bestSellersLoading.classList.add('hidden');
-                elements.bestSellersContainer.innerHTML = `<div class="text-accent2 text-center text-lg">No Best Sellers Found.</div>`;
+                elements.noBestSellers.classList.remove('hidden');
                 return;
             }
             elements.bestSellersContainer.innerHTML = '';
+
             bestSellers.forEach(book => {
                 const authorNames = book.authorBooks?.length > 0
                     ? book.authorBooks.map(ab => ab.author.name).join(', ')
@@ -474,12 +544,12 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <button id="wishlist-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="wishlist-bestseller-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="24" width="24">
                                 <path stroke-width="3" fill="none" stroke="#fff" d="M21.3 28.3 16 23l-5.3 5.3c-.6.6-1.7.2-1.7-.7V5c0-.6.4-1 1-1h12c.6 0 1 .4 1 1v22.6c0 .9-1.1 1.3-1.7.7"/>
                             </svg>
                         </button>
-                        <button id="cart-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
+                        <button id="cart-bestseller-${book.id}" class="bg-accent3 flex flex-1 items-center justify-center rounded py-2 text-white hover:bg-accent4">
                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="#fff" stroke-width="2">
                                 <path fill="none" stroke-linecap="round" d="M11 20.5h.1m5.9 0h.1M3 3h2.14a1 1 0 0 1 1 .85L6.62 7 8 16l11-1 2-8H6.62"/>
                             </svg>
@@ -487,39 +557,50 @@
                     </div>
                 `;
 
-                if (window.isAuthenticated) {
-                    initializeWishlistButton(`wishlist-${book.id}`, book.id, book);
-                    initializeCartButton(`cart-${book.id}`, book.id, book);
-                } else {
-                    bookElement.querySelector(`#wishlist-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage wishlist'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                    bookElement.querySelector(`#cart-${book.id}`).addEventListener('click', (e) => {
-                        e.preventDefault();
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage cart'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                    });
-                }
-
                 elements.bestSellersContainer.appendChild(bookElement);
             });
+
             elements.bestSellersLoading.classList.add('hidden');
+
+            // Initialize buttons with timeout
+            setTimeout(() => {
+                bestSellers.forEach(book => {
+                    if (window.isAuthenticated) {
+                        initializeWishlistButton(`wishlist-bestseller-${book.id}`, book.id, book);
+                        // Cart button already filtered by fetchBestSellerBooks (published books only)
+                        initializeCartButton(`cart-bestseller-${book.id}`, book.id, book);
+                    } else {
+                        const bookElement = document.querySelector(`#wishlist-bestseller-${book.id}`).parentElement.parentElement;
+                        bookElement.querySelector(`#wishlist-bestseller-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage wishlist'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                        bookElement.querySelector(`#cart-bestseller-${book.id}`).addEventListener('click', (e) => {
+                            e.preventDefault();
+                            Toast.fire({
+                                icon: 'error',
+                                title: 'Please log in to manage cart'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        });
+                    }
+                });
+            }, 100);
         }
 
         // Fetch and render Most Popular Genres
         async function fetchBestSellerGenres() {
             const books = await fetchBooks();
-            const bestSellers = books.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 5);
+            const bestSellers = books
+                .filter(book => isBookPublished(book))
+                .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
+                .slice(0, 5);
             const genres = new Set();
             bestSellers.forEach(book => {
                 book.genreBooks?.forEach(genreObj => {
@@ -541,7 +622,7 @@
             genres.forEach(genre => {
                 const genreElement = document.createElement('a');
                 genreElement.href = `/Book/Browse`;
-                genreElement.className = 'bg-accent1 flex items-center justify-center rounded p-4 text-center text-white hover:bg-accent4';
+                genreElement.className = 'bg-accent1 flex items-center justify-center rounded p-4 text-center text-white hover:bg-accent2 transition-colors';
                 genreElement.innerHTML = `
                     <h3 class="font-semibold">${genre}</h3>
                 `;
@@ -560,7 +641,6 @@
                     .sort((a, b) => {
                         const ratingDiff = (b.rating || 0) - (a.rating || 0);
                         if (ratingDiff !== 0) return ratingDiff;
-                        // Secondary sort: most recent date (updatedAt or createdAt)
                         const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.createdAt);
                         const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.createdAt);
                         return dateB - dateA;
@@ -576,8 +656,8 @@
                     reviewCard.className = 'bg-primary rounded p-4 shadow-md border border-accent2';
                     reviewCard.innerHTML = `
                         <div class="mb-1 flex items-center">
-                            <img src="${review.users?.imageURL}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name}">
-                            <p class="text-accent2 text-xl font-semibold">${review.users?.name}</p>
+                            <img src="${review.users?.imageURL || '/images/default-user.png'}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name || 'Anonymous'}">
+                            <p class="text-accent2 text-xl font-semibold">${review.users?.name || 'Anonymous'}</p>
                         </div>
                         <p class="text-accent3 mb-2">Rating: ★ ${review.rating || 0}</p>
                         <p class="text-accent1 mb-2 line-clamp-5 italic">"${review.message || 'No comment'}"</p>
@@ -596,15 +676,13 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', async () => {
-            await Promise.all([
-                renderTrendingBook(),
-                renderAwardWinners(),
-                renderPromoBooks(),
-                renderPromotions(),
-                renderBestSellers(),
-                renderPopularGenres(),
-                fetchTopReviews()
-            ]);
+            await renderTrendingBook();
+            await renderAwardWinners();
+            await renderPromoBooks();
+            await renderPromotions();
+            await renderBestSellers();
+            await renderPopularGenres();
+            await fetchTopReviews();
         });
     </script>
 }
