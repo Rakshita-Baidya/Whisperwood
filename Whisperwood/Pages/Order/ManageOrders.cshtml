@@ -7,7 +7,7 @@
 
 @* displays manage orders *@
 <div class="container mx-auto px-6 py-8">
-    <div class="mb-6 flex items-center justify-between">
+    <div class="mb-4 flex items-center justify-between">
         <h1 class="text-accent4 text-2xl font-bold">Manage Orders</h1>
         <button id="filter-button" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Filter Orders</button>
     </div>
@@ -198,7 +198,7 @@
 
             if (params.search) {
                 filtered = filtered.filter(o =>
-                    (o.user?.name?.toLowerCase() || '').includes(params.search) ||
+                    (o.user?.userName?.toLowerCase() || '').includes(params.search) ||
                     o.id.toLowerCase().includes(params.search) ||
                     (o.orderBill?.claimCode?.toLowerCase() || '').includes(params.search)
                 );
@@ -262,7 +262,7 @@
                 row.className = 'border-b border-accent1 bg-white';
                 row.innerHTML = `
                     <td class="p-3">${order.id}</td>
-                    <td class="p-3">${order.user?.name || 'Unknown User'}</td>
+                    <td class="p-3">${order.user?.userName || 'Unknown User'}</td>
                     <td class="p-3">${new Date(order.orderedAt).toLocaleDateString()}</td>
                     <td class="p-3">${statusInfo.text}</td>
                     <td class="p-3">Rs. ${order.totalAmount.toFixed(2)}</td>

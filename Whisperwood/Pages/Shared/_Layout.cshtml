@@ -80,11 +80,10 @@
 
     @if (!hideNavbar)
     {
-        <header class="border-accent4 sticky top-0 z-50 border-b-[1.6px] bg-[#f8f3eb] p-4 text-white">
+        <header class="border-accent4 sticky top-0 z-50 border-b-[1.6px] bg-[#f8f3eb] p-2 text-white">
             <nav class="flex items-center justify-between px-12">
-                <h1 class="text-accent3 text-4xl font-bold">Whisperwood</h1>
+                <a href="/"><img src="/assets/logo.png" alt="Whisperwood" class="h-16"/></a>
                 <div class="relative flex items-center space-x-4 text-lg font-semibold">
-                    <a href="/" class="text-accent3 hover:text-accent4">Home</a>
                     <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
                     <a href="/book/BrowseByCategory" class="text-accent3 hover:text-accent4">Category</a>
                     @if (isAuthenticated)
