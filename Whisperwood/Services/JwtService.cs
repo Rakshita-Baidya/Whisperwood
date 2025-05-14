@@ -39,7 +39,7 @@ namespace Whisperwood.Services
                     issuer: _tokenInfo.Issuer,
                     audience: _tokenInfo.Audience,
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(_tokenInfo.ExpiryInMinutes),
+                    expires: DateTime.Now.AddMinutes(_tokenInfo.ExpiryInMinutes),
                     signingCredentials: signingCredentials
                 );
 

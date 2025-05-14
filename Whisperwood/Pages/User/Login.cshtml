@@ -6,7 +6,7 @@
 }
 
 <div class="flex min-h-screen items-center justify-center">
-    <div class="bg-primary border-accent2 mx-auto w-1/4 rounded border p-6 text-center shadow-md">
+    <div class="bg-primary border-accent2 mx-auto rounded border p-6 text-center shadow-md md:w-3/5 lg:w-2/5">
         <h1 class="text-accent4 mb-4 text-4xl font-bold">Login</h1>
         <form id="login-form" method="post" class="space-y-4">
             <div>
@@ -86,7 +86,6 @@
                     window.location.href = '/Index';
                 });
             } else {
-                // extracting error message
                 let errorText = 'Invalid email or password.';
                 if (data.message && typeof data.message === 'string') {
                     // handle cases like "{ message = Invalid email or password }"

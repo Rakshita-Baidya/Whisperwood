@@ -55,7 +55,7 @@ namespace Whisperwood.Services
                 User = user,
                 RecipientGroups = dto.RecipientGroups
             };
-            if (announcement.StartDate < DateOnly.FromDateTime(DateTime.UtcNow))
+            if (announcement.StartDate < DateOnly.FromDateTime(DateTime.Now))
             {
                 return new BadRequestObjectResult(new { message = "StartDate cannot be in the past." });
             }

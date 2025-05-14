@@ -61,7 +61,7 @@
                 // parsing jwt token
                 var handler = new JwtSecurityTokenHandler();
                 var token = handler.ReadJwtToken(jwtToken);
-                isAuthenticated = token != null && token.ValidTo > DateTime.UtcNow;
+                isAuthenticated = token != null && token.ValidTo > DateTime.Now;
 
                 // getting user from jwt
                 userId = token?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;

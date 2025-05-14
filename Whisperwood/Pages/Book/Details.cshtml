@@ -191,7 +191,7 @@
             return reviews.some(review => review.bookId === bookId);
         }
 
-        async function fetchBookDetails() {
+                async function fetchBookDetails() {
             const elements = {
                 loading: document.getElementById('loading'),
                 details: document.getElementById('book-details'),
@@ -218,12 +218,15 @@
 
             const isAdmin = window.isAdmin;
             const isStaff = window.isStaff;
-            const isAuthenticated = window.checkAuth('view profile');
+            const isAuthenticated = window.isAuthenticated; // Use global variable
             const id = window.location.pathname.split('/').pop();
 
             try {
                 const response = await fetch(`https://localhost:7018/api/Book/getbyid/${id}`);
-                if (!response.ok) throw new Error('Failed to load book details. Please try again later.');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to load book details. Please try again later.');
+                }
 
                 const book = await response.json();
                 const bookFormatMap = {
@@ -283,7 +286,7 @@
                     ? book.genreBooks.map(gb => `${gb.genre.name}`).join(', ')
                     : 'No genres listed';
 
-                // Initialize buttons with authentication checks
+                // Initialize buttons
                 if (isAuthenticated) {
                     initializeWishlistButton('add-to-wishlist', id);
                     window.initializeCartButton('add-to-cart', book.id, book);
@@ -334,7 +337,7 @@
 
                         elements.delete.addEventListener('click', (e) => {
                             e.preventDefault();
-                            deleteBook(book.id, book.title);
+                            deleteBook(book.id);
                         });
                     }
                 } else {
@@ -342,8 +345,8 @@
                     elements.wishlist.addEventListener('click', (e) => {
                         e.preventDefault();
                         Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage wishlist'
+                            icon: 'info',
+                            title: 'Please log in to add to wishlist'
                         }).then(() => {
                             window.location.href = '/User/Login';
                         });
@@ -352,8 +355,8 @@
                     elements.cart.addEventListener('click', (e) => {
                         e.preventDefault();
                         Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to manage cart'
+                            icon: 'info',
+                            title: 'Please log in to add to cart'
                         }).then(() => {
                             window.location.href = '/User/Login';
                         });
@@ -362,7 +365,7 @@
                     elements.review.addEventListener('click', (e) => {
                         e.preventDefault();
                         Toast.fire({
-                            icon: 'error',
+                            icon: 'info',
                             title: 'Please log in to add reviews'
                         }).then(() => {
                             window.location.href = '/User/Login';
@@ -375,7 +378,7 @@
                 elements.loading.classList.add('hidden');
                 Toast.fire({
                     icon: 'error',
-                    title: error.message || 'Failed to load book details'
+                    title: error.message || 'Failed to load book details. Please try again later.'
                 });
             }
         }

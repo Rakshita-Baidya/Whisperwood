@@ -61,21 +61,19 @@
     </div>
 
     <div id="announcement-list" class="hidden">
-        <div class="overflow-x-auto">
-            <table class="text-accent2 border-accent1 w-full border">
-                <thead>
-                    <tr class="bg-accent4 text-white">
-                        <th class="p-2 text-left">Title</th>
-                        <th class="p-2 text-left">Message</th>
-                        <th class="p-2 text-left">Recipient Groups</th>
-                        <th class="p-2 text-left">Start Date</th>
-                        <th class="p-2 text-left">End Date</th>
-                        <th class="p-2 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="announcements-table-body" class="bg-white"></tbody>
-            </table>
-        </div>
+        <table class="text-accent2 border-accent1 w-full border">
+            <thead>
+                <tr class="bg-accent4 text-white">
+                    <th class="p-2 text-left">Title</th>
+                    <th class="p-2 text-left">Message</th>
+                    <th class="p-2 text-left">Recipient Groups</th>
+                    <th class="p-2 text-left">Start Date</th>
+                    <th class="p-2 text-left">End Date</th>
+                    <th class="p-2 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="announcements-table-body" class="bg-white"></tbody>
+        </table>
     </div>
 
     <div id="no-announcements" class="text-accent2 mt-4 hidden text-center text-lg">No announcements found.</div>
@@ -267,8 +265,8 @@
                     const row = document.createElement('tr');
                     row.className = 'border-b border-accent1';
                     row.innerHTML = `
-                        <td class="truncate p-2">${announcement.title}</td>
-                        <td class="truncate p-2">${announcement.message}</td>
+                        <td class="p-2">${announcement.title}</td>
+                        <td class="p-2">${announcement.message}</td>
                         <td class="p-2">${announcement.recipientGroups.join(', ')}</td>
                         <td class="p-2">${formatDate(announcement.startDate)}</td>
                         <td class="p-2">${formatDate(announcement.endDate)}</td>

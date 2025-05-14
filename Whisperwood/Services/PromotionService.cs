@@ -189,7 +189,7 @@ namespace Whisperwood.Services
             if (string.IsNullOrEmpty(promoCode))
                 return (null, null);
 
-            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
 
             var promotion = await dbContext.Promotions
                 .FirstOrDefaultAsync(p => p.Code == promoCode && p.IsActive &&

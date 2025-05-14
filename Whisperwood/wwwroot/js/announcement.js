@@ -75,16 +75,23 @@
         const modal = document.getElementById('announcements-modal');
         const closeModal = document.getElementById('close-announcements-modal');
 
+        if (!icon || !modal || !closeModal) {
+            console.error('Required DOM elements for announcements are missing.');
+            return;
+        }
+
         icon.addEventListener('click', async () => {
             const announcements = await this.fetchAnnouncements();
-            if (!announcements) {
-                elements.noAnnouncements.classList.remove('hidden');
+            if (!announcements || announcements.length === 0) {
+                document.getElementById('no-announcements').classList.remove('hidden');
+                document.getElementById('announcements-list').innerHTML = '';
+                modal.classList.remove('hidden');
                 return;
             }
 
+            // Pass user object, which can be null for non-authenticated users
             const filteredAnnouncements = this.filterAnnouncements(announcements, user);
             this.renderAnnouncements(filteredAnnouncements);
-
             modal.classList.remove('hidden');
         });
 

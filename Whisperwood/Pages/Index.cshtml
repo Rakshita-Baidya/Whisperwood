@@ -25,7 +25,7 @@
     @* Award Winners *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-accent4  text-2xl font-bold uppercase">Award Winners</h2>
+            <h2 class="text-accent4 text-2xl font-bold uppercase">Award Winners</h2>
             <a href="/Book/BrowseByCategory" class="text-secondary hover:text-lg">See More</a>
         </div>
         <div id="award-winners-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
@@ -40,30 +40,30 @@
             <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Hot Deals</h2>
             <a href="/Book/BrowseByCategory" class="text-white hover:text-lg">Browse All</a>
         </div>
-        <div id="promo-books-container" class="mx-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            <div id="promo-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
+        <div id="promo-books-container" class="mx-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            <div id="promo-loading" class="col-span-full text-center text-lg text-white">Loading promotions...</div>
         </div>
-        <div id="no-promo-books" class="text-white mt-4 hidden text-center text-lg">No ongoing promotions found.</div>
+        <div id="no-promo-books" class="mt-4 hidden text-center text-lg text-white">No ongoing promotions found.</div>
     </section>
 
     @* Active Promotions (Promo Codes) *@
     <section class="my-10 rounded-lg bg-cover bg-center bg-[url('https://images.unsplash.com/photo-1512820790803-83ca734da794')] shadow-lg relative">
-        <div class="bg-black bg-opacity-60 rounded-lg px-6 py-6">
+        <div class="bg-opacity-60 rounded-lg bg-black px-6 py-6">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-2xl font-extrabold tracking-wide text-white uppercase">Active Promotions</h2>
                 <a href="/Promotions" class="text-sm text-white hover:text-lg">View All</a>
             </div>
-            <div id="promotions-container" class="mx-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div id="promotions-loading" class="text-lg text-white col-span-full text-center">Loading promotions...</div>
+            <div id="promotions-container" class="mx-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div id="promotions-loading" class="col-span-full text-center text-lg text-white">Loading promotions...</div>
             </div>
-            <div id="no-promotions" class="text-white mt-4 hidden text-center text-lg">No active promotions found.</div>
+            <div id="no-promotions" class="mt-4 hidden text-center text-lg text-white">No active promotions found.</div>
         </div>
     </section>
 
     @* Best Sellers *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-accent4 text-2xl uppercase font-bold">Best Sellers</h2>
+            <h2 class="text-accent4 text-2xl font-bold uppercase">Best Sellers</h2>
             <a href="/Book/BrowseByCategory" class="text-secondary hover:text-lg">See More</a>
         </div>
         <div id="best-sellers-container" class="mx-6 grid grid-cols-5 gap-4 overflow-x-auto scroll-smooth">
@@ -89,7 +89,6 @@
 </div>
 
 @section Scripts {
-    <script src="/js/promotion.js"></script>
     <script>
         // Cache DOM elements
         const elements = {
@@ -179,7 +178,7 @@
                     : `<div class="text-accent3 bg-accent1 mb-4 flex h-36 w-52 items-center justify-center rounded-md">No Image</div>`
                 }
                 <h2 class="text-accent3 truncate text-xl font-semibold">${topBook.title || 'Untitled'}</h2>
-                <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
+                <p class="text-accent1 truncate font-medium text-nowrap">${authorNames}</p>
                 <div class="mb-3 flex justify-between">
                     <p class="text-accent3">★ ${topBook.averageRating?.toFixed(1) || 0.0}</p>
                     <div class="text-right">
@@ -226,7 +225,7 @@
                             });
                         });
                     }
-                } else {
+                    } else {
                     bookElement.querySelector(`#wishlist-trending-${topBook.id}`).addEventListener('click', (e) => {
                         e.preventDefault();
                         Toast.fire({
@@ -285,7 +284,7 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-52 items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
+                    <p class="text-accent1 truncate font-medium text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
@@ -324,12 +323,10 @@
                             initializeCartButton(`cart-award-${book.id}`, book.id, book);
                         } else {
                             const cartButton = document.querySelector(`#cart-award-${book.id}`);
-                            cartButton.disabled = true;
-                            cartButton.classList.add('opacity-50', 'cursor-not-allowed');
                             cartButton.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 Toast.fire({
-                                    icon: 'info',
+                                    icon: 'error',
                                     title: 'This book is not yet available'
                                 });
                             });
@@ -391,7 +388,7 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-full items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
+                    <p class="text-accent1 truncate font-medium text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
@@ -467,14 +464,14 @@
                 const promotionItem = document.createElement('div');
                 promotionItem.className = 'bg-primary p-4 rounded-lg border border-accent1 shadow-lg hover:shadow-xl transform transition-transform hover:scale-105';
                 promotionItem.innerHTML = `
-                    <h3 class="text-accent3 font-semibold text-lg mb-2">${promotion.name || 'Special Offer'}</h3>
+                    <h3 class="text-accent3 mb-2 text-lg font-semibold">${promotion.name || 'Special Offer'}</h3>
                     <p class="text-accent2 mb-3 line-clamp-2">${promotion.description || 'No description'}</p>
-                    <div class="flex items-center justify-between mb-3">
-                        <p class="text-accent2">Use code: <span class="font-semibold bg-accent1 px-2 py-1 rounded text-white cursor-pointer copy-promo-code" data-code="${promotion.code}">${promotion.code}</span></p>
-                        <span class="bg-accent4 text-white text-xs font-bold px-2 py-1 rounded">${promotion.discountPercent}% OFF</span>
+                    <div class="mb-3 flex items-center justify-between">
+                        <p class="text-accent2">Use code: <span class="bg-accent1 copy-promo-code cursor-pointer rounded px-2 py-1 font-semibold text-white" data-code="${promotion.code}">${promotion.code}</span></p>
+                        <span class="bg-accent4 rounded px-2 py-1 text-xs font-bold text-white">${promotion.discountPercent}% OFF</span>
                     </div>
                     <p class="text-accent1 text-sm">Valid: ${new Date(promotion.startDate).toLocaleDateString()} - ${new Date(promotion.endDate).toLocaleDateString()}</p>
-                    ${!window.isAuthenticated ? '<p class="text-red-600 text-sm mt-2">Please log in to use this promotion code.</p>' : ''}
+                    ${!window.isAuthenticated ? '<p class="mt-2 text-sm text-red-600">Please log in to use this promotion code.</p>' : ''}
                 `;
                 elements.promotionsContainer.appendChild(promotionItem);
             });
@@ -536,7 +533,7 @@
                         : `<div class="text-accent3 bg-accent1 mb-4 flex h-64 w-52 items-center justify-center rounded-md">No Image</div>`
                     }
                     <h2 class="text-accent3 truncate text-xl font-semibold">${book.title || 'Untitled'}</h2>
-                    <p class="text-accent1 font-medium truncate text-nowrap">${authorNames}</p>
+                    <p class="text-accent1 truncate font-medium text-nowrap">${authorNames}</p>
                     <div class="mb-3 flex justify-between">
                         <p class="text-accent3">★ ${book.averageRating?.toFixed(1) || 0.0}</p>
                         <div class="text-right">
@@ -603,15 +600,14 @@
             const books = await fetchBooks();
             const bestSellers = books
                 .filter(book => isBookPublished(book))
-                .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0))
-                .slice(0, 5);
+                .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
             const genres = new Set();
             bestSellers.forEach(book => {
                 book.genreBooks?.forEach(genreObj => {
                     genres.add(genreObj.genre.name);
                 });
             });
-            return Array.from(genres);
+            return Array.from(genres).slice(0, 5);
         }
 
         async function renderPopularGenres() {

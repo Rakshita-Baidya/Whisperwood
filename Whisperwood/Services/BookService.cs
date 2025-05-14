@@ -193,7 +193,7 @@ namespace Whisperwood.Services
 
         private bool CalculateIsOnSale(decimal? discountPercentage, DateOnly? startDate, DateOnly? endDate)
         {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateOnly.FromDateTime(DateTime.Now);
             return discountPercentage > 0 &&
                    (!startDate.HasValue || startDate <= today) &&
                    (!endDate.HasValue || endDate >= today);
@@ -260,7 +260,7 @@ namespace Whisperwood.Services
 
             if (filter.IsOnSale.HasValue && filter.IsOnSale.Value)
             {
-                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var today = DateOnly.FromDateTime(DateTime.Now);
                 query = query.Where(b => b.IsOnSale && b.DiscountPercentage > 0 &&
                     (!b.DiscountStartDate.HasValue || b.DiscountStartDate <= today) &&
                     (!b.DiscountEndDate.HasValue || b.DiscountEndDate >= today));

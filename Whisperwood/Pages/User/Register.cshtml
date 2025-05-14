@@ -8,7 +8,7 @@
 <div class="flex min-h-screen items-center justify-center">
     <div class="bg-primary border-accent3 mx-auto w-2/3 rounded border p-6 text-center shadow-md">
         <h1 class="text-accent4 mb-4 text-4xl font-bold">Register</h1>
-        <form id="register-form" class="grid grid-cols-2 gap-6">
+        <form id="register-form" class="grid md:grid-cols-1 lg:grid-cols-2 lg:gap-6">
             <div>
                 <label class="text-accent4 block text-lg font-medium" for="name">Name</label>
                 <input type="text" id="name" name="name" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
@@ -26,23 +26,23 @@
                 <input type="email" id="email" name="email" class="border-accent2 w-full rounded border p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
             </div>
             <div class="relative">
-                <label class="text-accent4 block text-lg font-medium" for="password">Password</label>
+                <label class="text-accent4 block text-lg font-medium" for="password">Password*</label>
                 <input type="password" id="password" name="password" class="border-accent2 w-full rounded border p-2 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required title="Password must be at least 6 characters, including a number, letter, and special character" />
                 <button type="button" class="absolute top-10 right-2 text-gray-500 transition hover:text-accent3" onclick="togglePassword('password', this)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" /></svg>
                 </button>
-                <p class="text-accent2 mt-1 text-sm">Password must be 6+ characters, with a number, letter, and special character.</p>
+                <p class="text-accent2 mt-1 text-sm">*Must be 6+ characters, with a number, letter, and special character.</p>
             </div>
 
-            <div class="relative mt-4">
+            <div class="relative">
                 <label class="text-accent4 block text-lg font-medium" for="confirm-password">Confirm Password</label>
                 <input type="password" id="confirm-password" name="confirm-password" class="border-accent2 w-full rounded border p-2 pr-10 text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent3" required />
-                <button type="button" class="absolute top-10 right-2 text-gray-500 transition hover:text-accent3" onclick="togglePassword('password', this)">
+                <button type="button" class="absolute top-10 right-2 text-gray-500 transition hover:text-accent3" onclick="togglePassword('confirm-password', this)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24M1 1l22 22" /></svg>
                 </button>
             </div>
 
-            <div class="col-span-full">
+            <div class="col-span-full mt-3">
                 <button type="submit" class="bg-accent3 w-full rounded px-4 py-2 text-lg font-medium text-white hover:bg-accent4 focus:outline-none focus:ring-2 focus:ring-accent3">Register</button>
                 <p class="text-accent2 mt-4">
                     Already have an account? <a href="/User/Login" class="text-accent1 hover:text-accent4">Login</a>
