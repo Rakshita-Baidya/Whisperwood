@@ -19,14 +19,12 @@ namespace Whisperwood.Services
         public async Task<IActionResult> AddAnnouncementAsync(Guid userId, AnnouncementDto dto)
         {
             var user = await dbContext.Users.FindAsync(userId);
-            if (user == null)
+            if (user != null)
             {
-                return new BadRequestObjectResult(new { message = "User not found. Are you sure you're logged in correctly?" });
-            }
-
-            if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
-            {
-                return new UnauthorizedObjectResult(new { message = "Only admins or staff can add announcements." });
+                if (!user.IsAdmin.GetValueOrDefault(false))
+                {
+                    return new UnauthorizedObjectResult(new { message = "Only admins can add announcements." });
+                }
             }
 
             if (dto.StartDate > dto.EndDate)
@@ -70,7 +68,7 @@ namespace Whisperwood.Services
             return new OkObjectResult(announcementList);
         }
 
-        public async Task<IActionResult> GetAnnouncementByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetAnnouncementByIdAsync(Guid id)
         {
             var announcement = await dbContext.Announcements.Include(a => a.User).FirstOrDefaultAsync(a => a.Id == id);
             return announcement != null ? new OkObjectResult(announcement) : new NotFoundObjectResult(new { message = "Announcement not found!" });
@@ -81,9 +79,9 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsAdmin.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can update announcements." });
+                    return new UnauthorizedObjectResult(new { message = "Only admins can update announcements." });
                 }
             }
 
@@ -134,9 +132,9 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsAdmin.GetValueOrDefault(false))
                 {
-                    return new UnauthorizedObjectResult(new { message = "Only admins or staff can delete announcements." });
+                    return new UnauthorizedObjectResult(new { message = "Only admins can delete announcements." });
                 }
             }
 

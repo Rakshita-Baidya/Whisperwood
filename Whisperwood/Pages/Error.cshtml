@@ -1,0 +1,23 @@
+﻿@page
+@model Whisperwood.Pages.ErrorModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Unauthorized Access";
+}
+
+<div class="px-4 py-8 text-center">
+    <h1 class="text-accent3 mb-6 text-4xl font-bold">Unauthorized Access</h1>
+    <p class="text-accent3 mb-4">You do not have permission to access this page.</p>
+    <a href="/" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Return to Homepage</a>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Toast.fire({
+                icon: 'error',
+                title: 'Admin access required.'
+            });
+        });
+    </script>
+}

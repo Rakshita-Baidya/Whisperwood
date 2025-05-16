@@ -9,6 +9,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whisperwood - @ViewData["Title"]</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -19,6 +20,7 @@
     <script src="/js/bookFilter.js"></script>
     <script src="/js/announcement.js"></script>
     <script src="/js/promotion.js"></script>
+
     <style>
         ::-webkit-scrollbar {
             width: 6px;
@@ -58,12 +60,10 @@
         {
             try
             {
-                // parsing jwt token
+                // getting user from jwt
                 var handler = new JwtSecurityTokenHandler();
                 var token = handler.ReadJwtToken(jwtToken);
                 isAuthenticated = token != null && token.ValidTo > DateTime.Now;
-
-                // getting user from jwt
                 userId = token?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
                 isStaff = token?.Claims.Any(c => c.Type == "IsStaff" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
@@ -83,27 +83,14 @@
         <header class="border-accent4 sticky top-0 z-50 border-b-[1.6px] bg-[#f8f3eb] p-2 text-white">
             <nav class="flex items-center justify-between px-12">
                 <a href="/"><img src="/assets/logo.png" alt="Whisperwood" class="h-16"/></a>
+                @* general navigation links *@
                 <div class="relative flex items-center space-x-4 text-lg font-semibold">
-                    <a href="/book/browse" class="text-accent3 hover:text-accent4">Browse</a>
-                    <a href="/book/BrowseByCategory" class="text-accent3 hover:text-accent4">Category</a>
+                    <a href="/Book/Browse" class="text-accent3 hover:text-accent4">Browse</a>
+                    <a href="/Book/BrowseByCategory" class="text-accent3 hover:text-accent4">Category</a>
                     @if (isAuthenticated)
                     {
                         <div class="relative space-x-4">
-                            @if (isAdmin || isStaff)
-                            {
-                                <button id="staff-button" class="text-accent3 hover:text-accent4 focus:outline-none">
-                                    Staff
-                                    <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-                                <div id="staff-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-56 rounded border shadow-lg">
-                                    <a href="/Book/ManageBook" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Book</a>
-                                    <a href="/Promotion/ManagePromotion" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Promotion</a>
-                                    <a href="/Order/ManageOrders" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Orders</a>
-                                    <a href="/Announcement/ManageAnnouncement" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Announcement</a>
-                                </div>
-                            }
+                            @* admin menu *@
                             @if (isAdmin)
                             {
                                 <button id="admin-button" class="text-accent3 hover:text-accent4 focus:outline-none">
@@ -113,9 +100,26 @@
                                     </svg>
                                 </button>
                                 <div id="admin-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-56 rounded border shadow-lg">
-                                    <a href="/Author/ManageAuthor" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Authors</a>
+                                    <a href="/Promotion/ManagePromotion" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Promotion</a>
+                                    <a href="/Announcement/ManageAnnouncement" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Announcement</a>
                                 </div>
                             }
+                            @* staff menu *@
+                            @if (isAdmin || isStaff)
+                            {
+                                <button id="staff-button" class="text-accent3 hover:text-accent4 focus:outline-none">
+                                    Staff
+                                    <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div id="staff-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-56 rounded border shadow-lg">
+                                    <a href="/Author/ManageAuthor" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Authors</a>
+                                    <a href="/Book/ManageBook" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Book</a>
+                                    <a href="/Order/ManageOrders" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Manage Orders</a>
+                                </div>
+                            }
+                            @* general user menu *@
                             <button id="user-button" class="text-accent3 hover:text-accent4 focus:outline-none">
                                 User
                                 <svg class="inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,10 +128,10 @@
                             </button>
                             <div id="user-menu" class="bg-primary border-accent4 absolute right-0 z-10 mt-2 hidden w-36 rounded border shadow-lg">
                                 <a href="/User/UserProfile" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Profile</a>
-                                <a href="/User/UserReview" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Review</a>
                                 <a href="/User/UserWishlist" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Wishlist</a>
                                 <a href="/User/UserCart" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Cart</a>
                                 <a href="/User/UserOrder" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Orders</a>
+                                <a href="/User/UserReview" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Review</a>
                                 <a href="/User/Logout" class="text-accent3 block px-4 py-2 hover:bg-accent2 hover:text-white">Logout</a>
                             </div>
                         </div>
@@ -137,9 +141,7 @@
                         <a href="/User/Login" class="text-accent3 hover:text-accent4">Login</a>
                     }
                     <button id="promotions-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518">
-                            <path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 292.518 292.518"><path fill="currentColor" stroke="currentColor" stroke-width="4" d="M292.518 125.66c0-17.848-13.592-32.578-30.965-34.381V18.455a7.5 7.5 0 0 0-10.216-6.991L108.39 66.988H30.225a7.5 7.5 0 0 0-5.305 2.197c-.573.574-14.118 14.282-20.992 34.914-6.502 19.513-8.138 48.891 20.993 78.031a7.5 7.5 0 0 0 5.304 2.197h1.736l59.188 93.738a7.5 7.5 0 0 0 6.342 3.496h61.402c4.143 0 7.5-3.357 7.5-7.5a7.47 7.47 0 0 0-1.445-4.427l-52.984-83.917 139.37 54.226a7.5 7.5 0 0 0 6.954-.799 7.5 7.5 0 0 0 3.266-6.19v-72.92c17.373-1.801 30.964-16.528 30.964-34.374M33.516 81.988h68.78v87.34H33.401c-36.846-39.31-8.186-77.778.115-87.34m68.111 184.574-51.913-82.215h43.643l51.911 82.215zm15.67-186.941 129.257-50.207v192.575l-129.257-50.291zm144.257 65.256v-38.44c9.071 1.694 15.965 9.662 15.965 19.223-.001 9.559-6.894 17.523-15.965 19.217" /></svg>
                     </button>
                     <button id="announcements-icon" class="text-accent3 hover:text-accent2 focus:outline-none">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -151,6 +153,7 @@
         </header>
     }
 
+    @* broadcast *@
     @if (isAdmin || isStaff)
     {
         <div id="order-updates" class="fixed top-[8%] z-[9999] w-full text-xl"></div>
@@ -205,8 +208,8 @@
                         <h3 class="mb-2 font-semibold">Quick Links</h3>
                         <ul class="space-y-2 text-white">
                             <li><a href="/" class="hover:text-accent2">Home</a></li>
-                            <li><a href="/book/browse" class="hover:text-accent2">Browse</a></li>
-                            <li><a href="/book/BrowseByCategory" class="hover:text-accent2">Category</a></li>
+                            <li><a href="/Book/Browse" class="hover:text-accent2">Browse</a></li>
+                            <li><a href="/Book/BrowseByCategory" class="hover:text-accent2">Category</a></li>
                         </ul>
                     </div>
                     <div>
@@ -216,6 +219,7 @@
                             <li><a href="/User/UserWishlist" class="hover:text-accent2">Wishlist</a></li>
                             <li><a href="/User/UserCart" class="hover:text-accent2">Cart</a></li>
                             <li><a href="/User/UserOrder" class="hover:text-accent2">Orders</a></li>
+                            <li><a href="/User/UserReview" class="hover:text-accent2"/></li>
                         </ul>
                     </div>
                     <div>
@@ -255,6 +259,7 @@
             }
         });
 
+        // check authentication status
         window.checkAuth = (action = 'access this feature') => {
             if (!window.jwtToken) {
                 Toast.fire({
@@ -280,7 +285,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // setting up menu toggles
-
             const staffButton = document.getElementById('staff-button');
             const staffMenu = document.getElementById('staff-menu');
             const adminButton = document.getElementById('admin-button');

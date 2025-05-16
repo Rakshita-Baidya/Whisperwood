@@ -3,6 +3,14 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Add Announcement";
+
+    // get isAdmin from layout
+    bool isAdmin = ViewData["isAdmin"]?.ToString()?.ToLower() == "true" || false;
+    if (!isAdmin)
+    {
+        Response.Redirect("/Error");
+        return;
+    }
 }
 
 <div class="px-4 py-8">

@@ -3,6 +3,14 @@
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Update Announcement";
+
+    // get isAdmin from layout
+    bool isAdmin = ViewData["isAdmin"]?.ToString()?.ToLower() == "true" || false;
+    if (!isAdmin)
+    {
+        Response.Redirect("/Error");
+        return;
+    }
 }
 
 <div class="px-4 py-8">
@@ -89,17 +97,6 @@
 
         // initializes form event listeners on DOM load
         document.addEventListener('DOMContentLoaded', () => {
-            // check authentication
-            if (!window.jwtToken) {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Please log in to update an announcement.'
-                }).then(() => {
-                    window.location.href = '/User/Login';
-                });
-                return;
-            }
-
             const form = document.getElementById('announcement-form');
             const announcementId = window.location.pathname.split('/').pop();
             // validate announcement ID
@@ -165,17 +162,6 @@
                         },
                         body: JSON.stringify(announcementDto)
                     });
-
-                    if (response.status === 401) {
-                        Toast.fire({
-                            icon: 'error',
-                            title: 'Please log in to update the announcement.'
-                        }).then(() => {
-                            window.location.href = '/User/Login';
-                        });
-                        return;
-                    }
-
                     if (response.ok) {
                         // show success toast and redirect
                         Toast.fire({
