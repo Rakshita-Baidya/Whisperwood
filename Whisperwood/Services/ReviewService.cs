@@ -57,7 +57,7 @@ namespace Whisperwood.Services
                 BookId = dto.BookId,
                 Rating = dto.Rating,
                 Message = dto.Message ?? "",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             dbContext.Reviews.Add(review);
@@ -146,7 +146,7 @@ namespace Whisperwood.Services
             if (dto.Rating != null) review.Rating = dto.Rating.Value;
             if (dto.Message != null) review.Message = dto.Message;
 
-            review.UpdatedAt = DateTime.Now;
+            review.UpdatedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync();
 
             if (dto.BookId != null && dto.BookId != oldBookId)

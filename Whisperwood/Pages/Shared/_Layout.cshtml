@@ -63,7 +63,7 @@
                 // getting user from jwt
                 var handler = new JwtSecurityTokenHandler();
                 var token = handler.ReadJwtToken(jwtToken);
-                isAuthenticated = token != null && token.ValidTo > DateTime.Now;
+                isAuthenticated = token != null && token.ValidTo > DateTime.UtcNow;
                 userId = token?.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
                 isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
                 isStaff = token?.Claims.Any(c => c.Type == "IsStaff" && c.Value.Equals("True", StringComparison.OrdinalIgnoreCase)) ?? false;
@@ -232,7 +232,7 @@
                     </div>
                 </div>
             </div>
-            <p class="bg-secondary py-2 text-center">© @DateTime.Now.Year Whisperwood</p>
+            <p class="bg-secondary py-2 text-center">© @DateTime.UtcNow.Year Whisperwood</p>
         </footer>
     }
 

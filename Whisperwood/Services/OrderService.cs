@@ -31,7 +31,7 @@ namespace Whisperwood.Services
         {
             if (book.IsOnSale && book.DiscountPercentage > 0)
             {
-                var today = DateOnly.FromDateTime(DateTime.Now);
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
                 bool isSaleActive = (!book.DiscountStartDate.HasValue || book.DiscountStartDate <= today) &&
                                    (!book.DiscountEndDate.HasValue || book.DiscountEndDate >= today);
                 if (isSaleActive)
@@ -118,8 +118,8 @@ namespace Whisperwood.Services
                 TotalAmount = total,
                 Discount = totalDiscount,
                 Status = Orders.OrderStatus.Pending,
-                Date = DateOnly.FromDateTime(DateTime.Now),
-                OrderedAt = DateTime.Now,
+                Date = DateOnly.FromDateTime(DateTime.UtcNow),
+                OrderedAt = DateTime.UtcNow,
                 OrderItems = orderItems,
                 PromoCode = dto.PromoCode
             };

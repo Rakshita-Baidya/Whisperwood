@@ -36,7 +36,7 @@ namespace Whisperwood.Controllers
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.Now.AddMinutes(60)
+                    Expires = DateTime.UtcNow.AddMinutes(60)
                 };
                 Response.Cookies.Append("JwtToken", token, cookieOptions);
 

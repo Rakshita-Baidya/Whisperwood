@@ -45,7 +45,7 @@ namespace Whisperwood.Models
         public int? Edition { get; set; }
         public bool AvailabilityStatus { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<AuthorBooks> AuthorBooks { get; set; } = [];
         public ICollection<PublisherBooks> PublisherBooks { get; set; } = [];
         public ICollection<CategoryBooks> CategoryBooks { get; set; } = [];

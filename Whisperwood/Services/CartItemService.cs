@@ -20,7 +20,7 @@ namespace Whisperwood.Services
         {
             if (book.IsOnSale && book.DiscountPercentage > 0)
             {
-                var today = DateOnly.FromDateTime(DateTime.Now);
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
                 bool isSaleActive = (!book.DiscountStartDate.HasValue || book.DiscountStartDate <= today) &&
                                    (!book.DiscountEndDate.HasValue || book.DiscountEndDate >= today);
                 if (isSaleActive)

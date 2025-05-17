@@ -12,7 +12,7 @@ namespace Whisperwood.Models
         [Range(1, 5)]
         public int Rating { get; set; } = 0;
         public string Message { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
     }
 }

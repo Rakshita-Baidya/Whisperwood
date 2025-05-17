@@ -21,7 +21,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsAdmin.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new
                     {
@@ -109,7 +109,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsAdmin.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new
                     {
@@ -151,7 +151,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsAdmin.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new
                     {
@@ -179,7 +179,7 @@ namespace Whisperwood.Services
 
         private void RecalculateIsActive(Promotions promotion)
         {
-            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
             promotion.IsActive = promotion.StartDate <= currentDate && currentDate <= promotion.EndDate;
         }
 
@@ -189,7 +189,7 @@ namespace Whisperwood.Services
             if (string.IsNullOrEmpty(promoCode))
                 return (null, null);
 
-            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+            var currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
 
             var promotion = await dbContext.Promotions
                 .FirstOrDefaultAsync(p => p.Code == promoCode && p.IsActive &&

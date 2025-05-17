@@ -22,7 +22,7 @@ namespace Whisperwood.Models
         [Column(TypeName = "varchar(20)")]
         public OrderStatus Status { get; set; }
         public DateOnly Date { get; set; } = new DateOnly();
-        public DateTime OrderedAt { get; set; } = DateTime.Now;
+        public DateTime OrderedAt { get; set; } = DateTime.UtcNow;
         public Bill? OrderBill { get; set; }
         public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public enum OrderStatus { Pending, Cancelled, Fulfilled }

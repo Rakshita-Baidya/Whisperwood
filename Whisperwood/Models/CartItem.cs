@@ -20,7 +20,7 @@ namespace Whisperwood.Models
         public required int Quantity { get; set; }
         [Precision(10, 2)]
         public decimal SubTotal { get; set; }
-        public DateTime DateAdded { get; set; } = DateTime.Now;
+        public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
     }
 }
