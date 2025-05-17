@@ -31,11 +31,9 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetGenreById(Guid id)
         {
-            var userId = GetLoggedInUserId();
-            return await genreService.GetGenreByIdAsync(userId, id);
+            return await genreService.GetGenreByIdAsync(id);
         }
 
         [HttpPut("update/{id}")]

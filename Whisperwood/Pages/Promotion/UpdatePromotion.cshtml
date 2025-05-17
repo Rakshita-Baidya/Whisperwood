@@ -1,6 +1,36 @@
 ﻿@page "{id}"
 @model Whisperwood.Pages.Promotion.UpdatePromotionModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
+    var httpContext = HttpContextAccessor.HttpContext;
+    string jwtToken = httpContext?.Request.Cookies["JwtToken"];
+    bool isAdmin = false;
+
+    if (!string.IsNullOrEmpty(jwtToken))
+    {
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                isAdmin = false;
+            }
+        }
+        catch
+        {
+            isAdmin = false;
+        }
+    }
+
+    if (!isAdmin)
+    {
+        httpContext.Response.Redirect("/Error");
+        return;
+    }
+
     Layout = "_Layout";
     ViewData["Title"] = "Update Promotion";
 }

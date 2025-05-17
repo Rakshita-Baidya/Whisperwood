@@ -31,11 +31,9 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetPublisherById(Guid id)
         {
-            var userId = GetLoggedInUserId();
-            return await publisherService.GetPublisherByIdAsync(userId, id);
+            return await publisherService.GetPublisherByIdAsync(id);
         }
 
         [HttpPut("update/{id}")]

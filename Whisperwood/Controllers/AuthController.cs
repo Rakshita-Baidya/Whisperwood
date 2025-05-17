@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Whisperwood.DTOs;
 using Whisperwood.Interfaces;
 
@@ -51,6 +52,8 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("user")]
+        [Authorize]
+
         public async Task<IActionResult> GetUser()
         {
             var userId = GetLoggedInUserId();

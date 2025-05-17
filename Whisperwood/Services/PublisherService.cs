@@ -50,9 +50,8 @@ namespace Whisperwood.Services
             return new OkObjectResult(publisherList);
         }
 
-        public async Task<IActionResult> GetPublisherByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetPublisherByIdAsync(Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
             var publisher = await dbContext.Publishers.FirstOrDefaultAsync(p => p.Id == id);
             return publisher != null ? new OkObjectResult(publisher) : new NotFoundObjectResult(new
             {

@@ -25,7 +25,7 @@ namespace Whisperwood.Services
                 {
                     return new UnauthorizedObjectResult(new
                     {
-                        message = "Only admins or staff can add promotions."
+                        message = "Only admins can add promotions."
                     });
                 }
             }
@@ -80,9 +80,8 @@ namespace Whisperwood.Services
         }
 
 
-        public async Task<IActionResult> GetPromotionByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetPromotionByIdAsync(Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
             var promotion = await dbContext.Promotions.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == id);
 
             if (promotion == null)
@@ -113,7 +112,7 @@ namespace Whisperwood.Services
                 {
                     return new UnauthorizedObjectResult(new
                     {
-                        message = "Only admins or staff can update promotions."
+                        message = "Only admins can update promotions."
                     });
                 }
             }
@@ -155,7 +154,7 @@ namespace Whisperwood.Services
                 {
                     return new UnauthorizedObjectResult(new
                     {
-                        message = "Only admins or staff can delete promotions."
+                        message = "Only admins can delete promotions."
                     });
                 }
             }

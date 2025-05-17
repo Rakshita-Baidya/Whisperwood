@@ -1,6 +1,36 @@
 ﻿@page
 @model Whisperwood.Pages.Promotion.AddPromotionModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
+    var httpContext = HttpContextAccessor.HttpContext;
+    string jwtToken = httpContext?.Request.Cookies["JwtToken"];
+    bool isAdmin = false;
+
+    if (!string.IsNullOrEmpty(jwtToken))
+    {
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                isAdmin = false;
+            }
+        }
+        catch
+        {
+            isAdmin = false;
+        }
+    }
+
+    if (!isAdmin)
+    {
+        httpContext.Response.Redirect("/Error");
+        return;
+    }
+
     Layout = "_Layout";
     ViewData["Title"] = "Add Promotion";
 }
@@ -94,16 +124,6 @@
                     },
                     body: JSON.stringify(promotionData)
                 });
-
-                if (response.status === 401) {
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Please log in to add promotions'
-                    }).then(() => {
-                        window.location.href = '/User/Login';
-                    });
-                    return;
-                }
 
                 if (!response.ok) {
                     const errorData = await response.json();

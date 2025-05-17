@@ -47,9 +47,8 @@ namespace Whisperwood.Services
             return new OkObjectResult(coverImageList);
         }
 
-        public async Task<IActionResult> GetCoverImageByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetCoverImageByIdAsync(Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
             var coverImage = await dbContext.CoverImages.FirstOrDefaultAsync(c => c.Id == id);
             return coverImage != null ? new OkObjectResult(coverImage) : new NotFoundObjectResult(new
             {

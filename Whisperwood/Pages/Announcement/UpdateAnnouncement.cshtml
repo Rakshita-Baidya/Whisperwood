@@ -1,16 +1,38 @@
 ﻿@page "{id}"
 @model Whisperwood.Pages.Announcement.UpdateAnnouncementModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    Layout = "_Layout";
-    ViewData["Title"] = "Update Announcement";
+    var httpContext = HttpContextAccessor.HttpContext;
+    string jwtToken = httpContext?.Request.Cookies["JwtToken"];
+    bool isAdmin = false;
 
-    // get isAdmin from layout
-    bool isAdmin = ViewData["isAdmin"]?.ToString()?.ToLower() == "true" || false;
+    if (!string.IsNullOrEmpty(jwtToken))
+    {
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            isAdmin = token?.Claims.Any(c => c.Type == "IsAdmin" && c.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                isAdmin = false;
+            }
+        }
+        catch
+        {
+            isAdmin = false;
+        }
+    }
+
     if (!isAdmin)
     {
-        Response.Redirect("/Error");
+        httpContext.Response.Redirect("/Error");
         return;
     }
+
+    Layout = "_Layout";
+    ViewData["Title"] = "Update Announcement";
 }
 
 <div class="px-4 py-8">

@@ -48,10 +48,8 @@ namespace Whisperwood.Services
             return new OkObjectResult(genres);
         }
 
-        public async Task<IActionResult> GetGenreByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetGenreByIdAsync(Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
-
             var genre = await dbContext.Genres.FirstOrDefaultAsync(g => g.Id == id);
             return genre != null ? new OkObjectResult(genre) : new NotFoundObjectResult(new
             {

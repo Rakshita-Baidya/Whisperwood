@@ -21,7 +21,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsStaff.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new { message = "Only admins or staff can add authors." });
                 }
@@ -49,9 +49,8 @@ namespace Whisperwood.Services
             return new OkObjectResult(authorList);
         }
 
-        public async Task<IActionResult> GetAuthorByIdAsync(Guid userId, Guid id)
+        public async Task<IActionResult> GetAuthorByIdAsync(Guid id)
         {
-            var user = await dbContext.Users.FindAsync(userId);
             var author = await dbContext.Authors.FirstOrDefaultAsync(a => a.Id == id);
             return author != null ? new OkObjectResult(author) : new NotFoundObjectResult(new { message = "Author not found!" });
         }
@@ -61,7 +60,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsStaff.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new { message = "Only admins or staff can update authors." });
                 }
@@ -89,7 +88,7 @@ namespace Whisperwood.Services
             var user = await dbContext.Users.FindAsync(userId);
             if (user != null)
             {
-                if (!user.IsAdmin.GetValueOrDefault(false) && !user.IsStaff.GetValueOrDefault(false))
+                if (!user.IsStaff.GetValueOrDefault(false))
                 {
                     return new UnauthorizedObjectResult(new { message = "Only admins or staff can delete authors." });
                 }

@@ -33,8 +33,7 @@ namespace Whisperwood.Controllers
         [HttpGet("getbyid/{id}")]
         public async Task<IActionResult> GetPromotionById(Guid id)
         {
-            var userId = GetLoggedInUserId();
-            return await promotionService.GetPromotionByIdAsync(userId, id);
+            return await promotionService.GetPromotionByIdAsync(id);
         }
 
         [HttpPut("update/{id}")]

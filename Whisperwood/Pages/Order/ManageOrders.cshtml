@@ -1,6 +1,36 @@
 ﻿@page
 @model Whisperwood.Pages.Order.ManageOrdersModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
+    var httpContext = HttpContextAccessor.HttpContext;
+    string jwtToken = httpContext?.Request.Cookies["JwtToken"];
+    bool isStaff = false;
+
+    if (!string.IsNullOrEmpty(jwtToken))
+    {
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            isStaff = token?.Claims.Any(c => c.Type == "IsStaff" && c.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                isStaff = false;
+            }
+        }
+        catch
+        {
+            isStaff = false;
+        }
+    }
+
+    if (!isStaff)
+    {
+        httpContext.Response.Redirect("/Error");
+        return;
+    }
+
     Layout = "_Layout";
     ViewData["Title"] = "Manage Orders";
 }

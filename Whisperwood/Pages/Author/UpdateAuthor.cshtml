@@ -1,6 +1,36 @@
 ﻿@page "{id}"
 @model Whisperwood.Pages.Author.UpdateAuthorModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
+    var httpContext = HttpContextAccessor.HttpContext;
+    string jwtToken = httpContext?.Request.Cookies["JwtToken"];
+    bool isStaff = false;
+
+    if (!string.IsNullOrEmpty(jwtToken))
+    {
+        try
+        {
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+            isStaff = token?.Claims.Any(c => c.Type == "IsStaff" && c.Value.Equals("true", StringComparison.OrdinalIgnoreCase)) ?? false;
+
+            if (token.ValidTo < DateTime.UtcNow)
+            {
+                isStaff = false;
+            }
+        }
+        catch
+        {
+            isStaff = false;
+        }
+    }
+
+    if (!isStaff)
+    {
+        httpContext.Response.Redirect("/Error");
+        return;
+    }
+
     Layout = "_Layout";
     ViewData["Title"] = "Update Author";
 }
@@ -34,7 +64,7 @@
                 <label for="contact" class="text-accent3 mb-1 block font-medium">Contact</label>
                 <input type="text" id="contact" name="contact" class="border-accent1 w-full rounded border p-2" placeholder="Author Contact" />
             </div>
-            <div class="flex justify-end gap-2 col-span-full">
+            <div class="col-span-full flex justify-end gap-2">
                 <button type="submit" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Update Author</button>
                 <a href="/Author/ManageAuthors" class="rounded bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancel</a>
             </div>

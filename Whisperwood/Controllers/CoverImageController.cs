@@ -31,11 +31,9 @@ namespace Whisperwood.Controllers
         }
 
         [HttpGet("getbyid/{id}")]
-        [Authorize]
         public async Task<IActionResult> GetCoverImageById(Guid id)
         {
-            var userId = GetLoggedInUserId();
-            return await coverImageService.GetCoverImageByIdAsync(userId, id);
+            return await coverImageService.GetCoverImageByIdAsync(id);
         }
 
         [HttpPut("updateCoverImage/{id}")]
