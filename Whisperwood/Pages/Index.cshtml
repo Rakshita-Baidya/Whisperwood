@@ -22,6 +22,31 @@
         </section>
     </div>
 
+    @* banner announcements *@
+    <section class="-mx-24 mb-10">
+        <div class="announcement-slider bg-gradient-to-r relative rounded from-[#eaddc6] to-[#d4a86a] py-8 shadow-2xl">
+            <div id="announcement-slides" class="overflow-hidden">
+                <div id="announcements-loading" class="flex items-center justify-center text-lg text-[#4b3e2c]">
+                    Loading announcements...
+                </div>
+            </div>
+            <button id="announcement-prev" class="bg-accent3 absolute top-1/2 left-4 hidden -translate-y-1/2 transform rounded-full p-2 text-white hover:bg-accent4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+            <button id="announcement-next" class="bg-accent3 absolute top-1/2 right-4 hidden -translate-y-1/2 transform rounded-full p-2 text-white hover:bg-accent4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
+            <div id="announcement-pagination" class="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform space-x-2"></div>
+        </div>
+        <div id="no-announcements" class="mt-4 hidden text-center text-lg text-[#4b3e2c]">
+            No active announcements found.
+        </div>
+    </section>
+
     @* Award Winners *@
     <section class="mb-10">
         <div class="mb-4 flex items-center justify-between">
@@ -95,6 +120,12 @@
             trendingContainer: document.getElementById('trending-container'),
             trendingLoading: document.getElementById('trending-loading'),
             noTrendingBooks: document.getElementById('no-trending-books'),
+            announcementSlides: document.getElementById('announcement-slides'),
+            announcementsLoading: document.getElementById('announcements-loading'),
+            noAnnouncements: document.getElementById('no-announcements'),
+            announcementPrev: document.getElementById('announcement-prev'),
+            announcementNext: document.getElementById('announcement-next'),
+            announcementPagination: document.getElementById('announcement-pagination'),
             awardWinnersContainer: document.getElementById('award-winners-container'),
             awardLoading: document.getElementById('award-loading'),
             noAwardWinners: document.getElementById('no-award-winners'),
@@ -114,6 +145,113 @@
 
         // Current date for filtering published books
         const TODAY = new Date('2025-05-13');
+
+        let currentSlide = 0;
+        let slides = [];
+        let slideInterval;
+
+        function showSlide(index) {
+            if (slides.length === 0) return;
+            currentSlide = (index + slides.length) % slides.length;
+            const offset = -currentSlide * 100;
+            elements.announcementSlides.style.transform = `translateX(${offset}%)`;
+            updatePagination();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function startSlider() {
+            if (slides.length > 1) {
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+        }
+
+        function stopSlider() {
+            clearInterval(slideInterval);
+        }
+
+        function updatePagination() {
+            elements.announcementPagination.innerHTML = '';
+            slides.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = `w-3 h-3 rounded-full cursor-pointer ${i === currentSlide ? 'bg-accent3' : 'bg-[#4b3e2c]/50'}`;
+                dot.addEventListener('click', () => {
+                    stopSlider();
+                    showSlide(i);
+                    startSlider();
+                });
+                elements.announcementPagination.appendChild(dot);
+            });
+        }
+
+        // render announcements slider
+        async function renderAnnouncementsSlider() {
+            // show loading state
+            elements.announcementsLoading.classList.remove('hidden');
+            elements.noAnnouncements.classList.add('hidden');
+
+            // construct user object
+            const user = {
+                isAdmin: window.isAdmin || false,
+                isStaff: window.isStaff || false
+            };
+
+            // fetch announcements
+            const announcements = await announcement.fetchAnnouncements();
+            const filteredAnnouncements = announcement.filterAnnouncements(announcements, user);
+
+            // clear loading state
+            elements.announcementsLoading.classList.add('hidden');
+            elements.announcementSlides.innerHTML = '';
+
+            // handle no announcements
+            if (!filteredAnnouncements.length) {
+                elements.noAnnouncements.classList.remove('hidden');
+                return;
+            }
+
+            // create slides
+            slides = filteredAnnouncements;
+            elements.announcementSlides.className = 'flex transition-transform duration-500';
+            slides.forEach(announcement => {
+                const slide = document.createElement('div');
+                slide.className = 'flex-shrink-0 w-full flex flex-col items-center justify-center px-6 py-8 text-center';
+                slide.innerHTML = `
+                    <h3 class="text-accent4 mb-2 text-2xl font-bold">${announcement.title || 'Announcement'}</h3>
+                    <p class="line-clamp-2 text-[#4b3e2c]">${announcement.message || 'No message'}</p>
+                `;
+                elements.announcementSlides.appendChild(slide);
+            });
+
+            // show navigation if multiple slides
+            if (slides.length > 1) {
+                elements.announcementPrev.classList.remove('hidden');
+                elements.announcementNext.classList.remove('hidden');
+                startSlider();
+            }
+
+            // initialize navigation
+            elements.announcementPrev.addEventListener('click', () => {
+                stopSlider();
+                prevSlide();
+                startSlider();
+            });
+            elements.announcementNext.addEventListener('click', () => {
+                stopSlider();
+                nextSlide();
+                startSlider();
+            });
+
+            // initialize pagination
+            updatePagination();
+            showSlide(0);
+        }
 
         // Fetch all books
         async function fetchBooks() {
@@ -677,6 +815,7 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', async () => {
             await renderTrendingBook();
+            await renderAnnouncementsSlider();
             await renderAwardWinners();
             await renderPromoBooks();
             await renderPromotions();
