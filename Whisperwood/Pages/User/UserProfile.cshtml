@@ -17,40 +17,38 @@
                      class="border-2 border-accent3 mb-4 hidden h-52 w-52 rounded-full object-cover" />
                 <h2 id="profile-name" class="text-accent4 text-center text-2xl font-semibold"></h2>
             </div>
-            <div class="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="grid flex-1 grid-cols-1 gap-4 text-lg sm:grid-cols-2">
                 <div>
                     <label class="text-accent4 font-semibold">Membership ID</label>
-                    <p id="profile-membership" class="text-accent1"></p>
+                    <p id="profile-membership" class="text-accent3"></p>
                 </div>
                 <div>
                     <label class="text-accent4 font-semibold">Username</label>
-                    <p id="profile-username" class="text-accent1"></p>
+                    <p id="profile-username" class="text-accent3"></p>
                 </div>
                 <div>
                     <label class="text-accent4 font-semibold">Email</label>
-                    <p id="profile-email" class="text-accent1"></p>
+                    <p id="profile-email" class="text-accent3"></p>
                 </div>
                 <div>
                     <label class="text-accent4 font-semibold">Phone Number</label>
-                    <p id="profile-phone" class="text-accent1"></p>
+                    <p id="profile-phone" class="text-accent3"></p>
                 </div>
                 
                 <div>
                     <label class="text-accent4 font-semibold">Orders Count</label>
-                    <p id="profile-orders" class="text-accent1"></p>
-                </div>
-                <div>
-                    <label class="text-accent4 font-semibold">Discount Eligible</label>
-                    <p id="profile-discount" class="text-accent1"></p>
+                    <p id="profile-orders" class="text-accent3"></p>
                 </div>
                 <div>
                     <label class="text-accent4 font-semibold">Account Status</label>
-                    <p id="profile-status" class="text-accent1"></p>
+                    <p id="profile-status" class="text-accent3"></p>
                 </div>
             </div>
         </div>
     </div>
-
+    <div class="mt-6 flex justify-end">
+        <a id="edit-profile-link" href="/User/UpdateUserProfile" class="bg-accent4 text-primary rounded px-4 py-2 hover:bg-accent5">Edit Profile</a>
+    </div>
 </div>
 
 @section Scripts {
@@ -58,11 +56,13 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const profileSection = document.getElementById('profile-section');
             const loadingElement = document.getElementById('loading');
+            const editProfileLink = document.getElementById('edit-profile-link');
 
             if (!window.isAuthenticated || !window.jwtToken) {
                 window.location.href = '/User/Login';
                 return;
             }
+            editProfileLink.href = `/User/UpdateUserProfile/${window.userId}`;
 
             async function fetchUserProfile() {
                 try {
@@ -94,7 +94,6 @@
                 document.getElementById('profile-phone').textContent = user.phoneNumber || 'N/A';
                 document.getElementById('profile-membership').textContent = user.membershipId || 'N/A';
                 document.getElementById('profile-orders').textContent = user.ordersCount || '0';
-                document.getElementById('profile-discount').textContent = user.isEligibleForDiscount ? 'Yes' : 'No';
                 document.getElementById('profile-status').textContent = [
                     user.isActive ? 'Active' : 'Inactive',
                     user.isAdmin ? 'Admin' : '',

@@ -57,9 +57,31 @@ namespace Whisperwood.Controllers
         public async Task<IActionResult> GetUser()
         {
             var userId = GetLoggedInUserId();
-            return await authService.GetUserByIdAsync(userId);
+            return await authService.GetUserAsync(userId);
         }
 
+        [HttpGet("getallusers")]
+        [Authorize]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var userId = GetLoggedInUserId();
+            return await authService.GetAllUsersAsync(userId);
+        }
 
+        [HttpGet("getuserbyid/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
+            var loggedInUserId = GetLoggedInUserId();
+            return await authService.GetUserByIdAsync(loggedInUserId, userId);
+        }
+
+        [HttpPut("updateuserbyid/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUser(Guid userId, UserUpdateDto dto)
+        {
+            var loggedInUserId = GetLoggedInUserId();
+            return await authService.UpdateUserAsync(loggedInUserId, userId, dto);
+        }
     }
 }

@@ -25,14 +25,13 @@ namespace Whisperwood.DTOs
         public string? Name { get; set; }
         [EmailAddress]
         public string? Email { get; set; }
-        public string? Password { get; set; }
-        [Compare("Password", ErrorMessage = "Passwords do not match")]
-        public string? ConfirmPassword { get; set; }
         public string? Username { get; set; }
         [Phone]
         public string? PhoneNumber { get; set; }
         public string? ImageURL { get; set; }
         public bool? IsAdmin { get; set; }
+        public bool? IsStaff { get; set; }
+
         public bool? IsActive { get; set; }
     }
     public class UserResponseDto
