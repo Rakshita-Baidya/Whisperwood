@@ -5,10 +5,10 @@
     ViewData["Title"] = "Unauthorized Access";
 }
 
-<div class="px-4 py-8 text-center">
-    <h1 class="text-accent3 mb-6 text-4xl font-bold">Unauthorized Access</h1>
-    <p class="text-accent3 mb-4">You do not have permission to access this page.</p>
-    <a href="/" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent2">Return to Homepage</a>
+<div class="mx-auto my-12 rounded-xl bg-[#eaddc6] px-10 py-20 text-center shadow-xl">
+    <h1 class="text-accent4 mb-4 text-4xl font-bold">Unauthorized Access</h1>
+    <p class="text-accent3 mb-6 text-2xl">You do not have permission to access this page.</p>
+    <a href="/" class="bg-accent3 rounded px-4 py-2 text-white hover:bg-accent4">Return to Homepage</a>
 </div>
 
 @section Scripts {
@@ -16,7 +16,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             Toast.fire({
                 icon: 'error',
-                title: 'Admin access required.'
+                title: 'You do not have access to view the requested page.'
             });
         });
     </script>
