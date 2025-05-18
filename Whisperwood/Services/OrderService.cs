@@ -396,6 +396,7 @@ namespace Whisperwood.Services
                 .Include(b => b.OrderBill)
                 .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Book)
+                .ThenInclude(c => c.CoverImage)
                 .ToListAsync();
 
             return new OkObjectResult(orders);

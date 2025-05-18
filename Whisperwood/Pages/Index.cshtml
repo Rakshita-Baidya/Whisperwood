@@ -797,6 +797,7 @@
                             <img src="${review.users?.imageURL || '/images/default-user.png'}" class="mr-2 h-8 w-8 rounded-full" alt="${review.users?.name || 'Anonymous'}">
                             <p class="text-accent2 text-xl font-semibold">${review.users?.name || 'Anonymous'}</p>
                         </div>
+                        <p class="text-accent4 mb-2 font-bold">${review.books?.title || 'Unknown book'}</p>
                         <p class="text-accent3 mb-2">Rating: ★ ${review.rating || 0}</p>
                         <p class="text-accent1 mb-2 line-clamp-2 italic">"${review.message || 'No comment'}"</p>
                         <p class="text-accent2 text-sm">${new Date(review.createdAt).toLocaleString()}</p>

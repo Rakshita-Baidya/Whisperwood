@@ -15,6 +15,7 @@
             <table class="border-accent1 text-accent2 w-full border">
                 <thead>
                     <tr class="bg-accent4 text-white">
+                        <th class="p-2 text-left">Book Image</th>
                         <th class="p-2 text-left">Book Title</th>
                         <th class="p-2 text-left">ISBN</th>
                         <th class="p-2 text-left">Price</th>
@@ -34,6 +35,7 @@
         <table class="border-accent1 text-accent2 w-full border">
             <thead>
                 <tr class="bg-accent4 text-white">
+                    <th class="p-2 text-left">Book Image</th>
                     <th class="p-2 text-left">Book Title</th>
                     <th class="p-2 text-left">ISBN</th>
                     <th class="p-2 text-left">Price</th>
@@ -204,6 +206,12 @@
         const renderPendingReviews = () => {
             elements.pendingTableBody.innerHTML = pendingReviews.map(book => `
                 <tr class="border-accent1 border-b bg-white">
+                    <td class="p-2">
+                        ${book.image
+                            ? `<img src="${book.image}" alt="${book.title}" class="border-2 border-accent2 h-20 w-16 object-cover" />`
+                            : `<div class="text-accent3 flex h-20 w-16 items-center justify-center">No Image</div>`
+                        }
+                    </td>
                     <td class="p-2">${book.title || 'Unknown'}</td>
                     <td class="p-2">${book.isbn || 'N/A'}</td>
                     <td class="p-2">Rs. ${book.price?.toFixed(2) || '0.00'}</td>
@@ -213,7 +221,6 @@
                     </td>
                 </tr>
             `).join('');
-
             if (pendingReviews.length > 0) {
                 elements.pendingList.classList.remove('hidden');
                 elements.noPendingReviews.classList.add('hidden');
@@ -232,6 +239,12 @@
 
             elements.tableBody.innerHTML = paginatedReviews.map(review => `
                 <tr class="border-accent1 border-b bg-white">
+                    <td class="p-2">
+                        ${review.books.coverImage?.coverImageURL
+                            ? `<img src="${review.books.coverImage.coverImageURL}" alt="${review.books.title}" class="border-2 border-accent2 h-20 w-16 object-cover" />`
+                            : `<div class="text-accent3 flex h-20 w-16 items-center justify-center">No Image</div>`
+                        }
+                    </td>
                     <td class="p-2">${review.books?.title || 'Unknown'}</td>
                     <td class="p-2">${review.books?.isbn || 'N/A'}</td>
                     <td class="p-2">Rs. ${review.books?.price?.toFixed(2) || '0.00'}</td>
@@ -294,6 +307,7 @@
                     if (item.book && !orderedBooks.some(b => b.id === item.book.id)) {
                         orderedBooks.push({
                             id: item.book.id,
+                            image: item.book.coverImage.coverImageURL,
                             title: item.book.title,
                             isbn: item.book.isbn,
                             price: item.book.price,
@@ -302,7 +316,7 @@
                     }
                 });
             });
-
+;
             // Filter books not reviewed
             pendingReviews = orderedBooks.filter(book =>
                 !allReviews.some(review => review.books?.id === book.id)

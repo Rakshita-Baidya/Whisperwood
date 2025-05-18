@@ -71,6 +71,7 @@ namespace Whisperwood.Services
             var reviews = await dbContext.Reviews
                 .Include(r => r.Users)
                 .Include(r => r.Books)
+                .ThenInclude(c => c.CoverImage)
                 .ToListAsync();
 
             return new OkObjectResult(reviews);
@@ -81,6 +82,7 @@ namespace Whisperwood.Services
             var review = await dbContext.Reviews
                 .Include(r => r.Users)
                 .Include(r => r.Books)
+                .ThenInclude(c => c.CoverImage)
                 .FirstOrDefaultAsync(r => r.Id == id);
             if (review == null)
                 return new NotFoundObjectResult(new
@@ -111,6 +113,7 @@ namespace Whisperwood.Services
         {
             return await dbContext.Reviews
                 .Include(b => b.Books)
+                .ThenInclude(c => c.CoverImage)
                 .Where(r => r.UserId == userId)
                 .ToListAsync();
         }
